@@ -1,0 +1,92 @@
+[0.000000] (-) TimerEvent: {}
+[0.000347] (nt_py) JobQueued: {'identifier': 'nt_py', 'dependencies': OrderedDict()}
+[0.000436] (nt_py) JobStarted: {'identifier': 'nt_py'}
+[0.098846] (-) TimerEvent: {}
+[0.200212] (-) TimerEvent: {}
+[0.324961] (-) TimerEvent: {}
+[0.429297] (-) TimerEvent: {}
+[0.530861] (-) TimerEvent: {}
+[0.631710] (-) TimerEvent: {}
+[0.734355] (-) TimerEvent: {}
+[0.835392] (-) TimerEvent: {}
+[0.936115] (-) TimerEvent: {}
+[1.039284] (-) TimerEvent: {}
+[1.154379] (-) TimerEvent: {}
+[1.262102] (-) TimerEvent: {}
+[1.364305] (-) TimerEvent: {}
+[1.470992] (-) TimerEvent: {}
+[1.573001] (-) TimerEvent: {}
+[1.673944] (-) TimerEvent: {}
+[1.774752] (-) TimerEvent: {}
+[1.875445] (-) TimerEvent: {}
+[1.976321] (-) TimerEvent: {}
+[2.077055] (-) TimerEvent: {}
+[2.177736] (-) TimerEvent: {}
+[2.281790] (-) TimerEvent: {}
+[2.385684] (-) TimerEvent: {}
+[2.486890] (-) TimerEvent: {}
+[2.587654] (-) TimerEvent: {}
+[2.688364] (-) TimerEvent: {}
+[2.789381] (-) TimerEvent: {}
+[2.890207] (-) TimerEvent: {}
+[2.991162] (-) TimerEvent: {}
+[3.091882] (-) TimerEvent: {}
+[3.192791] (-) TimerEvent: {}
+[3.293693] (-) TimerEvent: {}
+[3.394465] (-) TimerEvent: {}
+[3.495763] (-) TimerEvent: {}
+[3.596679] (-) TimerEvent: {}
+[3.705907] (-) TimerEvent: {}
+[3.710117] (nt_py) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../build/nt_py', 'build', '--build-base', '/home/jaych/Lunabotics2024-ROS/build/nt_py/build', 'install', '--record', '/home/jaych/Lunabotics2024-ROS/build/nt_py/install.log', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/jaych/Lunabotics2024-ROS/src/nt_py', 'env': {'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'jaych', 'XDG_SESSION_TYPE': 'x11', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/jazzy/opt/rviz_ogre_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'HOME': '/home/jaych', 'OLDPWD': '/home/jaych', 'DESKTOP_SESSION': 'ubuntu', 'ROS_PYTHON_VERSION': '3', 'GNOME_SHELL_SESSION_MODE': 'ubuntu', 'GTK_MODULES': 'gail:atk-bridge', 'MANAGERPID': '2516', 'SYSTEMD_EXEC_PID': '2980', 'GSM_SKIP_SSH_AGENT_WORKAROUND': 'true', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': 'truecolor', 'TERMINATOR_DBUS_NAME': 'net.tenshu.Terminator23558193cd9818af7fe4d2c2f5bd9d00f', 'GIO_LAUNCHED_DESKTOP_FILE_PID': '24657', 'GNOME_KEYRING_CONTROL': '/run/user/1000/keyring', 'DEBUGINFOD_URLS': 'https://debuginfod.ubuntu.com', 'ROS_DISTRO': 'jazzy', 'LOGNAME': 'jaych', 'JOURNAL_STREAM': '8:797', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'MEMORY_PRESSURE_WATCH': '/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/session.slice/org.gnome.SettingsDaemon.MediaKeys.service/memory.pressure', 'XDG_SESSION_CLASS': 'user', 'USERNAME': 'jaych', 'TERM': 'xterm-256color', 'GNOME_DESKTOP_SESSION_ID': 'this-is-deprecated', 'WINDOWPATH': '2', 'PATH': '/usr/lib/ccache:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin', 'SESSION_MANAGER': 'local/jaych-VMware-Virtual-Platform:@/tmp/.ICE-unix/2771,unix/jaych-VMware-Virtual-Platform:/tmp/.ICE-unix/2771', 'INVOCATION_ID': '38958f559d6842ff8efa3755de35f54b', 'XDG_MENU_PREFIX': 'gnome-', 'XDG_RUNTIME_DIR': '/run/user/1000', 'DISPLAY': ':1', 'TERMINATOR_DBUS_PATH': '/net/tenshu/Terminator2', 'LANG': 'en_US.UTF-8', 'XDG_CURRENT_DESKTOP': 'ubuntu:GNOME', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'ubuntu', 'XAUTHORITY': '/run/user/1000/gdm/Xauthority', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:', 'SSH_AUTH_SOCK': '/run/user/1000/keyring/ssh', 'AMENT_PREFIX_PATH': '/opt/ros/jazzy', 'SHELL': '/bin/bash', 'TERMINATOR_UUID': 'urn:uuid:fea30a7c-e215-4a11-86da-c20908476650', 'QT_ACCESSIBILITY': '1', 'GDMSESSION': 'ubuntu', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'GPG_AGENT_INFO': '/run/user/1000/gnupg/S.gpg-agent:0:1', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'QT_IM_MODULE': 'ibus', 'PWD': '/home/jaych/Lunabotics2024-ROS/build/nt_py', 'LC_ALL': 'en_US.UTF-8', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-ubuntu:/etc/xdg', 'XDG_DATA_DIRS': '/usr/share/ubuntu:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop', 'PYTHONPATH': '/home/jaych/Lunabotics2024-ROS/build/nt_py/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'MEMORY_PRESSURE_WRITE': 'c29tZSAyMDAwMDAgMjAwMDAwMAA=', 'VTE_VERSION': '7600', 'CMAKE_PREFIX_PATH': '/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor'}, 'shell': False}
+[3.806679] (-) TimerEvent: {}
+[3.914080] (-) TimerEvent: {}
+[4.024325] (-) TimerEvent: {}
+[4.125365] (-) TimerEvent: {}
+[4.231708] (-) TimerEvent: {}
+[4.334001] (-) TimerEvent: {}
+[4.443621] (-) TimerEvent: {}
+[4.552737] (-) TimerEvent: {}
+[4.554386] (nt_py) StdoutLine: {'line': b'running egg_info\n'}
+[4.555126] (nt_py) StdoutLine: {'line': b'creating ../../build/nt_py/nt_py.egg-info\n'}
+[4.628587] (nt_py) StdoutLine: {'line': b'writing ../../build/nt_py/nt_py.egg-info/PKG-INFO\n'}
+[4.629020] (nt_py) StdoutLine: {'line': b'writing dependency_links to ../../build/nt_py/nt_py.egg-info/dependency_links.txt\n'}
+[4.629210] (nt_py) StdoutLine: {'line': b'writing requirements to ../../build/nt_py/nt_py.egg-info/requires.txt\n'}
+[4.629385] (nt_py) StdoutLine: {'line': b'writing top-level names to ../../build/nt_py/nt_py.egg-info/top_level.txt\n'}
+[4.629588] (nt_py) StdoutLine: {'line': b"writing manifest file '../../build/nt_py/nt_py.egg-info/SOURCES.txt'\n"}
+[4.656159] (-) TimerEvent: {}
+[4.736254] (nt_py) StdoutLine: {'line': b"reading manifest file '../../build/nt_py/nt_py.egg-info/SOURCES.txt'\n"}
+[4.736773] (nt_py) StdoutLine: {'line': b"writing manifest file '../../build/nt_py/nt_py.egg-info/SOURCES.txt'\n"}
+[4.736993] (nt_py) StdoutLine: {'line': b'running build\n'}
+[4.737188] (nt_py) StdoutLine: {'line': b'running build_py\n'}
+[4.737372] (nt_py) StdoutLine: {'line': b'creating /home/jaych/Lunabotics2024-ROS/build/nt_py/build\n'}
+[4.737587] (nt_py) StdoutLine: {'line': b'creating /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib\n'}
+[4.737777] (nt_py) StdoutLine: {'line': b'creating /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py\n'}
+[4.738544] (nt_py) StdoutLine: {'line': b'copying nt_py/__init__.py -> /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py\n'}
+[4.738884] (nt_py) StdoutLine: {'line': b'copying nt_py/nt_integration.py -> /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py\n'}
+[4.739069] (nt_py) StdoutLine: {'line': b'running install\n'}
+[4.756675] (-) TimerEvent: {}
+[4.757480] (nt_py) StdoutLine: {'line': b'running install_lib\n'}
+[4.830372] (nt_py) StdoutLine: {'line': b'creating /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py\n'}
+[4.830868] (nt_py) StdoutLine: {'line': b'copying /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py/__init__.py -> /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py\n'}
+[4.831111] (nt_py) StdoutLine: {'line': b'copying /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py/nt_integration.py -> /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py\n'}
+[4.831329] (nt_py) StdoutLine: {'line': b'byte-compiling /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py/__init__.py to __init__.cpython-312.pyc\n'}
+[4.831724] (nt_py) StdoutLine: {'line': b'byte-compiling /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py/nt_integration.py to nt_integration.cpython-312.pyc\n'}
+[4.831997] (nt_py) StdoutLine: {'line': b'running install_data\n'}
+[4.832181] (nt_py) StdoutLine: {'line': b'creating /home/jaych/Lunabotics2024-ROS/install/nt_py/share/ament_index\n'}
+[4.832358] (nt_py) StdoutLine: {'line': b'creating /home/jaych/Lunabotics2024-ROS/install/nt_py/share/ament_index/resource_index\n'}
+[4.832631] (nt_py) StdoutLine: {'line': b'creating /home/jaych/Lunabotics2024-ROS/install/nt_py/share/ament_index/resource_index/packages\n'}
+[4.832861] (nt_py) StdoutLine: {'line': b'copying resource/nt_py -> /home/jaych/Lunabotics2024-ROS/install/nt_py/share/ament_index/resource_index/packages\n'}
+[4.833050] (nt_py) StdoutLine: {'line': b'copying package.xml -> /home/jaych/Lunabotics2024-ROS/install/nt_py/share/nt_py\n'}
+[4.833222] (nt_py) StdoutLine: {'line': b'running install_egg_info\n'}
+[4.857974] (-) TimerEvent: {}
+[4.921583] (nt_py) StdoutLine: {'line': b'Copying ../../build/nt_py/nt_py.egg-info to /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py-0.0.0-py3.12.egg-info\n'}
+[4.921969] (nt_py) StdoutLine: {'line': b'running install_scripts\n'}
+[4.958379] (-) TimerEvent: {}
+[5.060655] (-) TimerEvent: {}
+[5.162240] (-) TimerEvent: {}
+[5.264052] (-) TimerEvent: {}
+[5.313934] (nt_py) StdoutLine: {'line': b"writing list of installed files to '/home/jaych/Lunabotics2024-ROS/build/nt_py/install.log'\n"}
+[5.364664] (-) TimerEvent: {}
+[5.367953] (nt_py) CommandEnded: {'returncode': 0}
+[5.414161] (nt_py) JobEnded: {'identifier': 'nt_py', 'rc': 0}
+[5.416291] (-) EventReactorShutdown: {}

@@ -1,0 +1,33 @@
+running egg_info
+creating ../../build/nt_py/nt_py.egg-info
+writing ../../build/nt_py/nt_py.egg-info/PKG-INFO
+writing dependency_links to ../../build/nt_py/nt_py.egg-info/dependency_links.txt
+writing requirements to ../../build/nt_py/nt_py.egg-info/requires.txt
+writing top-level names to ../../build/nt_py/nt_py.egg-info/top_level.txt
+writing manifest file '../../build/nt_py/nt_py.egg-info/SOURCES.txt'
+reading manifest file '../../build/nt_py/nt_py.egg-info/SOURCES.txt'
+writing manifest file '../../build/nt_py/nt_py.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/jaych/Lunabotics2024-ROS/build/nt_py/build
+creating /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib
+creating /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py
+copying nt_py/__init__.py -> /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py
+copying nt_py/nt_integration.py -> /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py
+running install
+running install_lib
+creating /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py
+copying /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py/__init__.py -> /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py
+copying /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py/nt_integration.py -> /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py
+byte-compiling /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py/__init__.py to __init__.cpython-312.pyc
+byte-compiling /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py/nt_integration.py to nt_integration.cpython-312.pyc
+running install_data
+creating /home/jaych/Lunabotics2024-ROS/install/nt_py/share/ament_index
+creating /home/jaych/Lunabotics2024-ROS/install/nt_py/share/ament_index/resource_index
+creating /home/jaych/Lunabotics2024-ROS/install/nt_py/share/ament_index/resource_index/packages
+copying resource/nt_py -> /home/jaych/Lunabotics2024-ROS/install/nt_py/share/ament_index/resource_index/packages
+copying package.xml -> /home/jaych/Lunabotics2024-ROS/install/nt_py/share/nt_py
+running install_egg_info
+Copying ../../build/nt_py/nt_py.egg-info to /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py-0.0.0-py3.12.egg-info
+running install_scripts
+writing list of installed files to '/home/jaych/Lunabotics2024-ROS/build/nt_py/install.log'

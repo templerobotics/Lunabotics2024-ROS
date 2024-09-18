@@ -1,0 +1,35 @@
+[3.719s] Invoking command in '/home/jaych/Lunabotics2024-ROS/src/nt_py': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/jaych/Lunabotics2024-ROS/build/nt_py/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/nt_py build --build-base /home/jaych/Lunabotics2024-ROS/build/nt_py/build install --record /home/jaych/Lunabotics2024-ROS/build/nt_py/install.log --single-version-externally-managed install_data
+[4.554s] running egg_info
+[4.555s] creating ../../build/nt_py/nt_py.egg-info
+[4.628s] writing ../../build/nt_py/nt_py.egg-info/PKG-INFO
+[4.629s] writing dependency_links to ../../build/nt_py/nt_py.egg-info/dependency_links.txt
+[4.629s] writing requirements to ../../build/nt_py/nt_py.egg-info/requires.txt
+[4.629s] writing top-level names to ../../build/nt_py/nt_py.egg-info/top_level.txt
+[4.629s] writing manifest file '../../build/nt_py/nt_py.egg-info/SOURCES.txt'
+[4.736s] reading manifest file '../../build/nt_py/nt_py.egg-info/SOURCES.txt'
+[4.736s] writing manifest file '../../build/nt_py/nt_py.egg-info/SOURCES.txt'
+[4.737s] running build
+[4.737s] running build_py
+[4.737s] creating /home/jaych/Lunabotics2024-ROS/build/nt_py/build
+[4.737s] creating /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib
+[4.737s] creating /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py
+[4.738s] copying nt_py/__init__.py -> /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py
+[4.739s] copying nt_py/nt_integration.py -> /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py
+[4.739s] running install
+[4.757s] running install_lib
+[4.830s] creating /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py
+[4.831s] copying /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py/__init__.py -> /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py
+[4.831s] copying /home/jaych/Lunabotics2024-ROS/build/nt_py/build/lib/nt_py/nt_integration.py -> /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py
+[4.831s] byte-compiling /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py/__init__.py to __init__.cpython-312.pyc
+[4.831s] byte-compiling /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py/nt_integration.py to nt_integration.cpython-312.pyc
+[4.832s] running install_data
+[4.832s] creating /home/jaych/Lunabotics2024-ROS/install/nt_py/share/ament_index
+[4.832s] creating /home/jaych/Lunabotics2024-ROS/install/nt_py/share/ament_index/resource_index
+[4.832s] creating /home/jaych/Lunabotics2024-ROS/install/nt_py/share/ament_index/resource_index/packages
+[4.833s] copying resource/nt_py -> /home/jaych/Lunabotics2024-ROS/install/nt_py/share/ament_index/resource_index/packages
+[4.833s] copying package.xml -> /home/jaych/Lunabotics2024-ROS/install/nt_py/share/nt_py
+[4.833s] running install_egg_info
+[4.921s] Copying ../../build/nt_py/nt_py.egg-info to /home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages/nt_py-0.0.0-py3.12.egg-info
+[4.922s] running install_scripts
+[5.314s] writing list of installed files to '/home/jaych/Lunabotics2024-ROS/build/nt_py/install.log'
+[5.369s] Invoked command in '/home/jaych/Lunabotics2024-ROS/src/nt_py' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/jaych/Lunabotics2024-ROS/build/nt_py/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jaych/Lunabotics2024-ROS/install/nt_py/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/nt_py build --build-base /home/jaych/Lunabotics2024-ROS/build/nt_py/build install --record /home/jaych/Lunabotics2024-ROS/build/nt_py/install.log --single-version-externally-managed install_data
