@@ -13,9 +13,6 @@
 	
 	
 **Initialization Steps in Order**
-	Install Linux Environment
-	Install WPILIB 2024 while inside of the Linux Environment
-	Clone Lunabotics2024-ROS repo from Github
-	run a setup script to install ROS2 and packages(optional)
+	Install Linux Environment /Install WPILIB 2024 while inside of the Linux Environment / Clone Lunabotics2024-ROS repo from Github / Run a setup script to install ROS2 and packages(optional)
 
 	
