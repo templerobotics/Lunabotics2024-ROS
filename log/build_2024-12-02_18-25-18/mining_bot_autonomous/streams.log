@@ -1,0 +1,53 @@
+[0.013s] Invoking command in '/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/ubuntu/robotics/autonomous_robot_ws/src/mining_bot_autonomous -DCMAKE_INSTALL_PREFIX=/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_autonomous
+[0.117s] -- The C compiler identification is GNU 11.4.0
+[0.205s] -- The CXX compiler identification is GNU 11.4.0
+[0.217s] -- Detecting C compiler ABI info
+[0.291s] -- Detecting C compiler ABI info - done
+[0.301s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.302s] -- Detecting C compile features
+[0.302s] -- Detecting C compile features - done
+[0.306s] -- Detecting CXX compiler ABI info
+[0.383s] -- Detecting CXX compiler ABI info - done
+[0.396s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.397s] -- Detecting CXX compile features
+[0.398s] -- Detecting CXX compile features - done
+[0.400s] -- Found ament_cmake: 1.3.10 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.547s] -- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+[0.654s] -- Found rclcpp: 16.0.10 (/opt/ros/humble/share/rclcpp/cmake)
+[0.704s] -- Found rosidl_generator_c: 3.1.5 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.710s] -- Found rosidl_adapter: 3.1.5 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.721s] -- Found rosidl_generator_cpp: 3.1.5 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.737s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.756s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.821s] -- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[0.825s] -- Found rmw_fastrtps_cpp: 6.2.7 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+[0.934s] -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")  
+[0.961s] -- Found FastRTPS: /opt/ros/humble/include  
+[0.998s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[1.009s] -- Looking for pthread.h
+[1.082s] -- Looking for pthread.h - found
+[1.082s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[1.153s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[1.155s] -- Found Threads: TRUE  
+[1.217s] -- Found nav2_core: 1.1.16 (/opt/ros/humble/share/nav2_core/cmake)
+[1.545s] -- Found Eigen3: TRUE (found version "3.4.0") 
+[1.545s] -- Ensuring Eigen3 include directory is part of orocos-kdl CMake target
+[1.689s] [31mCMake Error at CMakeLists.txt:14 (find_package):
+[1.689s]   By not providing "Findtft.cmake" in CMAKE_MODULE_PATH this project has
+[1.689s]   asked CMake to find a package configuration file provided by "tft", but
+[1.689s]   CMake did not find one.
+[1.689s] 
+[1.689s]   Could not find a package configuration file provided by "tft" with any of
+[1.689s]   the following names:
+[1.689s] 
+[1.689s]     tftConfig.cmake
+[1.689s]     tft-config.cmake
+[1.690s] 
+[1.690s]   Add the installation prefix of "tft" to CMAKE_PREFIX_PATH or set "tft_DIR"
+[1.690s]   to a directory containing one of the above files.  If "tft" provides a
+[1.690s]   separate development package or SDK, be sure it has been installed.
+[1.690s] 
+[1.690s] [0m
+[1.690s] -- Configuring incomplete, errors occurred!
+[1.690s] See also "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/CMakeFiles/CMakeOutput.log".
+[1.698s] Invoked command in '/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous' returned '1': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/ubuntu/robotics/autonomous_robot_ws/src/mining_bot_autonomous -DCMAKE_INSTALL_PREFIX=/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_autonomous

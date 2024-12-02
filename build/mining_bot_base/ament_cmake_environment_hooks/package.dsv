@@ -1,0 +1,4 @@
+source;share/mining_bot_base/local_setup.bash
+source;share/mining_bot_base/local_setup.dsv
+source;share/mining_bot_base/local_setup.sh
+source;share/mining_bot_base/local_setup.zsh

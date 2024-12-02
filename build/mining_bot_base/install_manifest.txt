@@ -1,0 +1,15 @@
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/ament_index/resource_index/package_run_dependencies/mining_bot_base
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/ament_index/resource_index/parent_prefix_path/mining_bot_base
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/mining_bot_base/environment/ament_prefix_path.sh
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/mining_bot_base/environment/ament_prefix_path.dsv
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/mining_bot_base/environment/path.sh
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/mining_bot_base/environment/path.dsv
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/mining_bot_base/local_setup.bash
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/mining_bot_base/local_setup.sh
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/mining_bot_base/local_setup.zsh
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/mining_bot_base/local_setup.dsv
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/mining_bot_base/package.dsv
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/ament_index/resource_index/packages/mining_bot_base
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/mining_bot_base/cmake/mining_bot_baseConfig.cmake
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/mining_bot_base/cmake/mining_bot_baseConfig-version.cmake
+/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_base/share/mining_bot_base/package.xml
