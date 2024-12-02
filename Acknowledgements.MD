@@ -11,4 +11,4 @@ This contribution is the basis of our own custom ROS-based framework for our NAS
 
 ##License
 
-Please refer to the original sparkcan reporisotry for license information and usage terms 
+Please refer to the original sparkcan repository for license information and usage terms 
