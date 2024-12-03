@@ -62,11 +62,18 @@ if ! [ -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then
   rosdep update
 fi
 
-# Get the workspace path
-WORKSPACE_PATH=$(pwd)
-
 print_status "[Clean up old build and install directories]"
 rm -rf build install log
+
+print_status "[Unset problematic environment variables]"
+unset AMENT_PREFIX_PATH
+unset CMAKE_PREFIX_PATH
+
+print_status "[Install missing dependencies]"
+rosdep install --from-paths src --ignore-src -r -y
+
+# Get the workspace path
+WORKSPACE_PATH=$(pwd)
 
 print_status "[Set the ROS2 environment]"
 ainsl "source /opt/ros/$name_ros_version/setup.bash" ~/.bashrc
@@ -76,7 +83,7 @@ ainsl "source $WORKSPACE_PATH/install/setup.bash" ~/.bashrc
 ainsl "alias cw='cd $WORKSPACE_PATH'" ~/.bashrc
 ainsl "alias cb='cd $WORKSPACE_PATH && colcon build'" ~/.bashrc
 
-print_status "[Initial workspace build]"
+print_status "[Build the workspace]"
 colcon build
 
 if [ $? -eq 0 ]; then
@@ -85,6 +92,9 @@ else
   print_status "[Build failed. Check the errors above.]"
   exit 1
 fi
+
+print_status "[Source the workspace]"
+source install/setup.bash
 
 print_status "[Complete!!!]"
 echo "Please restart your terminal or run: source ~/.bashrc"
