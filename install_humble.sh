@@ -1,16 +1,16 @@
 #!/bin/bash
- 
+
 # Print status message in white text on a blue background
 print_status () {
   echo -e "\033[37;44m$1\033[0m"
 }
- 
+
 # Function to add a line to a file if it doesn't exist
 ainsl () {
   grep -qF -- "$1" $2 || echo "$1" >> $2
 }
- 
-# Print message giving an overview of the installation process
+
+# Print overview message
 echo ""
 echo "[Note] Target OS version  >>> Ubuntu 22.04.x (Jammy Jellyfish)"
 echo "[Note] Target ROS version >>> ROS2 Humble"
@@ -19,8 +19,8 @@ echo ""
 echo "PRESS [ENTER] TO CONTINUE THE INSTALLATION"
 echo "IF YOU WANT TO CANCEL, PRESS [CTRL] + [C]"
 read REPLY
- 
-print_status "[Set the target OS, ROS version]"
+
+print_status "[Set the target OS and ROS version]"
 name_os_version=${name_os_version:="jammy"}
 name_ros_version=${name_ros_version:="humble"}
 
@@ -60,6 +60,9 @@ fi
 # Get the workspace path
 WORKSPACE_PATH=$(pwd)
 
+print_status "[Clean up old build and install directories]"
+rm -rf build install log
+
 print_status "[Set the ROS2 environment]"
 ainsl "source /opt/ros/$name_ros_version/setup.bash" ~/.bashrc
 ainsl "source $WORKSPACE_PATH/install/setup.bash" ~/.bashrc
@@ -72,7 +75,16 @@ print_status "[Initial workspace build]"
 cd $WORKSPACE_PATH
 colcon build
 
+if [ $? -eq 0 ]; then
+  print_status "[Build completed successfully!]"
+else
+  print_status "[Build failed. Check the errors above.]"
+  exit 1
+fi
+
 print_status "[Complete!!!]"
 echo "Please restart your terminal or run: source ~/.bashrc"
 exit 0
+
+
 
