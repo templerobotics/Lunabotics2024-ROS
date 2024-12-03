@@ -29,21 +29,26 @@ sudo apt-get update -y
 sudo apt-get upgrade -y
 
 print_status "[Install build environment and dependencies]"
-sudo apt-get install -y build-essential curl
+sudo apt-get install -y build-essential curl python3-colcon-common-extensions
 
 print_status "[Install ROS2 Humble Desktop]"
 sudo apt-get install -y ros-humble-desktop
 
 print_status "[Install required ROS2 packages]"
 sudo apt-get install -y \
+  ros-humble-navigation2 \
+  ros-humble-nav2-bringup \
+  ros-humble-nav2-core \
+  ros-humble-nav-msgs \
+  ros-humble-sensor-msgs \
+  ros-humble-tf2-ros \
   ros-humble-teleop-twist-keyboard \
   ros-humble-urdf \
   ros-humble-xacro \
   ros-humble-rviz2 \
   ros-humble-controller-manager \
   ros-humble-diff-drive-controller \
-  ros-humble-hardware-interface \
-  python3-colcon-common-extensions
+  ros-humble-hardware-interface
 
 print_status "[Environment setup]"
 source /opt/ros/$name_ros_version/setup.bash
@@ -72,7 +77,6 @@ ainsl "alias cw='cd $WORKSPACE_PATH'" ~/.bashrc
 ainsl "alias cb='cd $WORKSPACE_PATH && colcon build'" ~/.bashrc
 
 print_status "[Initial workspace build]"
-cd $WORKSPACE_PATH
 colcon build
 
 if [ $? -eq 0 ]; then
@@ -85,6 +89,5 @@ fi
 print_status "[Complete!!!]"
 echo "Please restart your terminal or run: source ~/.bashrc"
 exit 0
-
 
 
