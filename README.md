@@ -3,9 +3,9 @@
 ## How to Utilize this repo:
 
 ### Inside your Linux Environment's base path: Install Sparkcan
-sudo add-apt-repository ppa:graysonarendt/sparkcan
-sudo apt update
-sudo apt install sparkcan
+1. sudo add-apt-repository ppa:graysonarendt/sparkcan
+2. sudo apt update
+3. sudo apt install sparkcan
 
 ### After Sparkcan Installation : Clone the Main Repo
 1. mkdir robotics
