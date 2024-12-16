@@ -7,7 +7,7 @@
 				{
 					"build" : ".",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-.-1aa4610d3335a425193a.json",
+					"jsonFile" : "directory-.-9649f637204f8a7b096b.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.12"
@@ -29,7 +29,7 @@
 					[
 						0
 					],
-					"name" : "mining_bot_autonomous",
+					"name" : "mining_bot_base",
 					"targetIndexes" : 
 					[
 						0,
@@ -41,15 +41,15 @@
 			[
 				{
 					"directoryIndex" : 0,
-					"id" : "mining_bot_autonomous_uninstall::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-mining_bot_autonomous_uninstall-cd637f778d4d9f68f16e.json",
-					"name" : "mining_bot_autonomous_uninstall",
+					"id" : "mining_bot_base_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mining_bot_base_uninstall-4cfb162a2657178a7171.json",
+					"name" : "mining_bot_base_uninstall",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "uninstall::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-uninstall-ea094e0dd39636fa5529.json",
+					"jsonFile" : "target-uninstall-84bb68f98e3761073e54.json",
 					"name" : "uninstall",
 					"projectIndex" : 0
 				}
@@ -59,8 +59,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous",
-		"source" : "/home/ubuntu/robotics/autonomous_robot_ws/src/mining_bot_autonomous"
+		"build" : "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base",
+		"source" : "/home/jayhaych/robotics/Lunabotics2024-ROS/src/mining_bot_base"
 	},
 	"version" : 
 	{

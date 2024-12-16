@@ -1,4 +1,0 @@
-Invoking command in '/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base -- -j4 -l4
-Invoked command in '/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base -- -j4 -l4
-Invoking command in '/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base
-Invoked command in '/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base

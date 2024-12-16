@@ -1,8 +1,8 @@
-# Install script for directory: /home/ubuntu/robotics/autonomous_robot_ws/src/mining_bot_autonomous
+# Install script for directory: /home/jayhaych/robotics/Lunabotics2024-ROS/src/mining_bot_autonomous
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/ubuntu/robotics/autonomous_robot_ws/install/mining_bot_autonomous")
+  set(CMAKE_INSTALL_PREFIX "/home/jayhaych/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -43,11 +43,11 @@ if(NOT DEFINED CMAKE_OBJDUMP)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ament_index/resource_index/package_run_dependencies" TYPE FILE FILES "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/mining_bot_autonomous")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ament_index/resource_index/package_run_dependencies" TYPE FILE FILES "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/mining_bot_autonomous")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ament_index/resource_index/parent_prefix_path" TYPE FILE FILES "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/ament_cmake_index/share/ament_index/resource_index/parent_prefix_path/mining_bot_autonomous")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ament_index/resource_index/parent_prefix_path" TYPE FILE FILES "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_index/share/ament_index/resource_index/parent_prefix_path/mining_bot_autonomous")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -55,7 +55,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous/environment" TYPE FILE FILES "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/ament_cmake_environment_hooks/ament_prefix_path.dsv")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous/environment" TYPE FILE FILES "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/ament_prefix_path.dsv")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -63,42 +63,42 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous/environment" TYPE FILE FILES "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/ament_cmake_environment_hooks/path.dsv")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous/environment" TYPE FILE FILES "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/path.dsv")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous" TYPE FILE FILES "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/ament_cmake_environment_hooks/local_setup.bash")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous" TYPE FILE FILES "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/local_setup.bash")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous" TYPE FILE FILES "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/ament_cmake_environment_hooks/local_setup.sh")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous" TYPE FILE FILES "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/local_setup.sh")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous" TYPE FILE FILES "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/ament_cmake_environment_hooks/local_setup.zsh")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous" TYPE FILE FILES "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/local_setup.zsh")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous" TYPE FILE FILES "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/ament_cmake_environment_hooks/local_setup.dsv")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous" TYPE FILE FILES "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/local_setup.dsv")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous" TYPE FILE FILES "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/ament_cmake_environment_hooks/package.dsv")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous" TYPE FILE FILES "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/package.dsv")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ament_index/resource_index/packages" TYPE FILE FILES "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/ament_cmake_index/share/ament_index/resource_index/packages/mining_bot_autonomous")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ament_index/resource_index/packages" TYPE FILE FILES "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_index/share/ament_index/resource_index/packages/mining_bot_autonomous")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous/cmake" TYPE FILE FILES
-    "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/ament_cmake_core/mining_bot_autonomousConfig.cmake"
-    "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/ament_cmake_core/mining_bot_autonomousConfig-version.cmake"
+    "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_core/mining_bot_autonomousConfig.cmake"
+    "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_core/mining_bot_autonomousConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous" TYPE FILE FILES "/home/ubuntu/robotics/autonomous_robot_ws/src/mining_bot_autonomous/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mining_bot_autonomous" TYPE FILE FILES "/home/jayhaych/robotics/Lunabotics2024-ROS/src/mining_bot_autonomous/package.xml")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -109,5 +109,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_autonomous/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

@@ -4,17 +4,12 @@
   <name>mining_bot_autonomous</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="ubuntu@todo.todo">ubuntu</maintainer>
+  <maintainer email="jayhaych@todo.todo">jayhaych</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>rclcpp</depend>
-  <depend> nav2_core</depend>
-  <depend> nav_msgs</depend>
-  <depend> sensor_msgs</depend>
-  <depend> tft</depend>
-  <depend> tf2_ros</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -36,7 +36,7 @@
 			{
 				"command" : 5,
 				"file" : 4,
-				"line" : 27,
+				"line" : 26,
 				"parent" : 0
 			},
 			{
@@ -223,7 +223,7 @@
 			"destination" : "share/ament_index/resource_index/package_run_dependencies",
 			"paths" : 
 			[
-				"/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/mining_bot_base"
+				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/mining_bot_base"
 			],
 			"type" : "file"
 		},
@@ -233,7 +233,7 @@
 			"destination" : "share/ament_index/resource_index/parent_prefix_path",
 			"paths" : 
 			[
-				"/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base/ament_cmake_index/share/ament_index/resource_index/parent_prefix_path/mining_bot_base"
+				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_index/share/ament_index/resource_index/parent_prefix_path/mining_bot_base"
 			],
 			"type" : "file"
 		},
@@ -253,7 +253,7 @@
 			"destination" : "share/mining_bot_base/environment",
 			"paths" : 
 			[
-				"/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base/ament_cmake_environment_hooks/ament_prefix_path.dsv"
+				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/ament_prefix_path.dsv"
 			],
 			"type" : "file"
 		},
@@ -273,7 +273,7 @@
 			"destination" : "share/mining_bot_base/environment",
 			"paths" : 
 			[
-				"/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base/ament_cmake_environment_hooks/path.dsv"
+				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/path.dsv"
 			],
 			"type" : "file"
 		},
@@ -283,7 +283,7 @@
 			"destination" : "share/mining_bot_base",
 			"paths" : 
 			[
-				"/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base/ament_cmake_environment_hooks/local_setup.bash"
+				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/local_setup.bash"
 			],
 			"type" : "file"
 		},
@@ -293,7 +293,7 @@
 			"destination" : "share/mining_bot_base",
 			"paths" : 
 			[
-				"/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base/ament_cmake_environment_hooks/local_setup.sh"
+				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/local_setup.sh"
 			],
 			"type" : "file"
 		},
@@ -303,7 +303,7 @@
 			"destination" : "share/mining_bot_base",
 			"paths" : 
 			[
-				"/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base/ament_cmake_environment_hooks/local_setup.zsh"
+				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/local_setup.zsh"
 			],
 			"type" : "file"
 		},
@@ -313,7 +313,7 @@
 			"destination" : "share/mining_bot_base",
 			"paths" : 
 			[
-				"/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base/ament_cmake_environment_hooks/local_setup.dsv"
+				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/local_setup.dsv"
 			],
 			"type" : "file"
 		},
@@ -323,7 +323,7 @@
 			"destination" : "share/mining_bot_base",
 			"paths" : 
 			[
-				"/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base/ament_cmake_environment_hooks/package.dsv"
+				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/package.dsv"
 			],
 			"type" : "file"
 		},
@@ -333,7 +333,7 @@
 			"destination" : "share/ament_index/resource_index/packages",
 			"paths" : 
 			[
-				"/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base/ament_cmake_index/share/ament_index/resource_index/packages/mining_bot_base"
+				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_index/share/ament_index/resource_index/packages/mining_bot_base"
 			],
 			"type" : "file"
 		},
@@ -343,8 +343,8 @@
 			"destination" : "share/mining_bot_base/cmake",
 			"paths" : 
 			[
-				"/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base/ament_cmake_core/mining_bot_baseConfig.cmake",
-				"/home/ubuntu/robotics/autonomous_robot_ws/build/mining_bot_base/ament_cmake_core/mining_bot_baseConfig-version.cmake"
+				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_core/mining_bot_baseConfig.cmake",
+				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_core/mining_bot_baseConfig-version.cmake"
 			],
 			"type" : "file"
 		},

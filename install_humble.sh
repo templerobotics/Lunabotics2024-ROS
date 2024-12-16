@@ -7,7 +7,7 @@ print_status () {
 
 # Function to add a line to a file if it doesn't exist
 ainsl () {
-  grep -qF -- "$1" $2 || echo "$1" >> $2
+  grep -qF -- "$1" "$2" || echo "$1" >> "$2"
 }
 
 # Print overview message
@@ -18,18 +18,23 @@ echo "[Note] Project path       >>> $(pwd)"
 echo ""
 echo "PRESS [ENTER] TO CONTINUE THE INSTALLATION"
 echo "IF YOU WANT TO CANCEL, PRESS [CTRL] + [C]"
-read REPLY
+read -r REPLY
 
-print_status "[Set the target OS and ROS version]"
+# Set variables
 name_os_version=${name_os_version:="jammy"}
 name_ros_version=${name_ros_version:="humble"}
+
+print_status "[Set up your sources.list and keys for ROS 2]"
+sudo apt-get update -y && sudo apt-get install -y software-properties-common curl
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | sudo gpg --dearmor -o /usr/share/keyrings/ros-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu ${name_os_version} main" | sudo tee /etc/apt/sources.list.d/ros2-latest.list > /dev/null
 
 print_status "[Update the package lists and upgrade them]"
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
 print_status "[Install build environment and dependencies]"
-sudo apt-get install -y build-essential curl python3-colcon-common-extensions
+sudo apt-get install -y build-essential python3-colcon-common-extensions python3-rosdep python3-vcstool git
 
 print_status "[Install ROS2 Humble Desktop]"
 sudo apt-get install -y ros-humble-desktop
@@ -50,54 +55,25 @@ sudo apt-get install -y \
   ros-humble-diff-drive-controller \
   ros-humble-hardware-interface
 
-print_status "[Environment setup]"
+print_status "[Initialize rosdep and Update]"
+if ! [ -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then
+  sudo rosdep init
+fi
+rosdep update
+
+print_status "[Set up environment variables]"
+ainsl "source /opt/ros/$name_ros_version/setup.bash" ~/.bashrc
+ainsl "source $(pwd)/install/setup.bash" ~/.bashrc
+
 source /opt/ros/$name_ros_version/setup.bash
 
-print_status "[Install rosdep]"
-sudo apt-get install -y python3-rosdep
-
-if ! [ -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then
-  print_status "[Initialize rosdep and Update]"
-  sudo sh -c "rosdep init"
-  rosdep update
-fi
-
-print_status "[Clean up old build and install directories]"
-rm -rf build install log
-
-print_status "[Unset problematic environment variables]"
-unset AMENT_PREFIX_PATH
-unset CMAKE_PREFIX_PATH
-
-print_status "[Install missing dependencies]"
-rosdep install --from-paths src --ignore-src -r -y
-
-# Get the workspace path
-WORKSPACE_PATH=$(pwd)
-
-print_status "[Set the ROS2 environment]"
-ainsl "source /opt/ros/$name_ros_version/setup.bash" ~/.bashrc
-ainsl "source $WORKSPACE_PATH/install/setup.bash" ~/.bashrc
-
-# Add useful aliases
-ainsl "alias cw='cd $WORKSPACE_PATH'" ~/.bashrc
-ainsl "alias cb='cd $WORKSPACE_PATH && colcon build'" ~/.bashrc
-
 print_status "[Build the workspace]"
-colcon build
-
-if [ $? -eq 0 ]; then
-  print_status "[Build completed successfully!]"
+if [ -d src ]; then
+  colcon build
 else
-  print_status "[Build failed. Check the errors above.]"
-  exit 1
+  echo "No 'src' folder found in the workspace. Please create it and add your ROS 2 packages."
 fi
 
-print_status "[Source the workspace]"
-source install/setup.bash
-
-print_status "[Complete!!!]"
-echo "Please restart your terminal or run: source ~/.bashrc"
+print_status "[Installation complete!]"
 exit 0
-
 
