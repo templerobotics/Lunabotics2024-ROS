@@ -1,4 +1,0 @@
-Invoking command in '/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous -- -j20 -l20
-Invoked command in '/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous -- -j20 -l20
-Invoking command in '/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous
-Invoked command in '/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous

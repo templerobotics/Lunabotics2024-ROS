@@ -12,9 +12,9 @@
 2. cd robotics
 3. git clone https://github.com/templerobotics/Lunabotics2024-ROS.git
 4. cd Lunabotics2024-ROS
-5. chmod +x install_humble.sh
-6. ./install_humble.sh
-7. Before running "colcon build", cd to Lunabotics2024-ROS then type, "rm -rf build/ install/ log/" to clear previous build artifacts if any
+5. Type, "rm -rf build/ install/ log/" while inside of the Lunabotics2024-ROS directory to clear previous build artifacts 
+6. chmod +x install_humble.sh --> The script will appear green in linux
+7. ./install_humble.sh
 8. In the Lunabotics2024-ROS directory type, "colcon build"
 
 
