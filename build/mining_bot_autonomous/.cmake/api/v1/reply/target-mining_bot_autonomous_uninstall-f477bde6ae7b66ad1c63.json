@@ -69,8 +69,8 @@
 			}
 		]
 	},
-	"id" : "mining_bot_base_uninstall::@6890427a1f51a3e7e1df",
-	"name" : "mining_bot_base_uninstall",
+	"id" : "mining_bot_autonomous_uninstall::@6890427a1f51a3e7e1df",
+	"name" : "mining_bot_autonomous_uninstall",
 	"paths" : 
 	{
 		"build" : ".",
@@ -98,13 +98,13 @@
 		{
 			"backtrace" : 9,
 			"isGenerated" : true,
-			"path" : "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/CMakeFiles/mining_bot_base_uninstall",
+			"path" : "/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/CMakeFiles/mining_bot_autonomous_uninstall",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 0,
 			"isGenerated" : true,
-			"path" : "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/CMakeFiles/mining_bot_base_uninstall.rule",
+			"path" : "/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/CMakeFiles/mining_bot_autonomous_uninstall.rule",
 			"sourceGroupIndex" : 1
 		}
 	],

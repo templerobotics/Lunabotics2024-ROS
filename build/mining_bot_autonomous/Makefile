@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/jayhaych/robotics/Lunabotics2024-ROS/src/mining_bot_autonomous
+CMAKE_SOURCE_DIR = /home/jaych/robotics/Lunabotics2024-ROS/src/mining_bot_autonomous
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous
+CMAKE_BINARY_DIR = /home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -142,9 +142,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/CMakeFiles /home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/CMakeFiles /home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

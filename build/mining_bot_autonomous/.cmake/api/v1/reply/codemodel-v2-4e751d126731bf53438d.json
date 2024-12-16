@@ -7,7 +7,7 @@
 				{
 					"build" : ".",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-.-e66de0d43b5bb693038e.json",
+					"jsonFile" : "directory-.-96f1b96ef0cd71d0e608.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.12"
@@ -42,7 +42,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "mining_bot_autonomous_uninstall::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-mining_bot_autonomous_uninstall-ec933a7127b284a5ed72.json",
+					"jsonFile" : "target-mining_bot_autonomous_uninstall-f477bde6ae7b66ad1c63.json",
 					"name" : "mining_bot_autonomous_uninstall",
 					"projectIndex" : 0
 				},
@@ -59,8 +59,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous",
-		"source" : "/home/jayhaych/robotics/Lunabotics2024-ROS/src/mining_bot_autonomous"
+		"build" : "/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous",
+		"source" : "/home/jaych/robotics/Lunabotics2024-ROS/src/mining_bot_autonomous"
 	},
 	"version" : 
 	{

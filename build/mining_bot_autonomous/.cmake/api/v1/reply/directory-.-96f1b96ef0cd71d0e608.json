@@ -36,7 +36,7 @@
 			{
 				"command" : 5,
 				"file" : 4,
-				"line" : 26,
+				"line" : 24,
 				"parent" : 0
 			},
 			{
@@ -223,7 +223,7 @@
 			"destination" : "share/ament_index/resource_index/package_run_dependencies",
 			"paths" : 
 			[
-				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/mining_bot_base"
+				"/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/mining_bot_autonomous"
 			],
 			"type" : "file"
 		},
@@ -233,14 +233,14 @@
 			"destination" : "share/ament_index/resource_index/parent_prefix_path",
 			"paths" : 
 			[
-				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_index/share/ament_index/resource_index/parent_prefix_path/mining_bot_base"
+				"/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_index/share/ament_index/resource_index/parent_prefix_path/mining_bot_autonomous"
 			],
 			"type" : "file"
 		},
 		{
 			"backtrace" : 14,
 			"component" : "Unspecified",
-			"destination" : "share/mining_bot_base/environment",
+			"destination" : "share/mining_bot_autonomous/environment",
 			"paths" : 
 			[
 				"/opt/ros/humble/share/ament_cmake_core/cmake/environment_hooks/environment/ament_prefix_path.sh"
@@ -250,17 +250,17 @@
 		{
 			"backtrace" : 15,
 			"component" : "Unspecified",
-			"destination" : "share/mining_bot_base/environment",
+			"destination" : "share/mining_bot_autonomous/environment",
 			"paths" : 
 			[
-				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/ament_prefix_path.dsv"
+				"/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/ament_prefix_path.dsv"
 			],
 			"type" : "file"
 		},
 		{
 			"backtrace" : 16,
 			"component" : "Unspecified",
-			"destination" : "share/mining_bot_base/environment",
+			"destination" : "share/mining_bot_autonomous/environment",
 			"paths" : 
 			[
 				"/opt/ros/humble/share/ament_cmake_core/cmake/environment_hooks/environment/path.sh"
@@ -270,60 +270,60 @@
 		{
 			"backtrace" : 17,
 			"component" : "Unspecified",
-			"destination" : "share/mining_bot_base/environment",
+			"destination" : "share/mining_bot_autonomous/environment",
 			"paths" : 
 			[
-				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/path.dsv"
+				"/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/path.dsv"
 			],
 			"type" : "file"
 		},
 		{
 			"backtrace" : 19,
 			"component" : "Unspecified",
-			"destination" : "share/mining_bot_base",
+			"destination" : "share/mining_bot_autonomous",
 			"paths" : 
 			[
-				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/local_setup.bash"
+				"/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/local_setup.bash"
 			],
 			"type" : "file"
 		},
 		{
 			"backtrace" : 20,
 			"component" : "Unspecified",
-			"destination" : "share/mining_bot_base",
+			"destination" : "share/mining_bot_autonomous",
 			"paths" : 
 			[
-				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/local_setup.sh"
+				"/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/local_setup.sh"
 			],
 			"type" : "file"
 		},
 		{
 			"backtrace" : 21,
 			"component" : "Unspecified",
-			"destination" : "share/mining_bot_base",
+			"destination" : "share/mining_bot_autonomous",
 			"paths" : 
 			[
-				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/local_setup.zsh"
+				"/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/local_setup.zsh"
 			],
 			"type" : "file"
 		},
 		{
 			"backtrace" : 22,
 			"component" : "Unspecified",
-			"destination" : "share/mining_bot_base",
+			"destination" : "share/mining_bot_autonomous",
 			"paths" : 
 			[
-				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/local_setup.dsv"
+				"/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/local_setup.dsv"
 			],
 			"type" : "file"
 		},
 		{
 			"backtrace" : 23,
 			"component" : "Unspecified",
-			"destination" : "share/mining_bot_base",
+			"destination" : "share/mining_bot_autonomous",
 			"paths" : 
 			[
-				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_environment_hooks/package.dsv"
+				"/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_environment_hooks/package.dsv"
 			],
 			"type" : "file"
 		},
@@ -333,25 +333,25 @@
 			"destination" : "share/ament_index/resource_index/packages",
 			"paths" : 
 			[
-				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_index/share/ament_index/resource_index/packages/mining_bot_base"
+				"/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_index/share/ament_index/resource_index/packages/mining_bot_autonomous"
 			],
 			"type" : "file"
 		},
 		{
 			"backtrace" : 30,
 			"component" : "Unspecified",
-			"destination" : "share/mining_bot_base/cmake",
+			"destination" : "share/mining_bot_autonomous/cmake",
 			"paths" : 
 			[
-				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_core/mining_bot_baseConfig.cmake",
-				"/home/jayhaych/robotics/Lunabotics2024-ROS/build/mining_bot_base/ament_cmake_core/mining_bot_baseConfig-version.cmake"
+				"/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_core/mining_bot_autonomousConfig.cmake",
+				"/home/jaych/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/ament_cmake_core/mining_bot_autonomousConfig-version.cmake"
 			],
 			"type" : "file"
 		},
 		{
 			"backtrace" : 31,
 			"component" : "Unspecified",
-			"destination" : "share/mining_bot_base",
+			"destination" : "share/mining_bot_autonomous",
 			"paths" : 
 			[
 				"package.xml"

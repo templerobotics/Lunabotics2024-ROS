@@ -14,6 +14,7 @@
 4. cd Lunabotics2024-ROS
 5. chmod +x install_humble.sh
 6. ./install_humble.sh
-7. colcon build
+7. Before running "colcon build", cd to Lunabotics2024-ROS then type, "rm -rf build/ install/ log/" to clear previous build artifacts if any
+8. In the Lunabotics2024-ROS directory type, "colcon build"
 
 
