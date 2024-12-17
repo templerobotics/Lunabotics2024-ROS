@@ -13,6 +13,9 @@
 #include <SparkFlex.hpp>
 #include <SparkMax.hpp>
 
+/* Custom Headers */
+#include "sparkmax_hardware_interface.hpp"
+
 
 /* Aliases & Type defs*/
 

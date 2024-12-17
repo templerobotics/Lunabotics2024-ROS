@@ -1,6 +1,5 @@
 #include "core.hpp"
 
-
 class SparkMaxHardware : public hardware_interface::SystemInterface {
 
 private:
@@ -21,21 +20,23 @@ public:
             return CallbackReturn::ERROR;
         }
 
-        /*  4 motor Motors  */
+        /*  4 Driver Motors  */
         hw_velocities_.resize(4, 0.0);  
         hw_positions_.resize(4, 0.0);
         hw_commands_.resize(4, 0.0);
         
         try {
-                /*  Initialize Sparkmaxes & Motors 
-                    These values are ARBITRARY. Use REV Hardware Client to verify!
-                 */
+
+            /*  Initialize Sparkmaxes & Motors 
+                These current values are ARBITRARY. Use REV Hardware Client to verify the SparkMax Can IDs
+            */
             front_left_motor = std::make_unique<SparkMax>("can0", 1);
             front_right_motor = std::make_unique<SparkMax>("can0",2);
             back_left_motor = std::make_unique<SparkMax>("can0",3);
             back_right_motor = std::make_unique<SparkMax>("can0",4);
 
-             for (auto controller : {front_left_motor_.get(), front_right_motor_.get(), back_left_motor_.get(), back_right_motor_.get()}) {
+
+            for (auto controller : {front_left_motor_.get(), front_right_motor_.get(), back_left_motor_.get(), back_right_motor_.get()}) {
                 controller->SetMotorType(MotorType::kBrushless);
                 controller->SetIdleMode(IdleMode::kCoast);
                 controller->SetInverted(true);
@@ -43,28 +44,24 @@ public:
             }
 
         } catch (const std::exception& e) {
-            RCLCPP_ERROR(rclcpp::get_logger("SparkMax"), "Failed to initialize: %s", e.what());
-            return CallbackReturn::ERROR;
+            RCLCPP_ERROR(rclcpp::get_logger("SparkMax Initialization Error!"), "Failed to initialize: %s", e.what());
+            return CallbackReturn::ERROR; /*Abort if initialization doesn't happen. Failure isn't enough*/
         }
-
+            
         return CallbackReturn::SUCCESS;
     }
 
+    /* Documentation: "Ownership is transferred to the caller" aka me. Question: What does that mean exactly? */
+    // Export state interfaces for position and velocity
+    /*  Prefix, Interface Name, Value */
     std::vector<hardware_interface::StateInterface> export_state_interfaces() override {
-        // Export state interfaces for position and velocity
         std::vector<hardware_interface::StateInterface> state_interfaces;
         
-        // Left wheel
-        state_interfaces.emplace_back(hardware_interface::StateInterface(
-            "left_wheel_joint", hardware_interface::HW_IF_VELOCITY, &hw_velocities_[0]));
-        state_interfaces.emplace_back(hardware_interface::StateInterface(
-            "left_wheel_joint", hardware_interface::HW_IF_POSITION, &hw_positions_[0]));
-            
-        // Right wheel
-        state_interfaces.emplace_back(hardware_interface::StateInterface(
-            "right_wheel_joint", hardware_interface::HW_IF_VELOCITY, &hw_velocities_[1]));
-        state_interfaces.emplace_back(hardware_interface::StateInterface(
-            "right_wheel_joint", hardware_interface::HW_IF_POSITION, &hw_positions_[1]));
+        state_interfaces.emplace_back(hardware_interface::StateInterface("front_left_wheel_joint", hardware_interface::HW_IF_VELOCITY, &hw_velocities_[0]));
+        state_interfaces.emplace_back(hardware_interface::StateInterface("back_left_wheel_joint", hardware_interface::HW_IF_POSITION, &hw_positions_[0]));
+        
+        state_interfaces.emplace_back(hardware_interface::StateInterface("front_right_wheel_joint", hardware_interface::HW_IF_VELOCITY, &hw_velocities_[1]));
+        state_interfaces.emplace_back(hardware_interface::StateInterface("back_right_wheel_joint", hardware_interface::HW_IF_POSITION, &hw_positions_[1]));
 
         return state_interfaces;
     }
@@ -80,6 +77,7 @@ public:
 
         return command_interfaces;
     }
+
 
     hardware_interface::return_type read(const rclcpp::Time &, const rclcpp::Duration &) override {
         // Read current states from motors
