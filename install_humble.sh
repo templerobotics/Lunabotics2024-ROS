@@ -55,6 +55,11 @@ sudo apt-get install -y \
   ros-humble-diff-drive-controller \
   ros-humble-hardware-interface
 
+print_status "[Installing some ROS2 Humble C++ Dependencies]"
+sudo apt update && sudo apt install -y ros-humble-rclcpp ros-humble-ros-base ros-dev-tools
+
+
+
 print_status "[Initialize rosdep and Update]"
 if ! [ -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then
   sudo rosdep init

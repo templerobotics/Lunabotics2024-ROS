@@ -1,0 +1,20 @@
+[0.008s] Invoking command in '/home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous -- -j24 -l24
+[0.023s] Invoked command in '/home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous -- -j24 -l24
+[0.026s] Invoking command in '/home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous
+[0.029s] -- Install configuration: ""
+[0.029s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/ament_index/resource_index/package_run_dependencies/mining_bot_autonomous
+[0.029s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/ament_index/resource_index/parent_prefix_path/mining_bot_autonomous
+[0.029s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/mining_bot_autonomous/environment/ament_prefix_path.sh
+[0.029s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/mining_bot_autonomous/environment/ament_prefix_path.dsv
+[0.029s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/mining_bot_autonomous/environment/path.sh
+[0.029s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/mining_bot_autonomous/environment/path.dsv
+[0.029s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/mining_bot_autonomous/local_setup.bash
+[0.029s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/mining_bot_autonomous/local_setup.sh
+[0.029s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/mining_bot_autonomous/local_setup.zsh
+[0.029s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/mining_bot_autonomous/local_setup.dsv
+[0.029s] -- Installing: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/mining_bot_autonomous/package.dsv
+[0.029s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/ament_index/resource_index/packages/mining_bot_autonomous
+[0.030s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/mining_bot_autonomous/cmake/mining_bot_autonomousConfig.cmake
+[0.030s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/mining_bot_autonomous/cmake/mining_bot_autonomousConfig-version.cmake
+[0.030s] -- Up-to-date: /home/jayhaych02/robotics/Lunabotics2024-ROS/install/mining_bot_autonomous/share/mining_bot_autonomous/package.xml
+[0.030s] Invoked command in '/home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous

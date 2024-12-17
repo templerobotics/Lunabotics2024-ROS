@@ -1,1 +1,1 @@
-hardware_interface:rclcpp:sparkcan
+eigen:geometry_msgs:hardware_interface:rclcpp:sparkcan:std_msgs

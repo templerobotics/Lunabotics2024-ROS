@@ -4,7 +4,7 @@
   <name>mining_bot_base</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="jayhaych@todo.todo">jayhaych</maintainer>
+  <maintainer email="jaseanhow@gmail.com">jayhaych02</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
@@ -12,6 +12,9 @@
   <depend>rclcpp</depend>
   <depend>hardware_interface</depend>
   <depend>sparkcan</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>eigen</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
