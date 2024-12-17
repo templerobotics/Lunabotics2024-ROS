@@ -10,6 +10,13 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(sparkcan REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+
+include_directories(include)
+include_directories($(EIGEN3_INCLUDE_DIR))
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

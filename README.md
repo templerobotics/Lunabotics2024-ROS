@@ -18,3 +18,8 @@
 8. In the Lunabotics2024-ROS directory type, "colcon build"
 
 
+### Troubleshooting : Resolving potential RCLCPP & Sparkcan Include Issues
+1. In vscode type, "CTRL + SHIFT + p" to edit configurations for C/C++ (UI)
+2. Navigate to "Include Path --> One Include path per line" 
+3. Add the 2 lines, " /usr/include/** " and " /opt/ros/humble/include/** "
+4. Doing this should allow you to right click any rclcpp or Sparkcan headerfile object to "go to definition" 

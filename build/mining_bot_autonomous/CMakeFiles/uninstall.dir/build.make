@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ubuntu/robotics/Lunabotics2024-ROS/src/mining_bot_autonomous
+CMAKE_SOURCE_DIR = /home/jayhaych02/robotics/Lunabotics2024-ROS/src/mining_bot_autonomous
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ubuntu/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous
+CMAKE_BINARY_DIR = /home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous
 
 # Utility rule file for uninstall.
 
@@ -78,6 +78,6 @@ CMakeFiles/uninstall.dir/clean:
 .PHONY : CMakeFiles/uninstall.dir/clean
 
 CMakeFiles/uninstall.dir/depend:
-	cd /home/ubuntu/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ubuntu/robotics/Lunabotics2024-ROS/src/mining_bot_autonomous /home/ubuntu/robotics/Lunabotics2024-ROS/src/mining_bot_autonomous /home/ubuntu/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous /home/ubuntu/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous /home/ubuntu/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/CMakeFiles/uninstall.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/jayhaych02/robotics/Lunabotics2024-ROS/src/mining_bot_autonomous /home/jayhaych02/robotics/Lunabotics2024-ROS/src/mining_bot_autonomous /home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous /home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous /home/jayhaych02/robotics/Lunabotics2024-ROS/build/mining_bot_autonomous/CMakeFiles/uninstall.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/uninstall.dir/depend
 
