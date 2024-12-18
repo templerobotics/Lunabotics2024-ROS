@@ -15,6 +15,12 @@
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>eigen</depend>
+  <depend>pluginlib</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>eigen3</depend>
+  <depend>tf2_stamped</depend>
+
+
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

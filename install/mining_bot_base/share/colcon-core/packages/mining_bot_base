@@ -1,1 +1,1 @@
-eigen:geometry_msgs:hardware_interface:rclcpp:sparkcan:std_msgs
+eigen:eigen3:geometry_msgs:hardware_interface:pluginlib:rclcpp:rclcpp_lifecycle:sparkcan:std_msgs:tf2_stamped

@@ -1,1 +1,1 @@
-rclcpp;hardware_interface;sparkcan;std_msgs;geometry_msgs;eigen;ament_lint_auto;ament_lint_common
+rclcpp;hardware_interface;sparkcan;std_msgs;geometry_msgs;eigen;pluginlib;rclcpp_lifecycle;eigen3;tf2_stamped;ament_lint_auto;ament_lint_common
