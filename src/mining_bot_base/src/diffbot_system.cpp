@@ -2,12 +2,19 @@
 
 namespace diffdrive_turobotics{
 
+   /*    
+      info.joints = Hardware_Info --> vector<ComponentInfo> 
+      Every component info object has a command_interfaces variable / (2) state_interfaces / (3) name / etc...
+
+      Our motors can read Postition/Velocity & we SetVoltage() to command the motors.
+
+      Question can we SetVelocity() on our motors to command them??? 47 min ROS2 Control video 3 mins 22 seconds in
+  */ 
+  
+
 hardware_interface::CallbackReturn DiffBotSystemHardware::on_init( const hardware_interface::HardwareInfo & info ){
   if ( hardware_interface::SystemInterface::on_init(info) != hardware_interface::CallbackReturn::SUCCESS ){ return hardware_interface::CallbackReturn::ERROR; }
-
-  /*Youtube tutorial used a struct at this spot. Recall why. Need to configure for our robot's config*/
-
-
+ 
   for (const hardware_interface::ComponentInfo & joint : info_.joints){
     assert(joint.command_interfaces.size() == 1 && "Joint must have exactly one command interface");
     if (joint.command_interfaces.size() != 1) {
