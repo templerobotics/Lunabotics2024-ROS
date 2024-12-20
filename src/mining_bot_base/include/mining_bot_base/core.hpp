@@ -56,8 +56,8 @@ struct Drivebase_Config{
   std::string right_back_wheel_name = "";                          
   const std::string DEVICE_ID = "can0";                 // Sparkmaxes CAN-bus are chained together, w/ each one having a UNIQUE CAN ID
   const static int RAMP_RATE_SECONDS = 1;
-  int ENC_COUNTS_PER_rEV = 4096; 
-  const static int LOOP_RATE = 30;
+  int ENC_COUNTS_PER_REV = 4096; 
+  int LOOP_RATE = 30;                                   // How often Hardware Interface "read()" and "write()" functions are called
   //Update these to reflect actual robot values
   const static int CAN_ID_LEFT_FRONT = 9;                         
   const static int CAN_ID_LEFT_BACK = 2; 
@@ -68,6 +68,10 @@ struct Drivebase_Config{
   const static int CURRENT_LIMIT_FREE = 30;
   const static int SECONDARY_CURRENT_LIMIT = 50; 
 
+    /*I THINK REV HARDWARE CLIENT CAN SET THESE!Also, I don't want to RECREATE the SPARKMAX object
+        that is already defined by Grayson. Unless I can somehow, ADD to the Sparkmax object, so that
+        it has more associated information? Is that needed or not? Idk yet...
+    */
   int PID_kP = 0;
   int PID_kI = 0;
   int PID_kD = 0;

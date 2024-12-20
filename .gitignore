@@ -1,0 +1,10 @@
+*.json
+*.cmake
+*.log
+*.txt
+*.build
+*.compiler
+build/
+install/
+log/
+

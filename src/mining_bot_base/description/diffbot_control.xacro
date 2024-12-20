@@ -1,0 +1,41 @@
+<ros2_control name="drivebase" type="system">
+    <hardware>
+        <plugin>diffdrive_turobotics/DrivebaseSystemHardware</plugin>
+        <!-- Wheel names -->
+        <param name="left_front_wheel_name">left_front_wheel_joint</param>
+        <param name="left_back_wheel_name">left_back_wheel_joint</param>
+        <param name="right_front_wheel_name">right_front_wheel_joint</param>
+        <param name="right_back_wheel_name">right_back_wheel_joint</param>
+        <param name="LOOP_RATE">30.0</param>
+        <param name="ENC_COUNTS_PER_REV">4096</param>
+
+        
+
+    </hardware>
+    
+    <!-- Define joints -->
+    <joint name="left_front_wheel_joint">
+        <command_interface name="velocity"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="left_back_wheel_joint">
+        <command_interface name="velocity"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="right_front_wheel_joint">
+        <command_interface name="velocity"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="right_back_wheel_joint">
+        <command_interface name="velocity"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+    </joint>
+
+</ros2_control>
