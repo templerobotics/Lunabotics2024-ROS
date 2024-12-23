@@ -39,8 +39,7 @@ private:
         this->declare_parameter("PS4", false);
         this->declare_parameter("Manual_Control", true);
         this->declare_parameter("outdoor_mode", false);
-        
-        RobotState_t .outdoor_mode = this->get_parameter("outdoor_mode").as_bool();
+        RobotState_t.outdoor_mode = this->get_parameter("outdoor_mode").as_bool();
     }
 
     void apply_control_mode() {
@@ -71,15 +70,15 @@ private:
 
     void control_robot() {
         if (buttons.home)
-            RobotState_t .robot_disabled = true;
+            RobotState_t.robot_disabled = true;
 
-        RobotState_t .lift_actuator_speed = (joystick.dpad_up == 1.0) ? -0.3 : 
+        RobotState_t.lift_actuator_speed = (joystick.dpad_up == 1.0) ? -0.3 : 
                                          (joystick.dpad_down == -1.0) ? 0.3 : 0.0;
         
-        RobotState_t .tilt_actuator_speed = (joystick.right_y_axis > 0.1) ? -0.3 : 
+        RobotState_t.tilt_actuator_speed = (joystick.right_y_axis > 0.1) ? -0.3 : 
                                          (joystick.right_y_axis < -0.1) ? 0.3 : 0.0;
 
-        RobotState_t .speed_multiplier = (buttons.x && buttons.y) ? 0.3 : 
+        RobotState_t.speed_multiplier = (buttons.x && buttons.y) ? 0.3 : 
                                       (buttons.x ? 0.1 : 0.6);
 
         // Modify joystick triggers for better control
@@ -87,16 +86,16 @@ private:
         joystick.left_trigger = (1.0 - joystick.left_trigger) / 2.0;
 
         if (joystick.right_trigger != 0.0) {
-            RobotState_t .left_speed = joystick.right_trigger - joystick.left_x_axis;
-            RobotState_t .right_speed = joystick.right_trigger + joystick.left_x_axis;
+            RobotState_t.left_speed = joystick.right_trigger - joystick.left_x_axis;
+            RobotState_t.right_speed = joystick.right_trigger + joystick.left_x_axis;
         }
         else if (joystick.left_trigger != 0.0) {
-            RobotState_t .left_speed = -(joystick.left_trigger - joystick.left_x_axis);
-            RobotState_t .right_speed = -(joystick.left_trigger + joystick.left_x_axis);
+            RobotState_t.left_speed = -(joystick.left_trigger - joystick.left_x_axis);
+            RobotState_t.right_speed = -(joystick.left_trigger + joystick.left_x_axis);
         }
         else {
-            RobotState_t .left_speed = -joystick.left_x_axis;
-            RobotState_t .right_speed = joystick.left_x_axis;
+            RobotState_t.left_speed = -joystick.left_x_axis;
+            RobotState_t.right_speed = joystick.left_x_axis;
         }
 
         // Apply motor commands
@@ -122,16 +121,16 @@ private:
         buttons.right_bumper = get_button(joy_msg, {5, 5, 5});
 
         if (buttons.share) {
-            RobotState_t .manual_enabled = true;
+            RobotState_t.manual_enabled = true;
             RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "\033[1;35mMANUAL CONTROL:\033[0m \033[1;32mENABLED\033[0m");
         }
 
         if (buttons.menu) {
-            RobotState_t .manual_enabled = false;
+            RobotState_t.manual_enabled = false;
             RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "\033[1;33mAUTONOMOUS CONTROL:\033[0m \033[1;32mENABLED\033[0m");
         }
 
-        if (RobotState_t .manual_enabled) {
+        if (RobotState_t.manual_enabled) {
             // Update joystick states
             joystick.left_x_axis = joy_msg->axes[0];
             joystick.left_y_axis = joy_msg->axes[1];
@@ -141,7 +140,7 @@ private:
             joystick.dpad_up = get_axis(joy_msg, {5, 7, 7});
             joystick.dpad_down = get_axis(joy_msg, {5, 7, 7});
 
-            if (RobotState_t .robot_disabled) {
+            if (RobotState_t.robot_disabled) {
                 RCLCPP_ERROR(get_logger(), "\033[1;31mROBOT DISABLED\033[0m");
             } else {
                 SparkMax::Heartbeat();
