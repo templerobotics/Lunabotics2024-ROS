@@ -122,12 +122,12 @@ private:
 
         if (buttons.share) {
             RobotState_t.manual_enabled = true;
-            RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "\033[1;35mMANUAL CONTROL:\033[0m \033[1;32mENABLED\033[0m");
+            RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "MANUAL CONTROL:ENABLED");
         }
 
         if (buttons.menu) {
             RobotState_t.manual_enabled = false;
-            RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "\033[1;33mAUTONOMOUS CONTROL:\033[0m \033[1;32mENABLED\033[0m");
+            RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "AUTONOMOUS CONTROL:ENABLED");
         }
 
         if (RobotState_t.manual_enabled) {
@@ -141,7 +141,7 @@ private:
             joystick.dpad_down = get_axis(joy_msg, {5, 7, 7});
 
             if (RobotState_t.robot_disabled) {
-                RCLCPP_ERROR(get_logger(), "\033[1;31mROBOT DISABLED\033[0m");
+                RCLCPP_ERROR(get_logger(), "ROBOT DISABLED");
             } else {
                 SparkMax::Heartbeat();
                 control_robot();
