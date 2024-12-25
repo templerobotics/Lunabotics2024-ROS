@@ -53,6 +53,8 @@ Dumping utilizes initialized motors & linear actuators to dump on to our conveye
 #include <rcl_interfaces/msg/set_parameters_result.hpp>
 #include <sensor_msgs/msg/joy.hpp>
 #include <geometry_msgs/msg/twist.hpp>
+#include "std_msgs/msg/bool.hpp"
+
 using std::placeholders::_1;
 
 using JoyMsg = sensor_msgs::msg::Joy::SharedPtr;
@@ -62,6 +64,8 @@ using JoySubscription = rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr;
 using TwistMsg = geometry_msgs::msg::Twist::SharedPtr;
 using Twist = geometry_msgs::msg::Twist;
 using TwistSubscription = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr;
+using BoolPublisher = rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr;
+using namespace std::chrono_literals;
 
 /*
     Should I default the bools to their
