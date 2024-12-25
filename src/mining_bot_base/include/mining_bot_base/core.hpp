@@ -63,6 +63,10 @@ using TwistMsg = geometry_msgs::msg::Twist::SharedPtr;
 using Twist = geometry_msgs::msg::Twist;
 using TwistSubscription = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr;
 
+/*
+    Should I default the bools to their
+    ideal initial values?
+*/
 
 typedef struct{
     bool home, share, menu;
@@ -80,15 +84,17 @@ typedef struct{
 }XBOX_JOYSTICK_INPUT_t;
 
 typedef struct{
-    bool manual_enabled = true;
-    bool robot_disabled = false;
-    bool outdoor_mode = false;
+    bool manual_enabled;
+    bool robot_disabled; 
+    bool outdoor_mode;
+    bool XBOX;
+    bool PS4;
     double speed_multiplier = 0.6;
     double left_speed = 0.0;
     double right_speed = 0.0;
     double lift_actuator_speed = 0.0;
     double tilt_actuator_speed = 0.0;
-} RobotState_t ;
+}ROBOTSTATE_t;
 
 enum class Motor{
     leftFront,
