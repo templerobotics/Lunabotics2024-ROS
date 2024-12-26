@@ -1,10 +1,9 @@
 #pragma once
 
 /*  ROS2 Headers  */
-#include <rclcpp/rclcpp.hpp>
+
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
-#include <eigen.h>
 #include <cstddef>
 #include <iomanip>
 #include <memory>
@@ -17,26 +16,20 @@
 #include "rclcpp/duration.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp/time.hpp"
-#include "rclcpp_lifecycle/state.hpp"
-#include "hardware_interface/lexical_casts.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "pluginlib/class_list_macros.hpp"
-
 #include "rclcpp/logger.hpp"
 #include "rcutils/logging_macros.h"
 #include "rclcpp/utilities.hpp"
 #include "rclcpp/logging.hpp"
 #include <cassert>
-
+#include <chrono>
+#include <functional>
+#include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/string.hpp"
 
 /*  Sparkcan Headers    */
 #include <SparkBase.hpp> 
 #include <SparkFlex.hpp>
 #include <SparkMax.hpp>
-
-
-/* Custom Headers */
-
 
 
 /* 
@@ -66,11 +59,6 @@ using Twist = geometry_msgs::msg::Twist;
 using TwistSubscription = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr;
 using BoolPublisher = rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr;
 using namespace std::chrono_literals;
-
-/*
-    Should I default the bools to their
-    ideal initial values?
-*/
 
 typedef struct{
     bool home, share, menu;

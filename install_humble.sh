@@ -62,8 +62,8 @@ fi
 rosdep update
 
 print_status "[Set up environment variables]"
-ainsl "source /opt/ros/$name_ros_version/setup.bash" ~/.bashrc
-ainsl "source $(pwd)/install/setup.bash" ~/.bashrc
+ainsl "source \$HOME/robotics/Lunabotics2024-ROS/install/setup.bash" ~/.bashrc
+ainsl "source \$(pwd)/install/setup.bash" ~/.bashrc
 
 source /opt/ros/$name_ros_version/setup.bash
 

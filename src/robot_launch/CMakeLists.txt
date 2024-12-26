@@ -5,16 +5,11 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-
 find_package(ament_cmake REQUIRED)
 find_package(rclpy REQUIRED)
 
-add_executable(teleop_state_manager src/teleop_State_Manager.cpp)
-ament_target_dependencies(teleop_state_manager rclcpp std_msgs)
-install(TARGETS
-  teleop_state_manager
-  DESTINATION lib/${PROJECT_NAME}
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
 )
-
 
 ament_package()

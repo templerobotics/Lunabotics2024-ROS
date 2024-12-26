@@ -15,7 +15,6 @@
 */
 #include "core.hpp"
 
-
 class Teleop_State_Manager : public rclcpp::Node{
 
 public:
@@ -84,14 +83,13 @@ void callback_publish_states() {
     pub_robot_enabled->publish(msg);
     
 }
-    
-int main(int argc, char** argv) {
+
+};
+
+int main(int argc, char* argv[]) {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<Teleop_State_Manager>();
     rclcpp::spin(node);
     rclcpp::shutdown();
     return 0;
-}
-
-
 }
