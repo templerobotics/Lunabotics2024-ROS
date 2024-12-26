@@ -1,46 +1,14 @@
 #include "core.hpp"
-/*
-    Question: Declare the robot_disabled as true in constructor and then false when i set parameters, so that
-    control functions can control the robot? Is this correct?
-    In this file in the apply control mode, I set robot disabled to false, meaning the robot is ready to drive
 
-    Made a struct to save the current robot configuration variables in an organized manner,
-    in contrast to making a bunch of variables scattered throghout the file
-
-    Poll the struct state variables in each function to drive code execution
-    Make sure to initialize the variables in an init() function 
-    Poll state FIRST. Check incorrect state first, meaning if the robot is disabled()
-    then NO control code should apply to the robot at all
-
-    In other files:
-        Use the same struct instances, and declare() and fetch() current parameter states
-        These newly initialized and fetched parameter states drive the other subsystem files
-        like Teleop_Digging & Teleop_Dumping
-
-    Might be a design pattern suitable for this, but I don't see the reason to focus that
-    much on extreme design patterns in teleop when autonomy is the main focus
-    NOTE: Does NOT mean to ignore Teleop should still be good though
-
-
-*/
 class Teleop_Drivebase : public rclcpp::Node{
 
 public:
-    Teleop_Drivebase() : Node("Drivebase"),
-        m_left_front("can0", 1),
-        m_left_rear("can0", 2),
-        m_right_front("can0", 3),
-        m_right_rear("can0", 4),
-        {
-            /* I could set this in the struct, but I need this state to be retained across multiple nodes*/
-            robot_state.robot_disabled = true;
-            robot_state.manual_enabled = false;
-            robot_state.outdoor_mode = false;
-            robot_state.XBOX = true;
-            robot_state.PS4 = false;
-            init_parameters();
-            apply_control_mode();
-        }
+    Teleop_Drivebase() : Node("Drivebase"),m_left_front("can0", 1),m_left_rear("can0", 2),m_right_front("can0", 3),m_right_rear("can0", 4),
+    {
+        init_parameters();
+        apply_control_mode();
+    }
+
 private:
     XBOX_BUTTONS_t buttons;
     XBOX_JOYSTICK_INPUT_t joystick;
@@ -53,13 +21,8 @@ private:
 
     TwistSubscription velocity_subscriber;
     JoySubscription joy_subscriber;
-void init_parameters() {
-    this->declare_parameter("XBOX", true);
-    this->declare_parameter("PS4", false);
-    this->declare_parameter("manual_enabled", true);
-    this->declare_parameter("outdoor_mode", false);
-    this->declare_parameter("robot_disabled",false);
 
+void init_parameters() {
     robot_state.outdoor_mode = this->get_parameter("outdoor_mode").as_bool();
     robot_state.XBOX = this->get_parameter("XBOX").as_bool();
     robot_state.PS4 = this->get_parameter("PS4").as_bool();

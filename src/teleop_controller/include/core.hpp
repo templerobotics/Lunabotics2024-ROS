@@ -1,7 +1,6 @@
 #pragma once
 
 /*  ROS2 Headers  */
-
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <cstddef>
@@ -32,33 +31,34 @@
 #include <SparkMax.hpp>
 
 
-/* 
-
-TODO:
-Seperate into (1) Drivebase (2) Digging (3) Dumping. 
-Drivebase initializes the motors
-Digging Initializes the linear actuators --> motors should be already running
-Dumping utilizes initialized motors & linear actuators to dump on to our conveyer belt
-
-*/
-
 /* START : XBOX Teleoperation */
 #include <rcl_interfaces/msg/set_parameters_result.hpp>
 #include <sensor_msgs/msg/joy.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include "std_msgs/msg/bool.hpp"
+#include "rcl_interfaces/msg/parameter_event.hpp"
+#include "rcl_interfaces/srv/set_parameters.hpp"  
+#include "rcl_interfaces/msg/parameter_descriptor.hpp"
+using namespace std::chrono_literals;
 
 using std::placeholders::_1;
-
 using JoyMsg = sensor_msgs::msg::Joy::SharedPtr;
 using Joy = sensor_msgs::msg::Joy;
 using JoySubscription = rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr;
-
 using TwistMsg = geometry_msgs::msg::Twist::SharedPtr;
 using Twist = geometry_msgs::msg::Twist;
 using TwistSubscription = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr;
 using BoolPublisher = rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr;
-using namespace std::chrono_literals;
+
+
+using ParamVector = std::vector<rclcpp::Parameter>;
+using ParamDescriptor = rcl_interfaces::msg::ParameterDescriptor;
+using ParamEventHandler = std::shared_ptr<rclcpp::ParameterEventHandler>;
+using SetParamsRes = rcl_interfaces::msg::SetParametersResult;
+using ParamService = rclcpp::Service<rcl_interfaces::srv::SetParameters>::SharedPtr;
+using ParamResponse = std::shared_ptr<rcl_interfaces::srv::SetParameters::Response>;
+using ParamRequest = std::shared_ptr<rcl_interfaces::srv::SetParameters::Request>;
+using msg_Bool = std_msgs::msg::Bool;
 
 typedef struct{
     bool home, share, menu;
