@@ -20,11 +20,8 @@ class Teleop_State_Manager : public rclcpp::Node{
 
 public:
     Teleop_State_Manager() : Node("Teleop_State_Manager"){
-    robot_state.robot_disabled = true;
-    robot_state.manual_enabled = false;
-    robot_state.outdoor_mode = false;
-    robot_state.XBOX = true;
-    robot_state.PS4 = false;
+
+    init_parameters();
 
     pub_robot_enabled = this->create_publisher<std_msgs::msg::Bool>("robot_state/enabled", 10);
     pub_manual_mode = this->create_publisher<std_msgs::msg::Bool>("robot_state/manual_mode", 10);
@@ -44,6 +41,12 @@ private:
     rclcpp::TimerBase::SharedPtr timer;
 
 void init_parameters() {
+    robot_state.robot_disabled = true;
+    robot_state.manual_enabled = true;
+    robot_state.outdoor_mode = false;
+    robot_state.XBOX = true;
+    robot_state.PS4 = false;
+
     this->declare_parameter("XBOX", true);
     this->declare_parameter("PS4", false);
     this->declare_parameter("manual_enabled", true);
@@ -57,24 +60,34 @@ void init_parameters() {
     robot_state.outdoor_mode = this->get_parameter("outdoor_mode").as_bool();
     robot_state.robot_disabled = this->get_parameter("robot_disabled").as_bool();
 }
-//Publishers publish continuously while node spins, so yes, I do need all the publishers
+
 void callback_publish_states() {
     auto msg = std_msgs::msg::Bool();
     msg.data = robot_state.robot_disabled;
-    RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", msg.data.c_str());
+    RCLCPP_INFO(this->get_logger(), "Publishing: %s", msg.data ? "true" : "false");
     pub_robot_enabled->publish(msg);
 
-    msg.data = robot_state.robot_disabled;
-    RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", msg.data.c_str());
+    msg.data = robot_state.manual_enabled;
+    RCLCPP_INFO(this->get_logger(), "Publishing: %s", msg.data ? "true" : "false");
+    pub_robot_enabled->publish(msg);
+
+    msg.data = robot_state.outdoor_mode;
+    RCLCPP_INFO(this->get_logger(), "Publishing: %s", msg.data ? "true" : "false");
+    pub_robot_enabled->publish(msg);
+
+    msg.data = robot_state.XBOX;
+    RCLCPP_INFO(this->get_logger(), "Publishing: %s", msg.data ? "true" : "false");
+    pub_robot_enabled->publish(msg);
+
+    msg.data = robot_state.PS4;
+    RCLCPP_INFO(this->get_logger(), "Publishing: %s", msg.data ? "true" : "false");
     pub_robot_enabled->publish(msg);
     
 }
     
-
-
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<Teleop_StateManager>();
+    auto node = std::make_shared<Teleop_State_Manager>();
     rclcpp::spin(node);
     rclcpp::shutdown();
     return 0;

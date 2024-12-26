@@ -8,6 +8,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sparkcan REQUIRED)
@@ -21,6 +22,7 @@ ament_target_dependencies(teleop_controller rclcpp sensor_msgs geometry_msgs spa
 # Install targets
 install(TARGETS
   teleop_controller
+  DIRECTORY /robot_launch/launch
   DESTINATION lib/${PROJECT_NAME}
 )
 
