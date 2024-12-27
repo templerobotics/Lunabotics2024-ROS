@@ -15,7 +15,7 @@ public:
         init_state_from_parameters();
         
         pub_robot_enabled = this->create_publisher<msg_Bool>("robot_state/enabled", 10);
-        pub_manual_mode = this->create_publisher<msg_Bool>("robot_state/manual_mode", 10);
+        pub_manual_enabled = this->create_publisher<msg_Bool>("robot_state/manual_enabled", 10);
         pub_xbox = this->create_publisher<msg_Bool>("robot_state/XBOX", 10);
         pub_ps4 = this->create_publisher<msg_Bool>("robot_state/PS4", 10);
         pub_outdoor_mode = this->create_publisher<msg_Bool>("robot_state/outdoor_mode", 10);
@@ -26,7 +26,7 @@ public:
 private:
     ROBOTSTATE_t robot_state;
     BoolPublisher pub_robot_enabled;
-    BoolPublisher pub_manual_mode;
+    BoolPublisher pub_manual_enabled;
     BoolPublisher pub_xbox;
     BoolPublisher pub_ps4;
     BoolPublisher pub_outdoor_mode;
@@ -148,7 +148,7 @@ void callback_publish_states() {
 
     msg.data = robot_state.manual_enabled;
     RCLCPP_INFO(this->get_logger(), "Publishing: MANUAL ENABLED [ %s ]", msg.data ? "true" : "false");
-    pub_manual_mode->publish(msg);
+    pub_manual_enabled->publish(msg);
 
     msg.data = robot_state.outdoor_mode;
     RCLCPP_INFO(this->get_logger(), "Publishing: OUTDOOR MODE [ %s ]", msg.data ? "true" : "false");
