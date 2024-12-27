@@ -48,9 +48,12 @@ using JoySubscription = rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr;
 using TwistMsg = geometry_msgs::msg::Twist::SharedPtr;
 using Twist = geometry_msgs::msg::Twist;
 using TwistSubscription = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr;
+
 using BoolPublisher = rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr;
+using BoolSubscriber = rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr;
+using msg_Bool = std_msgs::msg::Bool;
 
-
+using SetParamClient = rclcpp::Client<rcl_interfaces::srv::SetParameters>::SharedPtr;
 using ParamVector = std::vector<rclcpp::Parameter>;
 using ParamDescriptor = rcl_interfaces::msg::ParameterDescriptor;
 using ParamEventHandler = std::shared_ptr<rclcpp::ParameterEventHandler>;
@@ -58,7 +61,7 @@ using SetParamsRes = rcl_interfaces::msg::SetParametersResult;
 using ParamService = rclcpp::Service<rcl_interfaces::srv::SetParameters>::SharedPtr;
 using ParamResponse = std::shared_ptr<rcl_interfaces::srv::SetParameters::Response>;
 using ParamRequest = std::shared_ptr<rcl_interfaces::srv::SetParameters::Request>;
-using msg_Bool = std_msgs::msg::Bool;
+
 
 typedef struct{
     bool home, share, menu;

@@ -35,7 +35,8 @@ private:
     ParamEventHandler param_sub;
 
 void init_param_event_subscriber(){
-    // Subscribe to parameter events for actual state updates
+    
+    // Subscribe to parameter events for actual state updates. Allows all params to be able to be triggered when set(), byassigning each param a callback() 
     param_sub = std::make_shared<rclcpp::ParameterEventHandler>(this);
     
     auto xbox_cb = [this](const rclcpp::Parameter & p) {
@@ -147,19 +148,19 @@ void callback_publish_states() {
 
     msg.data = robot_state.manual_enabled;
     RCLCPP_INFO(this->get_logger(), "Publishing: MANUAL ENABLED [ %s ]", msg.data ? "true" : "false");
-    pub_robot_enabled->publish(msg);
+    pub_manual_mode->publish(msg);
 
     msg.data = robot_state.outdoor_mode;
     RCLCPP_INFO(this->get_logger(), "Publishing: OUTDOOR MODE [ %s ]", msg.data ? "true" : "false");
-    pub_robot_enabled->publish(msg);
+    pub_outdoor_mode->publish(msg);
 
     msg.data = robot_state.XBOX;
     RCLCPP_INFO(this->get_logger(), "Publishing: XBOX [ %s]", msg.data ? "true" : "false");
-    pub_robot_enabled->publish(msg);
+    pub_xbox->publish(msg);
 
     msg.data = robot_state.PS4;
     RCLCPP_INFO(this->get_logger(), "Publishing: PS4 [ %s ]", msg.data ? "true" : "false");
-    pub_robot_enabled->publish(msg);
+    pub_ps4->publish(msg);
     
 }
 
