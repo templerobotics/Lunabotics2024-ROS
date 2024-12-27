@@ -45,6 +45,8 @@ private:
     TwistSubscription cmd_vel_sub;
     rclcpp::TimerBase::SharedPtr timer;
     
+    const ParamVector all_params;
+
     //Should be fine to have in every class. Focus is specific states being true/false for drivebase, mining, dumping to check before utilizing XBOX controls
     XBOX_BUTTONS_t buttons;
     XBOX_JOYSTICK_INPUT_t joystick;
@@ -58,31 +60,29 @@ private:
     TwistSubscription velocity_subscriber;
     JoySubscription joy_subscriber;
 
+//TODO: Look over this function & its use in greater scheme of the goal
 void fetch_store_current_parameters() {
-    robot_state.outdoor_mode = this->get_parameter("outdoor_mode").as_bool();
-    robot_state.XBOX = this->get_parameter("XBOX").as_bool();
-    robot_state.PS4 = this->get_parameter("PS4").as_bool();
-    robot_state.manual_enabled = this->get_parameter("manual_enabled").as_bool();  
-    robot_state.outdoor_mode = this->get_parameter("outdoor_mode").as_bool();
-    robot_state.robot_disabled = this->get_parameter("robot_disabled").as_bool();
-}
+    all_params = param_client.get( {"XBOX","PS4","manual_mode","robot_disabled"} );
+    for(const auto &param : all_params){
+        if(param.get_name().compare("XBOX")==0 && param_client->service_is_ready()){
+            param_client->async_send_request()
+        }
+    }
 
-
-void config_motor(SparkMax& motor){
-    motor.SetIdleMode(IdleMode::kBrake);
-    motor.SetMotorType(MotorType::kBrushless);
-    motor.BurnFlash();
 }
+//TODO: "Action Nodes" : Drivebase, Digging, Dumping --> Handle their own responses & send requests to SET() parameters at runtime
+// Overall Goal.Revise as needed
+//      if state is T/F then do something --> SET NEW PARAMETER STATE VALUES USING SERVICE REQUEST --> Make sure that the state is RETAINED in state_manager node fields
 
-void verify_states(){
-    //if state is T/F then do something --> SET NEW STATE USING SERVICE REQUEST --> Make sure that the state is saved in state_manager
-}
+void set_parameter(const std::string &param_name, bool new_value){}
+void handle_response(rclcpp::Client<rcl_interfaces::srv::SetParameters>::Future future){}
 
 void callback_xbox(){
     robot_state.XBOX = msg->data;
     RCLCPP_INFO(this->get_logger(), "XBOX state: %s", robot_state.XBOX ? "true" : "false");
     if (robot_state.XBOX) {
         RCLCPP_INFO(this->get_logger(), "XBOX controller active, enabling drive operations");
+
     } else {
         RCLCPP_INFO(this->get_logger(), "XBOX controller inactive, disabling drive operations");
     }
@@ -124,6 +124,12 @@ void callback_cmd_vel(){
 
 }
 
+
+void config_motor(SparkMax& motor){
+    motor.SetIdleMode(IdleMode::kBrake);
+    motor.SetMotorType(MotorType::kBrushless);
+    motor.BurnFlash();
+}
 
 int get_button(const JoyMsg &joy_msg, const std::initializer_list<int> &mappings) {
     bool xbox_enabled = this->get_parameter("XBOX").as_bool();
