@@ -4,7 +4,9 @@ class Teleop_Drivebase : public rclcpp::Node{
 public:
     Teleop_Drivebase() : Node("drivebase")
     {
-        /*  Put this after drivebase node above        ,m_left_front("can0", 1),m_left_rear("can0", 2),m_right_front("can0", 3),m_right_rear("can0", 4)*/
+        /*  Put this after drivebase node above when testing HARDWARE 
+            ,m_left_front("can0", 1),m_left_rear("can0", 2),m_right_front("can0", 3),m_right_rear("can0", 4)
+        */
         param_client = std::make_shared<rclcpp::SyncParametersClient>(this, "/Teleop_State_Manager");// Create client to modify state manager parameters 
         while (!param_client->wait_for_service(1s)) { // Wait for state manager to be available. If not ready, error
             if (!rclcpp::ok()) {
@@ -26,8 +28,8 @@ public:
         config_motor(m_left_rear);
         config_motor(m_right_front);
         config_motor(m_right_front);
-        m_right_front.SetInverted(true);    // Diff drive robot
-        m_right_rear.SetInverted(true);     // Diff drive robot
+        m_right_front.SetInverted(true);   ---->  Diff drive robot
+        m_right_rear.SetInverted(true);    ----> Diff drive robot
         */
 
         /* Make this 0.1ms when testing on actual hardware = 10HZ = 10x per second */
@@ -66,21 +68,32 @@ private:
 
 
 rcl_interfaces::msg::Parameter create_bool_parameter(const std::string &name, bool value) {
-    
     rcl_interfaces::msg::Parameter parameter;
     parameter.name = name;
     parameter.value.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
     parameter.value.bool_value = value;
     return parameter;
-
 }
 
+/*param is type msg_Bool --> but upon calling this function, I can cast to string if need be. Ideally keep as bool though*/
 void set_parameter(const std::string &param_name, bool new_value){
-
     ParamVector parameters;
     parameters.push_back(rclcpp::Parameter(param_name, new_value));
     param_client->set_parameters(parameters);
+    
+}
 
+//  callback calls this function 
+//  lets say XBOX is true, what do we do to set XBOX to false AND send that val to state manager to be consistently published?
+//  since we're subscribing, sending a value back upstream to state manager is not possible, so NEED a service?
+//IM DUMB --> CONVERT THE DATA INSIDE THE PARAM aka ".data" field
+//I DELETED "const" --> ideally keep the const, but in order to bypass it would need to use PTR(*) and not Ref(&) --> doing too much w/ that. SO just remove "const" probably best bet
+void set_param(msg_Bool &current_param_val, bool new_val){
+    if( !param_client->has_parameter(std::to_string(current_param_val.data))){
+        RCLCPP_ERROR(get_logger(),"ERROR! State Manager node does NOT contain param: [%s]", std::to_string(current_param_val.data));
+    }
+    current_param_val.data = new_val; //DELETE THIS LINE, TEMPORARY SO WE CAN COLCON BUILD SUCCESSFULLY. BELOW IS CORRECT FUNCTION CALL
+    //param_client->set_parameters_atomically()
 }
 
 void handle_response(rclcpp::Client<rcl_interfaces::srv::SetParameters>::Future future){
@@ -101,32 +114,32 @@ void handle_response(rclcpp::Client<rcl_interfaces::srv::SetParameters>::Future 
     }
 
 
-//What we "hear" from the topic is of type msg_Bool
 void callback_xbox(const msg_Bool &state_XBOX){
     robot_state.XBOX = state_XBOX.data;
-    RCLCPP_INFO(get_logger(), "XBOX state: %s", robot_state.XBOX ? "true" : "false");
+    RCLCPP_INFO(get_logger(), "XBOX Controller State: %s", robot_state.XBOX ? "true" : "false");
     if (robot_state.XBOX) {
-        RCLCPP_INFO(get_logger(), "XBOX controller active, enabling drive operations");
+        RCLCPP_INFO(get_logger(), "XBOX Controller is Active, enabling drive operations");
 
     } else {
-        RCLCPP_INFO(get_logger(), "XBOX controller inactive, disabling drive operations");
+        RCLCPP_INFO(get_logger(), "XBOX Controller is Inactive, disabling drive operations");
     }
 
 }
 
 void callback_robot_enabled(const msg_Bool &state_robot_disabled){
     robot_state.robot_disabled = state_robot_disabled.data;
-    RCLCPP_INFO(get_logger(), "Robot disabled state:[%s]", robot_state.robot_disabled ? "true" : "false");
+    RCLCPP_INFO(get_logger(), "Robot Disabled State:[%s]", robot_state.robot_disabled ? "true" : "false");
     if (robot_state.robot_disabled == false) {
         RCLCPP_INFO(get_logger(), "Robot is ACTIVE, enabling drive operations");
     } else {
         RCLCPP_INFO(get_logger(), "Robot is INACTIVE, disabling drive operations");
     }
+    
 }
 
 void callback_manual_enabled(const msg_Bool &state_manual_enabled){
     robot_state.manual_enabled = state_manual_enabled.data;
-    RCLCPP_INFO(get_logger(), "Robot state: %s", robot_state.manual_enabled ? "true" : "false");
+    RCLCPP_INFO(get_logger(), "Robot Manual Enabled State: %s", robot_state.manual_enabled ? "true" : "false");
     if (robot_state.manual_enabled == true) {
         RCLCPP_INFO(get_logger(), "Robot Manual Enabled IS [%s], enabling drive operations",robot_state.manual_enabled ? "true" : "false");
     } else {
@@ -136,7 +149,7 @@ void callback_manual_enabled(const msg_Bool &state_manual_enabled){
 void callback_motor_heartbeat(){
     /*
         Can't test this without physical hardware, since there's 
-        no CAN interfacing on only software
+        no CAN protocol info being transmitted without hardware
     try{
         m_left_front.Heartbeat();
         m_left_rear.Heartbeat();
@@ -146,7 +159,7 @@ void callback_motor_heartbeat(){
         std::cerr << "Motor Heartbeat Error: " << e.what() << std::endl;
     }
     */
-      RCLCPP_INFO(get_logger(), "Current States - XBOX: %s, Manual: %s, Robot Disabled: %s",
+      RCLCPP_INFO(get_logger(), "Current States - XBOX: %s, Manual Enabled: %s, Robot Disabled: %s",
         robot_state.XBOX ? "true" : "false",
         robot_state.manual_enabled ? "true" : "false",
         robot_state.robot_disabled ? "true" : "false");
