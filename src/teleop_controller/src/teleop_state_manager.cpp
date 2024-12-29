@@ -14,7 +14,7 @@ public:
 
         init_state_from_parameters();
         
-        pub_robot_enabled = this->create_publisher<msg_Bool>("robot_state/enabled", 10);
+        pub_robot_enabled = this->create_publisher<msg_Bool>("robot_state/robot_disabled", 10);
         pub_manual_enabled = this->create_publisher<msg_Bool>("robot_state/manual_enabled", 10);
         pub_xbox = this->create_publisher<msg_Bool>("robot_state/XBOX", 10);
         pub_ps4 = this->create_publisher<msg_Bool>("robot_state/PS4", 10);
@@ -103,6 +103,7 @@ void declare_parameters() {
     outdoor_mode_descriptor.additional_constraints = "Adjusts robot behavior for outdoor operation";
     outdoor_mode_descriptor.read_only = false;
     
+    // Initialize each parameter to T/F respectively ---> In Drivebase these will be correctly set in control logic function
     this->declare_parameter("XBOX", true, xbox_descriptor);
     this->declare_parameter("PS4", false, ps4_descriptor);
     this->declare_parameter("robot_disabled", true, robot_disabled_descriptor);
@@ -119,9 +120,11 @@ void init_state_from_parameters() {
 }
 
 rcl_interfaces::msg::SetParametersResult validate_parameters(const ParamVector &parameters) {
+    
     SetParamsRes result;
     result.successful = true;
     
+    /*robot HAS to enabled for anything to work ie -----> robot_disabled = FALSE for anything on the robot to function*/
     for (const auto &param : parameters) {
         if (param.get_name() == "XBOX" && param.as_bool() && this->get_parameter("PS4").as_bool()) {
             result.successful = false;
@@ -132,7 +135,7 @@ rcl_interfaces::msg::SetParametersResult validate_parameters(const ParamVector &
             result.successful = false;
             result.reason = "Cannot enable PS4 while XBOX is active";
             return result;
-        }
+        }   //If set manual mode to T & the robot_disabled = T --> error
         
         // Validate manual mode constraints if needed
         // Add any other validation logic here
@@ -141,30 +144,48 @@ rcl_interfaces::msg::SetParametersResult validate_parameters(const ParamVector &
 }
 
 void callback_publish_states() {
-    auto msg = msg_Bool();
-    msg.data = robot_state.robot_disabled;
-    RCLCPP_INFO(this->get_logger(), "Publishing: ROBOT DISABLED [ %s ]", msg.data ? "true" : "false");
-    pub_robot_enabled->publish(msg);
+    //if( robot_state_changed() ){
+        auto msg = msg_Bool();
+        msg.data = robot_state.robot_disabled;
+        RCLCPP_INFO(this->get_logger(), "Publishing: ROBOT DISABLED [ %s ]", msg.data ? "true" : "false");
+        pub_robot_enabled->publish(msg);
 
-    msg.data = robot_state.manual_enabled;
-    RCLCPP_INFO(this->get_logger(), "Publishing: MANUAL ENABLED [ %s ]", msg.data ? "true" : "false");
-    pub_manual_enabled->publish(msg);
+        msg.data = robot_state.manual_enabled;
+        RCLCPP_INFO(this->get_logger(), "Publishing: MANUAL ENABLED [ %s ]", msg.data ? "true" : "false");
+        pub_manual_enabled->publish(msg);
 
-    msg.data = robot_state.outdoor_mode;
-    RCLCPP_INFO(this->get_logger(), "Publishing: OUTDOOR MODE [ %s ]", msg.data ? "true" : "false");
-    pub_outdoor_mode->publish(msg);
+        msg.data = robot_state.outdoor_mode;
+        RCLCPP_INFO(this->get_logger(), "Publishing: OUTDOOR MODE [ %s ]", msg.data ? "true" : "false");
+        pub_outdoor_mode->publish(msg);
 
-    msg.data = robot_state.XBOX;
-    RCLCPP_INFO(this->get_logger(), "Publishing: XBOX [ %s]", msg.data ? "true" : "false");
-    pub_xbox->publish(msg);
+        msg.data = robot_state.XBOX;
+        RCLCPP_INFO(this->get_logger(), "Publishing: XBOX [ %s]", msg.data ? "true" : "false");
+        pub_xbox->publish(msg);
 
-    msg.data = robot_state.PS4;
-    RCLCPP_INFO(this->get_logger(), "Publishing: PS4 [ %s ]", msg.data ? "true" : "false");
-    pub_ps4->publish(msg);
+        msg.data = robot_state.PS4;
+        RCLCPP_INFO(this->get_logger(), "Publishing: PS4 [ %s ]", msg.data ? "true" : "false");
+        pub_ps4->publish(msg);
+    //}
     
 }
 
+/*
+bool robot_state_changed() {
+    static ROBOTSTATE_t last_state = robot_state;
+    bool changed = (robot_state != last_state);
+    last_state = robot_state;
+    return changed;
+}
 
+bool equal_states(ROBOTSTATE_t states1, ROBOT_STATE_t states2 ){
+    for(bool state : states1){  if(state!=states2){ return false; } }
+    return true;
+}
+
+
+
+*/
+    
 };
 
 int main(int argc, char* argv[]) {

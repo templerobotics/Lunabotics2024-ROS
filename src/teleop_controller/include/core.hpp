@@ -24,6 +24,17 @@
 #include <functional>
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
+#include <future>
+
+
+
+#include <chrono>
+#include <future>
+#include <vector>
+#include <rclcpp/rclcpp.hpp>
+
+
+
 
 /*  Sparkcan Headers    */
 #include <SparkBase.hpp> 
@@ -32,6 +43,7 @@
 
 
 /* START : XBOX Teleoperation */
+#include <rcl_interfaces/msg/parameter.hpp>
 #include <rcl_interfaces/msg/set_parameters_result.hpp>
 #include <sensor_msgs/msg/joy.hpp>
 #include <geometry_msgs/msg/twist.hpp>

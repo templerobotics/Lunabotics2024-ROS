@@ -7,6 +7,7 @@ public:
         /*  Put this after drivebase node above when testing HARDWARE 
             ,m_left_front("can0", 1),m_left_rear("can0", 2),m_right_front("can0", 3),m_right_rear("can0", 4)
         */
+
         param_client = std::make_shared<rclcpp::SyncParametersClient>(this, "/Teleop_State_Manager");// Create client to modify state manager parameters 
         while (!param_client->wait_for_service(1s)) { // Wait for state manager to be available. If not ready, error
             if (!rclcpp::ok()) {
@@ -34,7 +35,7 @@ public:
 
         /* Make this 0.1ms when testing on actual hardware = 10HZ = 10x per second */
         //timer = create_wall_timer(1s, std::bind(&Teleop_Drivebase::callback_motor_heartbeat, this));
-        cmd_vel_sub = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Drivebase::callback_cmd_vel, this, std::placeholders::_1));
+        cmd_vel_sub = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Drivebase::callback_cmd_vel_control_logic, this, std::placeholders::_1));
         //TODO: Load physical robot parameters from URDF file OR make them parameters in TELEOP_STATE MANAGER
         //              . As for right now, make them hard-coded values until further runtime parameter testing
     
@@ -69,57 +70,6 @@ private:
     JoySubscription joy_subscriber;
 
 
-rcl_interfaces::msg::Parameter create_bool_parameter(const std::string &name, bool value) {
-    rcl_interfaces::msg::Parameter parameter;
-    parameter.name = name;
-    parameter.value.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
-    parameter.value.bool_value = value;
-    return parameter;
-}
-
-/*param is type msg_Bool --> but upon calling this function, I can cast to string if need be. Ideally keep as bool?*/
-void set_parameter(const std::string &param_name, bool new_value){
-    ParamVector parameters;
-    parameters.push_back(rclcpp::Parameter(param_name, new_value));
-    param_client->set_parameters(parameters);
-    
-}
-
-
-/*
- 
-//  lets say XBOX is true, what do we do to set XBOX to false AND send that val to state manager to be consistently published?
-//  since we're subscribing, sending a value back upstream to state manager is not possible, so NEED a service?
-//IM DUMB --> CONVERT THE DATA INSIDE THE PARAM aka ".data" field
-//I DELETED "const" --> ideally keep the const, but in order to bypass it would need to use PTR(*) and not Ref(&) --> doing too much w/ that. SO just remove "const" probably best bet
-void set_param(bool current_param_val, bool new_val){
-    if( !param_client->has_parameter(std::to_string(current_param_val))){
-        RCLCPP_ERROR(get_logger(),"ERROR! State Manager node does NOT contain param: [%s]", std::to_string(current_param_val));
-    }
-    current_param_val = new_val; //DELETE THIS LINE. BELOW IS CORRECT FUNCTION CALL
-    RCLCPP_INFO(getlogger(),"NEW BOOL VALUE = %s",std::to_string(current_param_val));
-    //param_client->set_parameters_atomically() --> Use the parameter itself and not just the associated bool value. Use this line
-}
-*/
-
-
-void handle_response(rclcpp::Client<rcl_interfaces::srv::SetParameters>::Future future){
-     // Wait for the response
-        rclcpp::spin_until_future_complete(get_node_base_interface(), future);
-        if (future.valid()) {
-            const auto &response = future.get();
-            for (const auto &result : response->results) {
-                if (result.successful) {
-                    RCLCPP_INFO(get_logger(), "Successfully set parameter '%d'.", result.successful);
-                } else {
-                    RCLCPP_ERROR(get_logger(), "Failed to set parameter '%d': %s", result.successful, result.reason.c_str());
-                }
-            }
-        } else {
-            RCLCPP_ERROR(get_logger(), "Failed to receive response from SetParameters service.");
-        }
-    }
-
 
 void callback_xbox(const msg_Bool &state_XBOX){
     robot_state.XBOX = state_XBOX.data;
@@ -131,7 +81,6 @@ void callback_xbox(const msg_Bool &state_XBOX){
         RCLCPP_INFO(get_logger(), "XBOX Controller is Inactive, disabling drive operations");
     }
    
-
 }
 
 void callback_robot_enabled(const msg_Bool &state_robot_disabled){
@@ -173,21 +122,14 @@ void callback_motor_heartbeat(){
     robot_state.robot_disabled ? "true" : "false");
 }
 
-/*
-TODO: Implement this function. Set_param() ----> send it back upstream to State Manager to publish
-*/
-void callback_cmd_vel(const geometry_msgs::msg::Twist::SharedPtr msg){
-    double ang_z = msg.get()->angular.z;
-    double total = 5 + ang_z;
-    RCLCPP_INFO(get_logger(),"TOTAL = %lf",total);
-}
-
 
 void config_motor(SparkMax& motor){
     motor.SetIdleMode(IdleMode::kBrake);
     motor.SetMotorType(MotorType::kBrushless);
     motor.BurnFlash();
 }
+
+
 
 int get_button(const JoyMsg &joy_msg, const std::initializer_list<int> &mappings) {
     bool xbox_enabled = get_parameter("XBOX").as_bool();
@@ -203,6 +145,98 @@ double get_axis(const JoyMsg &joy_msg, const std::initializer_list<int> &mapping
     return joy_msg->axes[*(mappings.begin() + index)];
 }
 
+/*
+TODO
+- receive joystick input
+- convert joystick input --> velocity commands
+- convert velocity commands ---> voltages invoked by SparkCan SetVoltage()
+- Set_param() ----> send states back upstream to State Manager to publish
+
+*/
+void callback_cmd_vel_control_logic(const geometry_msgs::msg::Twist::SharedPtr msg){
+    if(robot_state.robot_disabled == true || robot_state.manual_enabled == false || robot_state.PS4==true || robot_state.XBOX == false){ 
+        std::cout << "ERROR! Robot must be ENABLED in order to execute control logic!" << std::endl; 
+    }
+
+    if (msg->linear.x > 0.5) { // Arbitrary threshold for testing
+            RCLCPP_INFO(get_logger(), "Linear X > 0.5, enabling manual mode.");
+            set_param("manual_enabled", true);
+        } else {
+            RCLCPP_INFO(get_logger(), "Linear X <= 0.5, disabling manual mode.");
+            set_param("manual_enabled", false);
+        }
+}
+
+
+void set_param(const std::string &param_name, bool new_val) {
+    
+    /*
+    if (!param_client->has_parameter(param_name)) {
+        RCLCPP_ERROR(get_logger(),"State Manager node does not contain parameter: [%s]. Attempted value: [%s]",param_name.c_str(), new_val ? "true" : "false");
+        return;
+    }
+    // create param obj to send upstream to state manager node
+    rcl_interfaces::msg::Parameter parameter;
+    parameter.name = param_name;
+    parameter.value.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+    parameter.value.bool_value = new_val;
+   
+    auto request = std::make_shared<rcl_interfaces::srv::SetParameters::Request>();
+    request->parameters.push_back(parameter);
+    auto future = param_client->set_parameters_atomically(parameters, std::chrono::milliseconds(1000));
+ 
+    handle_response(future);
+
+    */
+
+    if (!param_client->has_parameter(param_name)) {
+        RCLCPP_ERROR(get_logger(), 
+            "State Manager node does not contain parameter: [%s]. Attempted value: [%s]",
+            param_name.c_str(), new_val ? "true" : "false");
+        return;
+    }
+    
+    std::vector<rclcpp::Parameter> parameters;
+    parameters.emplace_back(rclcpp::Parameter(param_name, new_val));
+    
+    try {
+        auto result = param_client->set_parameters_atomically(parameters);
+        if (result.successful) {
+            RCLCPP_INFO(get_logger(), "Successfully set parameter %s", param_name.c_str());
+        } else {
+            RCLCPP_ERROR(get_logger(), "Failed to set parameter %s: %s", 
+                        param_name.c_str(), result.reason.c_str());
+        }
+    } catch (const std::exception& e) {
+        RCLCPP_ERROR(get_logger(), "Error setting parameter: %s", e.what());
+    }
+    
+}
+
+/*
+void handle_response(rclcpp::Client<rcl_interfaces::srv::SetParameters>::Future future) {
+    if (!future.valid()) {RCLCPP_ERROR(get_logger(), "Parameter set request failed: Future invalid");return;}
+    try {
+        auto response = future.get();
+        // For set_parameters_atomically, we'll always get exactly one result
+        if (!response.empty()) {
+            const auto& result = response[0];
+            if (result.successful) {
+                RCLCPP_INFO(get_logger(), "Successfully set parameter");
+            } else {
+                RCLCPP_ERROR(get_logger(), "Failed to set parameter: %s", result.reason.c_str());
+            }
+        } else {
+            RCLCPP_ERROR(get_logger(), "Empty response received from parameter set request");
+        }
+    } catch (const std::exception& e) {
+        RCLCPP_ERROR(get_logger(), "Exception while handling parameter response: %s", e.what());
+    }
+
+}
+
+
+*/
 
 
 };
