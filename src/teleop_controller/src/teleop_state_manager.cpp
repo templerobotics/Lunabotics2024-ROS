@@ -135,7 +135,7 @@ rcl_interfaces::msg::SetParametersResult validate_parameters(const ParamVector &
             result.successful = false;
             result.reason = "Cannot enable PS4 while XBOX is active";
             return result;
-        }   //If set manual mode to T & the robot_disabled = T --> error
+        }   
         
         // Validate manual mode constraints if needed
         // Add any other validation logic here
