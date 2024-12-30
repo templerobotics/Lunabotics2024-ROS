@@ -10,8 +10,8 @@ public:
     {
         ready_client = create_client<std_srvs::srv::Trigger>("state_manager_ready");
         param_client = create_client<teleop_controller::srv::SetParameter>("set_parameter");
-        wait_for_state_manager();                               // Wait for state manager to be ready
-        prep_robot();                                           // Initialize parameters after state manager is ready
+        wait_for_state_manager();                               
+        prep_robot();
 
 
         sub_xbox = create_subscription<msg_Bool>("robot_state/XBOX", 10,std::bind(&Teleop_Drivebase::callback_xbox, this, std::placeholders::_1)); 
@@ -28,8 +28,7 @@ public:
         m_right_rear.SetInverted(true);    ----> Diff drive robot
         */
 
-        timer = create_wall_timer(5s, std::bind(&Teleop_Drivebase::callback_motor_heartbeat, this));// Make timer tick 0.1ms for actual hardware: 10hZ = 10x per second 
-       
+        timer = create_wall_timer(5s, std::bind(&Teleop_Drivebase::callback_motor_heartbeat, this)); 
         cmd_vel_sub = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Drivebase::callback_cmd_vel_control_logic, this, std::placeholders::_1));
         
     }
@@ -42,7 +41,8 @@ private:
     XBOX_BUTTONS_t buttons;
     XBOX_JOYSTICK_INPUT_t joystick;
     ROBOTSTATE_t robot_state;
-    
+
+    ROBOT_MEASUREMENTS_t robot_dimensions;// determine if I want to use this struct at all or not
     /*
     SparkMax m_left_front;
     SparkMax m_left_rear;
@@ -75,9 +75,7 @@ void wait_for_state_manager() {
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
     auto future = ready_client->async_send_request(request);
     
-    // Wait for the response
-    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) == 
-        rclcpp::FutureReturnCode::SUCCESS) {
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) == rclcpp::FutureReturnCode::SUCCESS) {
         auto response = future.get();
         if (response->success) {
             RCLCPP_INFO(get_logger(), "State Manager is ready. Message: %s", 
@@ -202,16 +200,60 @@ double get_axis(const JoyMsg &joy_msg, const std::initializer_list<int> &mapping
 }
 
 
-
+// Note : Make init function for robot_dimensions struct variables as well. Also put Joystick & Twist msg in this function at the same time if possible?
 void callback_cmd_vel_control_logic(const geometry_msgs::msg::Twist::SharedPtr msg){
     if(robot_state.robot_disabled == true || robot_state.manual_enabled==false || robot_state.PS4==true || robot_state.XBOX==false){
-        std::cout << "ERROR! Robot must be FULLY ENABLED CORRECTLY in order to execute control logic!" << std::endl; 
+        std::cout << "ERROR! Robot must be FULLY ENABLED CORRECTLY in order to execute control logic!\nExiting..." << std::endl; 
+        std::exit(1);
     }
-    printf("INSIDE CMD VEL CALLBACK!\nLINEAR VELOCITY = [%.2lf]\n",msg->linear.x);
+        printf("INSIDE CMD VEL CALLBACK!");
+   try {
+        // upper/lower bounds for velocities
+        double linear_x = std::min(std::max(msg->linear.x, -robot_dimensions.max_velocity), robot_dimensions.max_velocity);
+        double angular_z = std::min(std::max(msg->angular.z, -robot_dimensions.max_angular_velocity), robot_dimensions.max_angular_velocity);
+
+    
+        double half_track = robot_dimensions.track_width / 2.0;
+        double half_base = robot_dimensions.wheel_base / 2.0;
+
+        // Calc wheel velocities
+        double left_front_velocity = linear_x - (angular_z * half_track) - (angular_z * half_base);
+        double left_rear_velocity = linear_x - (angular_z * half_track) + (angular_z * half_base);
+        double right_front_velocity = linear_x + (angular_z * half_track) - (angular_z * half_base);
+        double right_rear_velocity = linear_x + (angular_z * half_track) + (angular_z * half_base);
+
+        // Convert velocities to voltage commands (simple proportional control)
+        double voltage_scaling = robot_dimensions.voltage_limit / robot_dimensions.max_velocity;
+
+        // Calc voltages for each wheel
+        double lf_voltage = left_front_velocity * voltage_scaling;
+        double lr_voltage = left_rear_velocity * voltage_scaling;
+        double rf_voltage = right_front_velocity * voltage_scaling;
+        double rr_voltage = right_rear_velocity * voltage_scaling;
+
+        // Limit voltages
+        lf_voltage = std::min(std::max(lf_voltage, -robot_dimensions.voltage_limit), robot_dimensions.voltage_limit);
+        lr_voltage = std::min(std::max(lr_voltage, -robot_dimensions.voltage_limit), robot_dimensions.voltage_limit);
+        rf_voltage = std::min(std::max(rf_voltage, -robot_dimensions.voltage_limit), robot_dimensions.voltage_limit);
+        rr_voltage = std::min(std::max(rr_voltage, -robot_dimensions.voltage_limit), robot_dimensions.voltage_limit);
+
+        /*
+        Apply voltages to motors
+
+        m_left_front.SetVoltage(lf_voltage);
+        m_left_rear.SetVoltage(lr_voltage);
+        m_right_front.SetVoltage(rf_voltage);
+        m_right_rear.SetVoltage(rr_voltage);
+        */
+
+        RCLCPP_INFO(get_logger(),"Applied voltages - LF: %.2f V, LR: %.2f V, RF: %.2f V, RR: %.2f V",lf_voltage, lr_voltage, rf_voltage, rr_voltage);
+    }
+        catch (const std::exception& e) {
+            RCLCPP_ERROR(get_logger(),"Error in cmdVelCallback: %s", e.what());
+    }
+
 
 }
-
-
 
 
 

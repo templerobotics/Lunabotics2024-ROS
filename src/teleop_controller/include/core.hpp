@@ -20,17 +20,10 @@
 #include "rclcpp/utilities.hpp"
 #include "rclcpp/logging.hpp"
 #include <cassert>
-#include <chrono>
 #include <functional>
-#include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include <future>
-
-
-
 #include <chrono>
-#include <future>
-#include <vector>
 #include <rclcpp/rclcpp.hpp>
 
 
@@ -52,6 +45,7 @@
 #include "rcl_interfaces/srv/set_parameters.hpp"  
 #include "rcl_interfaces/msg/parameter_descriptor.hpp"
 #include <std_srvs/srv/trigger.hpp>
+
 #include "teleop_controller/srv/set_parameter.hpp"  // generated from .srv file
 
 using namespace std::chrono_literals;
@@ -113,12 +107,7 @@ typedef struct{
 
 
 
-enum class Motor{
-    leftFront,
-    leftRear,
-    rightFront,
-    rightRear
-};
+
 
 
 

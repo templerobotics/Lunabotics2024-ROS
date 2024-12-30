@@ -6,17 +6,16 @@ public:
     
         declare_parameters();
         init_param_event_subscriber();
-        init_state_from_parameters();
+        init_internal_state_from_params();
 
         ready_service = create_service<std_srvs::srv::Trigger>("state_manager_ready",std::bind(&Teleop_State_Manager::handle_ready_check, this,std::placeholders::_1, std::placeholders::_2));       
         param_service = create_service<teleop_controller::srv::SetParameter>("set_parameter",std::bind(&Teleop_State_Manager::handle_set_parameter, this,std::placeholders::_1, std::placeholders::_2));
 
-        // Set up parameter callback for validation
+        // parameter callback for param validation --> can try to find a way to incorporate robot_disabled if need be. But other nodes prob don't need that
         param_callback_handle = this->add_on_set_parameters_callback([this](const ParamVector &parameters) {
             return validate_parameters(parameters);
         });
 
-        
         pub_robot_enabled = this->create_publisher<msg_Bool>("robot_state/robot_disabled", 10);
         pub_manual_enabled = this->create_publisher<msg_Bool>("robot_state/manual_enabled", 10);
         pub_xbox = this->create_publisher<msg_Bool>("robot_state/XBOX", 10);
@@ -50,10 +49,8 @@ void handle_ready_check(const std::shared_ptr<std_srvs::srv::Trigger::Request>re
 
 void handle_set_parameter(const std::shared_ptr<teleop_controller::srv::SetParameter::Request> request,std::shared_ptr<teleop_controller::srv::SetParameter::Response> response){
     try {
-        // Set the ROS parameter
         this->set_parameter(rclcpp::Parameter(request->param_name, request->new_value));
-        
-        // Update internal state to match
+        // Update internal state
         if (request->param_name == "robot_disabled") {
             robot_state.robot_disabled = request->new_value;
         } else if (request->param_name == "XBOX") {
@@ -76,7 +73,7 @@ void handle_set_parameter(const std::shared_ptr<teleop_controller::srv::SetParam
         RCLCPP_ERROR(get_logger(), "Failed to set parameter %s: %s", 
                     request->param_name.c_str(), e.what());
     }
-    
+
 }
 
 
@@ -148,8 +145,7 @@ void declare_parameters() {
     outdoor_mode_descriptor.description = "Enable/disable outdoor operation mode";
     outdoor_mode_descriptor.additional_constraints = "Adjusts robot behavior for outdoor operation";
     outdoor_mode_descriptor.read_only = false;
-    
-    //  Init params
+   
     this->declare_parameter("XBOX", true, xbox_descriptor);
     this->declare_parameter("PS4", false, ps4_descriptor);
     this->declare_parameter("robot_disabled", true, robot_disabled_descriptor);
@@ -157,7 +153,7 @@ void declare_parameters() {
     this->declare_parameter("outdoor_mode", false, outdoor_mode_descriptor);
 }
 
-void init_state_from_parameters() {
+void init_internal_state_from_params() {
     robot_state.XBOX = this->get_parameter("XBOX").as_bool();
     robot_state.PS4 = this->get_parameter("PS4").as_bool();
     robot_state.manual_enabled = this->get_parameter("manual_enabled").as_bool();
@@ -214,7 +210,6 @@ void callback_publish_states() {
         pub_ps4->publish(msg);
     
 }
-
 
 
 
