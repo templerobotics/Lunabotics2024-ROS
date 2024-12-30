@@ -6,13 +6,16 @@ public:
     
         declare_parameters();
         init_param_event_subscriber();
-        
+        init_state_from_parameters();
+
+        ready_service = create_service<std_srvs::srv::Trigger>("state_manager_ready",std::bind(&Teleop_State_Manager::handle_ready_check, this,std::placeholders::_1, std::placeholders::_2));       
+        param_service = create_service<teleop_controller::srv::SetParameter>("set_parameter",std::bind(&Teleop_State_Manager::handle_set_parameter, this,std::placeholders::_1, std::placeholders::_2));
+
         // Set up parameter callback for validation
         param_callback_handle = this->add_on_set_parameters_callback([this](const ParamVector &parameters) {
             return validate_parameters(parameters);
         });
 
-        init_state_from_parameters();
         
         pub_robot_enabled = this->create_publisher<msg_Bool>("robot_state/robot_disabled", 10);
         pub_manual_enabled = this->create_publisher<msg_Bool>("robot_state/manual_enabled", 10);
@@ -24,6 +27,9 @@ public:
     }
 
 private:
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr ready_service;
+    rclcpp::Service<teleop_controller::srv::SetParameter>::SharedPtr param_service;
+
     ROBOTSTATE_t robot_state;
     BoolPublisher pub_robot_enabled;
     BoolPublisher pub_manual_enabled;
@@ -33,6 +39,46 @@ private:
     rclcpp::TimerBase::SharedPtr timer;
     OnSetParametersCallbackHandle::SharedPtr param_callback_handle;
     ParamEventHandler param_sub;
+
+
+void handle_ready_check(const std::shared_ptr<std_srvs::srv::Trigger::Request>request,std::shared_ptr<std_srvs::srv::Trigger::Response> response){
+    RCLCPP_INFO(get_logger(), "Received ready check request (pointer: %p)", static_cast<void*>(request.get()));
+    response->success = true;
+    response->message = "State Manager initialized and ready";
+    RCLCPP_INFO(get_logger(), "State Manager ready service called");
+}
+
+void handle_set_parameter(const std::shared_ptr<teleop_controller::srv::SetParameter::Request> request,std::shared_ptr<teleop_controller::srv::SetParameter::Response> response){
+    try {
+        // Set the ROS parameter
+        this->set_parameter(rclcpp::Parameter(request->param_name, request->new_value));
+        
+        // Update internal state to match
+        if (request->param_name == "robot_disabled") {
+            robot_state.robot_disabled = request->new_value;
+        } else if (request->param_name == "XBOX") {
+            robot_state.XBOX = request->new_value;
+        } else if (request->param_name == "PS4") {
+            robot_state.PS4 = request->new_value;
+        } else if (request->param_name == "manual_enabled") {
+            robot_state.manual_enabled = request->new_value;
+        } else if (request->param_name == "outdoor_mode") {
+            robot_state.outdoor_mode = request->new_value;
+        }
+        response->success = true;
+        response->message = "Parameter set successfully";
+        RCLCPP_INFO(get_logger(), "Parameter %s set to %s", 
+                    request->param_name.c_str(), 
+                    request->new_value ? "true" : "false");
+    } catch (const std::exception& e) {
+        response->success = false;
+        response->message = std::string("Failed to set parameter: ") + e.what();
+        RCLCPP_ERROR(get_logger(), "Failed to set parameter %s: %s", 
+                    request->param_name.c_str(), e.what());
+    }
+    
+}
+
 
 void init_param_event_subscriber(){
     
@@ -103,7 +149,7 @@ void declare_parameters() {
     outdoor_mode_descriptor.additional_constraints = "Adjusts robot behavior for outdoor operation";
     outdoor_mode_descriptor.read_only = false;
     
-    // Initialize each parameter to T/F respectively ---> In Drivebase these will be correctly set in control logic function
+    //  Init params
     this->declare_parameter("XBOX", true, xbox_descriptor);
     this->declare_parameter("PS4", false, ps4_descriptor);
     this->declare_parameter("robot_disabled", true, robot_disabled_descriptor);
@@ -143,8 +189,9 @@ rcl_interfaces::msg::SetParametersResult validate_parameters(const ParamVector &
     return result;
 }
 
+
+
 void callback_publish_states() {
-    //if( robot_state_changed() ){
         auto msg = msg_Bool();
         msg.data = robot_state.robot_disabled;
         RCLCPP_INFO(this->get_logger(), "Publishing: ROBOT DISABLED [ %s ]", msg.data ? "true" : "false");
@@ -165,28 +212,16 @@ void callback_publish_states() {
         msg.data = robot_state.PS4;
         RCLCPP_INFO(this->get_logger(), "Publishing: PS4 [ %s ]", msg.data ? "true" : "false");
         pub_ps4->publish(msg);
-    //}
     
 }
 
-/*
-bool robot_state_changed() {
-    static ROBOTSTATE_t last_state = robot_state;
-    bool changed = (robot_state != last_state);
-    last_state = robot_state;
-    return changed;
-}
-
-bool equal_states(ROBOTSTATE_t states1, ROBOT_STATE_t states2 ){
-    for(bool state : states1){  if(state!=states2){ return false; } }
-    return true;
-}
 
 
 
-*/
-    
+
 };
+
+
 
 int main(int argc, char* argv[]) {
     rclcpp::init(argc, argv);

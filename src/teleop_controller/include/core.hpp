@@ -51,6 +51,9 @@
 #include "rcl_interfaces/msg/parameter_event.hpp"
 #include "rcl_interfaces/srv/set_parameters.hpp"  
 #include "rcl_interfaces/msg/parameter_descriptor.hpp"
+#include <std_srvs/srv/trigger.hpp>
+#include "teleop_controller/srv/set_parameter.hpp"  // generated from .srv file
+
 using namespace std::chrono_literals;
 
 using std::placeholders::_1;

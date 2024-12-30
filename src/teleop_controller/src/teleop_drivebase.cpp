@@ -1,21 +1,18 @@
 #include "core.hpp"
+/*  
+            For Constructor initialization --> NEED HARDWARE SETUP TO TEST
+        ,m_left_front("can0", 1),m_left_rear("can0", 2),m_right_front("can0", 3),m_right_rear("can0", 4)
+*/
 
 class Teleop_Drivebase : public rclcpp::Node{
 public:
     Teleop_Drivebase() : Node("drivebase")
     {
-        /*  
-            For Constructor initialization --> NEED HARDWARE SETUP TO TEST
-        ,m_left_front("can0", 1),m_left_rear("can0", 2),m_right_front("can0", 3),m_right_rear("can0", 4)
-        */
-        param_client = std::make_shared<rclcpp::SyncParametersClient>(this, "/Teleop_State_Manager");// Create client to modify state manager params at runtime, while this node spins 
-        while (!param_client->wait_for_service(1s)) { // Wait for state manager to be available. If not ready, error
-            if (!rclcpp::ok()) {
-                RCLCPP_ERROR(get_logger(), "Interrupted while waiting for state manager.");
-                return;
-            }
-            RCLCPP_INFO(get_logger(), "Waiting for state manager...");
-        }
+        ready_client = create_client<std_srvs::srv::Trigger>("state_manager_ready");
+        param_client = create_client<teleop_controller::srv::SetParameter>("set_parameter");
+        wait_for_state_manager();                               // Wait for state manager to be ready
+        prep_robot();                                           // Initialize parameters after state manager is ready
+
 
         sub_xbox = create_subscription<msg_Bool>("robot_state/XBOX", 10,std::bind(&Teleop_Drivebase::callback_xbox, this, std::placeholders::_1)); 
         sub_robot_enabled = create_subscription<msg_Bool>("robot_state/enabled", 10,std::bind(&Teleop_Drivebase::callback_robot_enabled, this, std::placeholders::_1));
@@ -32,13 +29,16 @@ public:
         */
 
         timer = create_wall_timer(5s, std::bind(&Teleop_Drivebase::callback_motor_heartbeat, this));// Make timer tick 0.1ms for actual hardware: 10hZ = 10x per second 
-        prep_robot();
+       
         cmd_vel_sub = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Drivebase::callback_cmd_vel_control_logic, this, std::placeholders::_1));
         
     }
     
 private:
-    //Validate states --> Utilize XBOX controls in control logic functions
+
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr ready_client;
+    rclcpp::Client<teleop_controller::srv::SetParameter>::SharedPtr param_client;
+
     XBOX_BUTTONS_t buttons;
     XBOX_JOYSTICK_INPUT_t joystick;
     ROBOTSTATE_t robot_state;
@@ -50,10 +50,6 @@ private:
     SparkMax m_right_rear;
     */
 
-    std::shared_ptr<rclcpp::SyncParametersClient> param_client;
-
-
-    
     BoolSubscriber sub_xbox;
     BoolSubscriber sub_robot_enabled;
     BoolSubscriber sub_manual_enabled_enabled;
@@ -63,6 +59,72 @@ private:
 
     TwistSubscription velocity_subscriber;
     JoySubscription joy_subscriber;
+
+
+
+
+void wait_for_state_manager() {
+    while (!ready_client->wait_for_service(1s)) {
+        if (!rclcpp::ok()) {
+            RCLCPP_ERROR(get_logger(), "Interrupted while waiting for state manager.");
+            return;
+        }
+        RCLCPP_INFO(get_logger(), "Waiting for state manager to be ready...");
+    }
+    
+    auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+    auto future = ready_client->async_send_request(request);
+    
+    // Wait for the response
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) == 
+        rclcpp::FutureReturnCode::SUCCESS) {
+        auto response = future.get();
+        if (response->success) {
+            RCLCPP_INFO(get_logger(), "State Manager is ready. Message: %s", 
+                        response->message.c_str());
+        } else {
+            RCLCPP_ERROR(get_logger(), "Failed to confirm State Manager readiness");
+        }
+    }
+}
+
+void set_param(const std::string& param_name, bool new_val) {
+    if (!param_client->wait_for_service(1s)) {
+        RCLCPP_ERROR(get_logger(), "Parameter service not available");
+        return;
+    }
+    
+    auto request = std::make_shared<teleop_controller::srv::SetParameter::Request>();
+    request->param_name = param_name;
+    request->new_value = new_val;
+    
+    auto future = param_client->async_send_request(request);
+    
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) == 
+        rclcpp::FutureReturnCode::SUCCESS) {
+        auto response = future.get();
+        if (response->success) {
+            RCLCPP_INFO(get_logger(), "Set parameter %s: %s", 
+                        param_name.c_str(), response->message.c_str());
+        } else {
+            RCLCPP_ERROR(get_logger(), "Failed to set parameter %s: %s", 
+                        param_name.c_str(), response->message.c_str());
+        }
+    }
+}
+
+
+void prep_robot() {
+    RCLCPP_INFO(get_logger(), "Initializing robot parameters...");
+    
+    set_param("robot_disabled", false);
+    set_param("XBOX", true);
+    set_param("PS4", false);
+    set_param("manual_enabled", true);
+    set_param("outdoor_mode", false);
+    
+    RCLCPP_INFO(get_logger(), "Robot parameters initialized");
+}
 
 
 void callback_xbox(const msg_Bool &state_XBOX){
@@ -139,43 +201,6 @@ double get_axis(const JoyMsg &joy_msg, const std::initializer_list<int> &mapping
     return joy_msg->axes[*(mappings.begin() + index)];
 }
 
-void set_param(const std::string &param_name, bool new_val) {
-    if (!param_client->has_parameter(param_name)) {
-        RCLCPP_ERROR(get_logger(), 
-            "State Manager node does not contain parameter: [%s]. Attempted value: [%s]",
-            param_name.c_str(), new_val ? "true" : "false");
-        return;
-    }
-    
-    std::vector<rclcpp::Parameter> parameters;
-    parameters.emplace_back(rclcpp::Parameter(param_name, new_val));
-    
-    try {
-        auto result = param_client->set_parameters_atomically(parameters);
-        if (result.successful) {
-            RCLCPP_INFO(get_logger(), "Successfully set parameter %s", param_name.c_str());
-        } else {
-            RCLCPP_ERROR(get_logger(), "Failed to set parameter %s: %s", 
-                        param_name.c_str(), result.reason.c_str());
-        }
-    } catch (const std::exception& e) {
-        RCLCPP_ERROR(get_logger(), "Error setting parameter: %s", e.what());
-    }
-    
-}
-
-//Init robot params prior to executing control logic
-void prep_robot(){
-    set_param("robot_disabled", false);  
-    set_param("XBOX", true);            
-    set_param("PS4", false);           
-    set_param("manual_enabled", true);   
-    set_param("outdoor_mode", false); 
-
-    RCLCPP_INFO(get_logger(), "Initializing robot parameters...");
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
-    RCLCPP_INFO(get_logger(), "Robot parameters initialized: XBOX=true, PS4=false, robot_disabled=false, manual_enabled=true");
-}
 
 
 void callback_cmd_vel_control_logic(const geometry_msgs::msg::Twist::SharedPtr msg){
