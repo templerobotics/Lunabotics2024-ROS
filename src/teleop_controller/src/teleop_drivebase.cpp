@@ -29,8 +29,9 @@ public:
         */
 
         timer = create_wall_timer(5s, std::bind(&Teleop_Drivebase::callback_motor_heartbeat, this)); 
-        cmd_vel_sub = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Drivebase::callback_cmd_vel_control_logic, this, std::placeholders::_1));
-        
+        cmd_vel_sub = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Drivebase::callback_cmd_vel, this, std::placeholders::_1) );
+        joy_sub = create_subscription<Joy>("joy", 10, std::bind(&Teleop_Drivebase::callback_joy, this, std::placeholders::_1) );
+
     }
     
 private:
@@ -38,11 +39,12 @@ private:
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr ready_client;
     rclcpp::Client<teleop_controller::srv::SetParameter>::SharedPtr param_client;
 
-    XBOX_BUTTONS_t buttons;
-    XBOX_JOYSTICK_INPUT_t joystick;
+    //Determine if I want to use this robot_measurements
+    ROBOT_ACTUATION_t robot_actuation;
+    XBOX_JOYSTICK_INPUT_t xbox_input;
     ROBOTSTATE_t robot_state;
-
-    ROBOT_MEASUREMENTS_t robot_dimensions;// determine if I want to use this struct at all or not
+    ROBOT_MEASUREMENTS_t robot_dimensions;
+    
     /*
     SparkMax m_left_front;
     SparkMax m_left_rear;
@@ -58,9 +60,7 @@ private:
     rclcpp::TimerBase::SharedPtr timer;
 
     TwistSubscription velocity_subscriber;
-    JoySubscription joy_subscriber;
-
-
+    JoySubscription joy_sub;
 
 
 void wait_for_state_manager() {
@@ -114,16 +114,13 @@ void set_param(const std::string& param_name, bool new_val) {
 
 void prep_robot() {
     RCLCPP_INFO(get_logger(), "Initializing robot parameters...");
-    
     set_param("robot_disabled", false);
     set_param("XBOX", true);
     set_param("PS4", false);
     set_param("manual_enabled", true);
     set_param("outdoor_mode", false);
-    
     RCLCPP_INFO(get_logger(), "Robot parameters initialized");
 }
-
 
 void callback_xbox(const msg_Bool &state_XBOX){
     robot_state.XBOX = state_XBOX.data;
@@ -200,55 +197,104 @@ double get_axis(const JoyMsg &joy_msg, const std::initializer_list<int> &mapping
 }
 
 
-// Note : Make init function for robot_dimensions struct variables as well. Also put Joystick & Twist msg in this function at the same time if possible?
-void callback_cmd_vel_control_logic(const geometry_msgs::msg::Twist::SharedPtr msg){
+void control_robot(){
+    if(xbox_input.home_button){ set_param("robot_disabled",true) ; robot_state.robot_disabled = true;}
+    robot_actuation.speed_lift_actuator = (xbox_input.dpad_vertical == 1.0) ? -0.3 : (xbox_input.dpad_vertical == -1.0) ? 0.3 : 0.0;
+    robot_actuation.speed_tilt_actuator = (xbox_input.right_y_axis > 0.1) ? -0.3 : (xbox_input.right_y_axis < -0.1) ? 0.3 : 0.0;
+    robot_actuation.speed_multiplier = (xbox_input.x_button && xbox_input.y_button) ? 0.3 : (xbox_input.x_button ? 0.1 : 0.6);
+
+}
+
+void callback_joy(const JoyMsg msg){
     if(robot_state.robot_disabled == true || robot_state.manual_enabled==false || robot_state.PS4==true || robot_state.XBOX==false){
-        std::cout << "ERROR! Robot must be FULLY ENABLED CORRECTLY in order to execute control logic!\nExiting..." << std::endl; 
+        RCLCPP_ERROR(get_logger(),"Error in Joy Callback. Robot must be fully enabled correctly to function!\nExiting...");
         std::exit(1);
     }
-        printf("INSIDE CMD VEL CALLBACK!");
-   try {
-        // upper/lower bounds for velocities
-        double linear_x = std::min(std::max(msg->linear.x, -robot_dimensions.max_velocity), robot_dimensions.max_velocity);
-        double angular_z = std::min(std::max(msg->angular.z, -robot_dimensions.max_angular_velocity), robot_dimensions.max_angular_velocity);
 
-    
-        double half_track = robot_dimensions.track_width / 2.0;
-        double half_base = robot_dimensions.wheel_base / 2.0;
+    auto clock = rclcpp::Clock();
+    printf("INSIDE JOY CALLBACK!");
 
-        // Calc wheel velocities
-        double left_front_velocity = linear_x - (angular_z * half_track) - (angular_z * half_base);
-        double left_rear_velocity = linear_x - (angular_z * half_track) + (angular_z * half_base);
-        double right_front_velocity = linear_x + (angular_z * half_track) - (angular_z * half_base);
-        double right_rear_velocity = linear_x + (angular_z * half_track) + (angular_z * half_base);
+    try{
+        xbox_input.share_button = get_button(msg, {9, 8, 6});
+        xbox_input.menu_button = get_button(msg, {10, 9, 7});
+        xbox_input.home_button = get_button(msg, {11, 10, 8});
+        xbox_input.a_button = get_button(msg, {1, 0, 0});
+        xbox_input.b_button = get_button(msg, {0, 2, 1});
+        xbox_input.x_button = get_button(msg, {2, 3, 2});
+        xbox_input.y_button = get_button(msg, {3, 2, 3});
+        xbox_input.left_bumper = get_button(msg, {4, 4, 4});
+        xbox_input.right_bumper = get_button(msg, {5, 5, 5});
 
-        // Convert velocities to voltage commands (simple proportional control)
-        double voltage_scaling = robot_dimensions.voltage_limit / robot_dimensions.max_velocity;
+        xbox_input.dpad_horizontal = get_axis(msg, {4, 6, 6});
+        xbox_input.dpad_vertical = get_axis(msg, {5, 7, 7});
 
-        // Calc voltages for each wheel
-        double lf_voltage = left_front_velocity * voltage_scaling;
-        double lr_voltage = left_rear_velocity * voltage_scaling;
-        double rf_voltage = right_front_velocity * voltage_scaling;
-        double rr_voltage = right_rear_velocity * voltage_scaling;
+        if(xbox_input.share_button){ 
+            if(robot_state.manual_enabled != true){ 
+                set_param("manual_enabled",true);//set in state manager
+                robot_state.manual_enabled = true;//set locally
+            }
+            RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "MANUAL CONTROL:ENABLED");
+        }
+        if(xbox_input.menu_button){ 
+            set_param("manual_enabled",false);
+            robot_state.manual_enabled = false;
+            RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "AUTONOMOUS CONTROL:ENABLED");
+        }
+        
+        rclcpp::Parameter param = get_parameter("manual_enabled");
+        bool current_state_manual = param.as_bool();
+        if(current_state_manual == true){
+            
+            xbox_input.left_x_axis = msg->axes[0];
+            xbox_input.left_y_axis = msg->axes[1];
+            xbox_input.right_y_axis = msg->axes[4];
+            xbox_input.left_trigger = msg->axes[2];
+            xbox_input.right_trigger = msg->axes[5];
+            if (robot_state.robot_disabled == true){
+                RCLCPP_ERROR(get_logger(), "ROBOT IS CURRENTLY DISABLED");
+            }
+            else
+            {
+                SparkMax::Heartbeat(); //ONLY TRY WITH REAL HARDWARE
+            }
 
-        // Limit voltages
-        lf_voltage = std::min(std::max(lf_voltage, -robot_dimensions.voltage_limit), robot_dimensions.voltage_limit);
-        lr_voltage = std::min(std::max(lr_voltage, -robot_dimensions.voltage_limit), robot_dimensions.voltage_limit);
-        rf_voltage = std::min(std::max(rf_voltage, -robot_dimensions.voltage_limit), robot_dimensions.voltage_limit);
-        rr_voltage = std::min(std::max(rr_voltage, -robot_dimensions.voltage_limit), robot_dimensions.voltage_limit);
+            control_robot(); //teleoperation
+        }
 
-        /*
-        Apply voltages to motors
-
-        m_left_front.SetVoltage(lf_voltage);
-        m_left_rear.SetVoltage(lr_voltage);
-        m_right_front.SetVoltage(rf_voltage);
-        m_right_rear.SetVoltage(rr_voltage);
-        */
-
-        RCLCPP_INFO(get_logger(),"Applied voltages - LF: %.2f V, LR: %.2f V, RF: %.2f V, RR: %.2f V",lf_voltage, lr_voltage, rf_voltage, rr_voltage);
     }
-        catch (const std::exception& e) {
+    catch (const std::exception& e) {
+        RCLCPP_ERROR(get_logger(),"Error in JOY Callback: %s", e.what());
+    }
+
+}
+
+// Note:Make init function for robot_dimensions struct variables as well. 
+void callback_cmd_vel(const geometry_msgs::msg::Twist::SharedPtr msg){
+    if(robot_state.robot_disabled == true || robot_state.manual_enabled==false || robot_state.PS4==true || robot_state.XBOX==false){
+        RCLCPP_ERROR(get_logger(),"Error in CMD VEL Callback. Robot must be fully enabled correctly to function!\nExiting...");
+        std::exit(1);
+    }
+    RCLCPP_INFO(get_logger(),"INSIDE CMD VEL CALLBACK %lf",msg->linear.x);
+   
+   try{
+        rclcpp::Parameter param = get_parameter("manual_enabled");
+        bool current_state_manual = param.as_bool();
+        if(robot_state.manual_enabled == false || current_state_manual == false){ // autonomous
+            SparkMax::Heartbeat();//NEED HARDWARE FOR THIS TO WORK
+            /*
+            replace with struct variables
+            
+            double linear_velocity = velocity_msg->linear.x;
+            double angular_velocity = velocity_msg->angular.z;
+            double wheel_radius = robot_state.outdoor_mode ? 0.2 : 0.127;
+            double wheel_distance = 0.5;
+            
+            left_wheel_motor_.SetDutyCycle(std::clamp(velocity_left_cmd, -1.0, 1.0));
+            right_wheel_motor_.SetDutyCycle(std::clamp(velocity_right_cmd, -1.0, 1.0));
+            */
+        }
+    }
+    catch (const std::exception& e) {
             RCLCPP_ERROR(get_logger(),"Error in cmdVelCallback: %s", e.what());
     }
 

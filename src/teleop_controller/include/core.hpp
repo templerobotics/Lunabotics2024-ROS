@@ -25,8 +25,7 @@
 #include <future>
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
-
-
+#include <fstream>
 
 
 /*  Sparkcan Headers    */
@@ -72,20 +71,28 @@ using ParamResponse = std::shared_ptr<rcl_interfaces::srv::SetParameters::Respon
 using ParamRequest = std::shared_ptr<rcl_interfaces::srv::SetParameters::Request>;
 
 
-typedef struct{
-    bool home, share, menu;
-    bool a, b, x, y;
-    bool left_bumper, right_bumper;
-}XBOX_BUTTONS_t;
 
 typedef struct{
+    bool home_button;
+    bool share_button;
+    bool menu_button;
+    bool a_button;
+    bool b_button;
+    bool x_button;
+    bool y_button;
     double left_x_axis;
     double left_y_axis;
     double right_y_axis;
     double right_x_axis;
-    double left_trigger, right_trigger;
-    double dpad_up, dpad_down, dpad_left, dpad_right;
+    double left_bumper, right_bumper,left_trigger, right_trigger;
+    double dpad_horizontal, dpad_vertical;
 }XBOX_JOYSTICK_INPUT_t;
+
+typedef struct{
+    double speed_lift_actuator;
+    double speed_tilt_actuator;
+    double speed_multiplier;
+}ROBOT_ACTUATION_t;
 
 typedef struct{
     bool manual_enabled;
@@ -104,11 +111,6 @@ typedef struct{
     double max_angular_velocity;
     double voltage_limit;
 }ROBOT_MEASUREMENTS_t;
-
-
-
-
-
 
 
 /*END : XBOX Teleoperation*/
