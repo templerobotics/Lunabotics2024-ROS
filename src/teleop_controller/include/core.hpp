@@ -96,12 +96,19 @@ typedef struct{
     bool outdoor_mode;
     bool XBOX;
     bool PS4;
-    double speed_multiplier = 0.6;
-    double left_speed = 0.0;
-    double right_speed = 0.0;
-    double lift_actuator_speed = 0.0;
-    double tilt_actuator_speed = 0.0;
 }ROBOTSTATE_t;
+
+typedef struct{
+    double wheel_radius;
+    double wheel_base;      // Distance between front & rear wheels
+    double track_width;     // Distance between left & right wheels
+    double max_velocity;
+    double min_velocity;
+    double max_angular_velocity;
+    double voltage_limit;
+}ROBOT_MEASUREMENTS_t;
+
+
 
 enum class Motor{
     leftFront,

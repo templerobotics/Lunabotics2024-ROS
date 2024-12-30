@@ -4,11 +4,11 @@ class Teleop_Drivebase : public rclcpp::Node{
 public:
     Teleop_Drivebase() : Node("drivebase")
     {
-        /*  Put this after drivebase node above when testing HARDWARE 
-            ,m_left_front("can0", 1),m_left_rear("can0", 2),m_right_front("can0", 3),m_right_rear("can0", 4)
+        /*  
+            For Constructor initialization --> NEED HARDWARE SETUP TO TEST
+        ,m_left_front("can0", 1),m_left_rear("can0", 2),m_right_front("can0", 3),m_right_rear("can0", 4)
         */
-
-        param_client = std::make_shared<rclcpp::SyncParametersClient>(this, "/Teleop_State_Manager");// Create client to modify state manager parameters 
+        param_client = std::make_shared<rclcpp::SyncParametersClient>(this, "/Teleop_State_Manager");// Create client to modify state manager params at runtime, while this node spins 
         while (!param_client->wait_for_service(1s)) { // Wait for state manager to be available. If not ready, error
             if (!rclcpp::ok()) {
                 RCLCPP_ERROR(get_logger(), "Interrupted while waiting for state manager.");
@@ -17,14 +17,12 @@ public:
             RCLCPP_INFO(get_logger(), "Waiting for state manager...");
         }
 
-
         sub_xbox = create_subscription<msg_Bool>("robot_state/XBOX", 10,std::bind(&Teleop_Drivebase::callback_xbox, this, std::placeholders::_1)); 
         sub_robot_enabled = create_subscription<msg_Bool>("robot_state/enabled", 10,std::bind(&Teleop_Drivebase::callback_robot_enabled, this, std::placeholders::_1));
         sub_manual_enabled_enabled = create_subscription<msg_Bool>("robot_state/manual_enabled", 10,std::bind(&Teleop_Drivebase::callback_manual_enabled, this, std::placeholders::_1));
         
         /*
-        CANT RUN WITHOUT PHYSICAL HARDWARE SETUP RUNNING AS WELL
-
+        CAN'T RUN CODE PERTAINING TO PHYSICAL HARDWARE WITHOUT PHYSICAL HARDWARE ACTUALLY SETUP 
         config_motor(m_left_front);
         config_motor(m_left_rear);
         config_motor(m_right_front);
@@ -33,19 +31,14 @@ public:
         m_right_rear.SetInverted(true);    ----> Diff drive robot
         */
 
-        // Make this 0.1ms when testing on actual hardware = 10HZ = 10x per second 
-        timer = create_wall_timer(1s, std::bind(&Teleop_Drivebase::callback_motor_heartbeat, this));
-        
+        timer = create_wall_timer(5s, std::bind(&Teleop_Drivebase::callback_motor_heartbeat, this));// Make timer tick 0.1ms for actual hardware: 10hZ = 10x per second 
         prep_robot();
-
         cmd_vel_sub = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Drivebase::callback_cmd_vel_control_logic, this, std::placeholders::_1));
-        //TODO: Load physical robot parameters from URDF file OR make them parameters in TELEOP_STATE MANAGER
-        //As for right now, make them hard-coded values until further runtime parameter testing
-    
+        
     }
     
 private:
-    //Validate states --> Utilize XBOX controls
+    //Validate states --> Utilize XBOX controls in control logic functions
     XBOX_BUTTONS_t buttons;
     XBOX_JOYSTICK_INPUT_t joystick;
     ROBOTSTATE_t robot_state;
@@ -58,6 +51,9 @@ private:
     */
 
     std::shared_ptr<rclcpp::SyncParametersClient> param_client;
+
+
+    
     BoolSubscriber sub_xbox;
     BoolSubscriber sub_robot_enabled;
     BoolSubscriber sub_manual_enabled_enabled;
@@ -177,7 +173,7 @@ void prep_robot(){
     set_param("outdoor_mode", false); 
 
     RCLCPP_INFO(get_logger(), "Initializing robot parameters...");
-    rclcpp::sleep_for(std::chrono::milliseconds(500));
+    rclcpp::sleep_for(std::chrono::milliseconds(1000));
     RCLCPP_INFO(get_logger(), "Robot parameters initialized: XBOX=true, PS4=false, robot_disabled=false, manual_enabled=true");
 }
 
@@ -187,6 +183,7 @@ void callback_cmd_vel_control_logic(const geometry_msgs::msg::Twist::SharedPtr m
         std::cout << "ERROR! Robot must be FULLY ENABLED CORRECTLY in order to execute control logic!" << std::endl; 
     }
     printf("INSIDE CMD VEL CALLBACK!\nLINEAR VELOCITY = [%.2lf]\n",msg->linear.x);
+
 }
 
 
