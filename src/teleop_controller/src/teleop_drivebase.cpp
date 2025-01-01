@@ -39,12 +39,25 @@ private:
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr ready_client;
     rclcpp::Client<teleop_controller::srv::SetParameter>::SharedPtr param_client;
 
-    //Determine if I want to use this robot_measurements
+    
     ROBOT_ACTUATION_t robot_actuation;
     XBOX_JOYSTICK_INPUT_t xbox_input;
     ROBOTSTATE_t robot_state;
-    ROBOT_MEASUREMENTS_t robot_dimensions;
+    ROBOT_LIMITS_t robot_dimensions; //Determine if I want to use robot_limits
     
+    /*
+    
+    Might have to make MOTOR CONTROLLER GROUP a class honestly
+    
+    MOTOR_CONTROLLER_GROUP_t left_motors;
+    MOTOR_CONTROLLER_GROUP_t right_motors;
+    SparkMax left;
+    SparkMax left2;
+    left_motors(left,left2);
+    left_motors.LEFT_SIDE()
+    
+    */
+
     /*
     SparkMax m_left_front;
     SparkMax m_left_rear;
@@ -198,11 +211,34 @@ double get_axis(const JoyMsg &joy_msg, const std::initializer_list<int> &mapping
 
 
 void control_robot(){
-    if(xbox_input.home_button){ set_param("robot_disabled",true) ; robot_state.robot_disabled = true;}
+    if(xbox_input.emergency_stop_button){ set_param("robot_disabled",true) ; robot_state.robot_disabled = true;}
     robot_actuation.speed_lift_actuator = (xbox_input.dpad_vertical == 1.0) ? -0.3 : (xbox_input.dpad_vertical == -1.0) ? 0.3 : 0.0;
-    robot_actuation.speed_tilt_actuator = (xbox_input.right_y_axis > 0.1) ? -0.3 : (xbox_input.right_y_axis < -0.1) ? 0.3 : 0.0;
-    robot_actuation.speed_multiplier = (xbox_input.x_button && xbox_input.y_button) ? 0.3 : (xbox_input.x_button ? 0.1 : 0.6);
+    robot_actuation.speed_tilt_actuator = (xbox_input.secondary_vertical_input > 0.1) ? -0.3 : (xbox_input.secondary_vertical_input < -0.1) ? 0.3 : 0.0;
+    robot_actuation.velocity_scaling = (xbox_input.x_button && xbox_input.y_button) ? 0.3 : (xbox_input.x_button ? 0.1 : 0.6);
 
+    xbox_input.throttle_forward = (1.0 - xbox_input.throttle_forward) / 2.0;
+    xbox_input.throttle_backwards = (1.0 - xbox_input.throttle_backwards) / 2.0;
+
+    if (xbox_input.throttle_forward != 0.0){
+        robot_actuation.wheel_speed_left = xbox_input.throttle_forward - xbox_input.joystick_turn_input;
+        robot_actuation.wheel_speed_right = xbox_input.throttle_forward + xbox_input.joystick_turn_input;
+
+    }else if(xbox_input.throttle_backwards != 0.0){
+        robot_actuation.wheel_speed_left = -(xbox_input.throttle_backwards - xbox_input.joystick_turn_input);
+        robot_actuation.wheel_speed_right = -(xbox_input.throttle_backwards + xbox_input.joystick_turn_input);
+    }else{
+        robot_actuation.wheel_speed_left = -xbox_input.joystick_turn_input;
+        robot_actuation.wheel_speed_right = xbox_input.joystick_turn_input;
+    }
+
+    /*
+    left_wheel_motor_.SetDutyCycle(std::clamp(left_speed_ * speed_multiplier_, -1.0, 1.0));
+    right_wheel_motor_.SetDutyCycle(std::clamp(right_speed_ * speed_multiplier_, -1.0, 1.0));
+    lift_actuator_motor_.SetDutyCycle(std::clamp(lift_actuator_speed_, -1.0, 1.0));
+    tilt_actuator_left_motor_.SetDutyCycle(std::clamp(tilt_actuator_speed_, -1.0, 1.0));
+    tilt_actuator_right_motor_.SetDutyCycle(std::clamp(tilt_actuator_speed_, -1.0, 1.0));
+    */
+    
 }
 
 void callback_joy(const JoyMsg msg){
@@ -215,9 +251,9 @@ void callback_joy(const JoyMsg msg){
     printf("INSIDE JOY CALLBACK!");
 
     try{
-        xbox_input.share_button = get_button(msg, {9, 8, 6});
-        xbox_input.menu_button = get_button(msg, {10, 9, 7});
-        xbox_input.home_button = get_button(msg, {11, 10, 8});
+        xbox_input.manual_mode_button = get_button(msg, {9, 8, 6});
+        xbox_input.autonomous_mode_button = get_button(msg, {10, 9, 7});
+        xbox_input.emergency_stop_button = get_button(msg, {11, 10, 8});
         xbox_input.a_button = get_button(msg, {1, 0, 0});
         xbox_input.b_button = get_button(msg, {0, 2, 1});
         xbox_input.x_button = get_button(msg, {2, 3, 2});
@@ -228,14 +264,14 @@ void callback_joy(const JoyMsg msg){
         xbox_input.dpad_horizontal = get_axis(msg, {4, 6, 6});
         xbox_input.dpad_vertical = get_axis(msg, {5, 7, 7});
 
-        if(xbox_input.share_button){ 
+        if(xbox_input.manual_mode_button){ 
             if(robot_state.manual_enabled != true){ 
                 set_param("manual_enabled",true);//set in state manager
                 robot_state.manual_enabled = true;//set locally
             }
             RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "MANUAL CONTROL:ENABLED");
         }
-        if(xbox_input.menu_button){ 
+        if(xbox_input.autonomous_mode_button){ 
             set_param("manual_enabled",false);
             robot_state.manual_enabled = false;
             RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "AUTONOMOUS CONTROL:ENABLED");
@@ -245,11 +281,11 @@ void callback_joy(const JoyMsg msg){
         bool current_state_manual = param.as_bool();
         if(current_state_manual == true){
             
-            xbox_input.left_x_axis = msg->axes[0];
-            xbox_input.left_y_axis = msg->axes[1];
-            xbox_input.right_y_axis = msg->axes[4];
-            xbox_input.left_trigger = msg->axes[2];
-            xbox_input.right_trigger = msg->axes[5];
+            xbox_input.joystick_turn_input = msg->axes[0];
+            xbox_input.joystick_forward_input = msg->axes[1];
+            xbox_input.secondary_vertical_input = msg->axes[4];
+            xbox_input.throttle_backwards = msg->axes[2];
+            xbox_input.throttle_forward = msg->axes[5];
             if (robot_state.robot_disabled == true){
                 RCLCPP_ERROR(get_logger(), "ROBOT IS CURRENTLY DISABLED");
             }
@@ -268,7 +304,7 @@ void callback_joy(const JoyMsg msg){
 
 }
 
-// Note:Make init function for robot_dimensions struct variables as well. 
+// Note:Make init function for robot_dimensions struct variables as well or URDF 
 void callback_cmd_vel(const geometry_msgs::msg::Twist::SharedPtr msg){
     if(robot_state.robot_disabled == true || robot_state.manual_enabled==false || robot_state.PS4==true || robot_state.XBOX==false){
         RCLCPP_ERROR(get_logger(),"Error in CMD VEL Callback. Robot must be fully enabled correctly to function!\nExiting...");
@@ -286,7 +322,7 @@ void callback_cmd_vel(const geometry_msgs::msg::Twist::SharedPtr msg){
             
             double linear_velocity = velocity_msg->linear.x;
             double angular_velocity = velocity_msg->angular.z;
-            double wheel_radius = robot_state.outdoor_mode ? 0.2 : 0.127;
+            robot_dimensions.wheel_radius = robot_state.outdoor_mode ? 0.2 : 0.127;
             double wheel_distance = 0.5;
             
             left_wheel_motor_.SetDutyCycle(std::clamp(velocity_left_cmd, -1.0, 1.0));

@@ -44,6 +44,9 @@
 #include "rcl_interfaces/srv/set_parameters.hpp"  
 #include "rcl_interfaces/msg/parameter_descriptor.hpp"
 #include <std_srvs/srv/trigger.hpp>
+#include <tuple>
+
+
 
 #include "teleop_controller/srv/set_parameter.hpp"  // generated from .srv file
 
@@ -73,25 +76,25 @@ using ParamRequest = std::shared_ptr<rcl_interfaces::srv::SetParameters::Request
 
 
 typedef struct{
-    bool home_button;
-    bool share_button;
-    bool menu_button;
+    bool emergency_stop_button;
+    bool manual_mode_button;
+    bool autonomous_mode_button;
     bool a_button;
     bool b_button;
     bool x_button;
     bool y_button;
-    double left_x_axis;
-    double left_y_axis;
-    double right_y_axis;
-    double right_x_axis;
-    double left_bumper, right_bumper,left_trigger, right_trigger;
+    double joystick_turn_input;
+    double joystick_forward_input;
+    double secondary_vertical_input;
+    double left_bumper, right_bumper,throttle_backwards, throttle_forward;
     double dpad_horizontal, dpad_vertical;
 }XBOX_JOYSTICK_INPUT_t;
 
 typedef struct{
     double speed_lift_actuator;
     double speed_tilt_actuator;
-    double speed_multiplier;
+    double velocity_scaling;
+    double wheel_speed_left, wheel_speed_right;
 }ROBOT_ACTUATION_t;
 
 typedef struct{
@@ -104,13 +107,31 @@ typedef struct{
 
 typedef struct{
     double wheel_radius;
-    double wheel_base;      // Distance between front & rear wheels
-    double track_width;     // Distance between left & right wheels
     double max_velocity;
     double min_velocity;
     double max_angular_velocity;
     double voltage_limit;
-}ROBOT_MEASUREMENTS_t;
+}ROBOT_LIMITS_t;
+
+
+/*
+4 Robot Drivebase motors form 2 groups for DIFF DRIVE robot
+FRC Java drivebase file has MotorControllerGroup class
+This is ROS not FRC. 
+We set() motor speeds w/ setVoltage() & setDutyCycle() 
+at the lowest level. Review how we do that in the code to make sure
+
+*/
+typedef struct{
+    std::tuple<SparkMax,SparkMax> LEFT_SIDE;
+    std::tuple<SparkMax,SparkMax> RIGHT_SIDE;
+}MOTOR_CONTROLLER_GROUP_t;
+
+enum class RobotSide{
+    LEFT,
+    RIGHT
+};
+
 
 
 /*END : XBOX Teleoperation*/
