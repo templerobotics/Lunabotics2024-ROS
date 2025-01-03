@@ -201,8 +201,6 @@ double get_axis(const JoyMsg &joy_msg, const std::initializer_list<int> &mapping
 
 void control_robot(){
     if(xbox_input.emergency_stop_button){ set_param("robot_disabled",true) ; robot_state.robot_disabled = true;}
-    robot_actuation.speed_lift_actuator = (xbox_input.dpad_vertical == 1.0) ? -0.3 : (xbox_input.dpad_vertical == -1.0) ? 0.3 : 0.0;
-    robot_actuation.speed_tilt_actuator = (xbox_input.secondary_vertical_input > 0.1) ? -0.3 : (xbox_input.secondary_vertical_input < -0.1) ? 0.3 : 0.0;
     robot_actuation.velocity_scaling = (xbox_input.x_button && xbox_input.y_button) ? 0.3 : (xbox_input.x_button ? 0.1 : 0.6);
 
     xbox_input.throttle_forward = (1.0 - xbox_input.throttle_forward) / 2.0;
@@ -223,9 +221,6 @@ void control_robot(){
     #ifdef HARDWARE_ENABLED
     left_motors.setSpeed(std::clamp(robot_actuation.wheel_speed_left * robot_actuation.velocity_scaling, -1.0, 1.0));
     right_motors.setSpeed(std::clamp(robot_actuation.wheel_speed_right * robot_actuation.velocity_scaling, -1.0, 1.0));
-    lift_actuator_motor_.SetDutyCycle(std::clamp(lift_actuator_speed_, -1.0, 1.0));
-    tilt_actuator_left_motor_.SetDutyCycle(std::clamp(tilt_actuator_speed_, -1.0, 1.0));
-    tilt_actuator_right_motor_.SetDutyCycle(std::clamp(tilt_actuator_speed_, -1.0, 1.0));
     #endif
     
 }
