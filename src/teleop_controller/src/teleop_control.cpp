@@ -1,8 +1,8 @@
 #include "core.hpp"
 
-class Teleop_Drivebase : public rclcpp::Node{
+class Teleop_Control : public rclcpp::Node{
 public:
-    Teleop_Drivebase() : Node("teleop_drivebase")    
+    Teleop_Control() : Node("Teleop_Control")    
     #ifdef HARDWARE_ENABLED
     , m_left_front("can0", 1)
     , m_left_rear("can0", 2)
@@ -17,9 +17,9 @@ public:
         wait_for_state_manager();                               
         prep_robot();
 
-        sub_xbox = create_subscription<msg_Bool>("robot_state/XBOX", 10,std::bind(&Teleop_Drivebase::callback_xbox, this, std::placeholders::_1)); 
-        sub_robot_enabled = create_subscription<msg_Bool>("robot_state/enabled", 10,std::bind(&Teleop_Drivebase::callback_robot_enabled, this, std::placeholders::_1));
-        sub_manual_enabled_enabled = create_subscription<msg_Bool>("robot_state/manual_enabled", 10,std::bind(&Teleop_Drivebase::callback_manual_enabled, this, std::placeholders::_1));
+        sub_xbox = create_subscription<msg_Bool>("robot_state/XBOX", 10,std::bind(&Teleop_Control::callback_xbox, this, std::placeholders::_1)); 
+        sub_robot_enabled = create_subscription<msg_Bool>("robot_state/enabled", 10,std::bind(&Teleop_Control::callback_robot_enabled, this, std::placeholders::_1));
+        sub_manual_enabled_enabled = create_subscription<msg_Bool>("robot_state/manual_enabled", 10,std::bind(&Teleop_Control::callback_manual_enabled, this, std::placeholders::_1));
         
         #ifdef HARDWARE_ENABLED
         config_motor(m_left_front);
@@ -30,9 +30,9 @@ public:
         m_right_rear.SetInverted(true);    ----> Diff drive robot
         #endif
 
-        timer = create_wall_timer(5s, std::bind(&Teleop_Drivebase::callback_motor_heartbeat, this)); 
-        cmd_vel_sub = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Drivebase::callback_cmd_vel, this, std::placeholders::_1) );
-        joy_sub = create_subscription<Joy>("joy", 10, std::bind(&Teleop_Drivebase::callback_joy, this, std::placeholders::_1) );
+        timer = create_wall_timer(5s, std::bind(&Teleop_Control::callback_motor_heartbeat, this)); 
+        cmd_vel_sub = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Control::callback_cmd_vel, this, std::placeholders::_1) );
+        joy_sub = create_subscription<Joy>("joy", 10, std::bind(&Teleop_Control::callback_joy, this, std::placeholders::_1) );
 
     }
     
@@ -361,7 +361,7 @@ void emergency_stop() {
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<Teleop_Drivebase>();
+    auto node = std::make_shared<Teleop_Control>();
     rclcpp::spin(node);
     rclcpp::shutdown();
     return 0;

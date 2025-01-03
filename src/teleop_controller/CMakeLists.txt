@@ -20,7 +20,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 
 add_executable(teleop_state_manager src/teleop_state_manager.cpp)
-add_executable(teleop_drivebase src/teleop_drivebase.cpp)
+add_executable(teleop_control src/teleop_control.cpp)
 
 ament_target_dependencies(teleop_state_manager 
   rclcpp 
@@ -31,7 +31,7 @@ ament_target_dependencies(teleop_state_manager
   std_srvs
 )
 
-ament_target_dependencies(teleop_drivebase 
+ament_target_dependencies(teleop_control 
   rclcpp 
   sensor_msgs 
   geometry_msgs 
@@ -45,13 +45,13 @@ rosidl_get_typesupport_target(cpp_typesupport_target
   ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 target_link_libraries(teleop_state_manager "${cpp_typesupport_target}")
-target_link_libraries(teleop_drivebase "${cpp_typesupport_target}")
+target_link_libraries(teleop_control "${cpp_typesupport_target}")
 
 include_directories(include)
 
 install(TARGETS
   teleop_state_manager
-  teleop_drivebase
+  teleop_control
   DESTINATION lib/${PROJECT_NAME}
 )
 

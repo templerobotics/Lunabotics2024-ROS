@@ -27,7 +27,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <fstream>
 
-
 /*  Sparkcan Headers    */
 #include <SparkBase.hpp> 
 #include <SparkFlex.hpp>
@@ -44,19 +43,14 @@
 #include "rcl_interfaces/srv/set_parameters.hpp"  
 #include "rcl_interfaces/msg/parameter_descriptor.hpp"
 #include <std_srvs/srv/trigger.hpp>
-#include <tuple>
-
-
 
 #include "teleop_controller/srv/set_parameter.hpp"  // generated from .srv file
-
 using namespace std::chrono_literals;
-
 using std::placeholders::_1;
+
 using JoyMsg = sensor_msgs::msg::Joy::SharedPtr;
 using Joy = sensor_msgs::msg::Joy;
 using JoySubscription = rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr;
-using TwistMsg = geometry_msgs::msg::Twist::SharedPtr;
 using Twist = geometry_msgs::msg::Twist;
 using TwistSubscription = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr;
 
@@ -64,14 +58,10 @@ using BoolPublisher = rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr;
 using BoolSubscriber = rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr;
 using msg_Bool = std_msgs::msg::Bool;
 
-using SetParamClient = rclcpp::Client<rcl_interfaces::srv::SetParameters>::SharedPtr;
 using ParamVector = std::vector<rclcpp::Parameter>;
 using ParamDescriptor = rcl_interfaces::msg::ParameterDescriptor;
 using ParamEventHandler = std::shared_ptr<rclcpp::ParameterEventHandler>;
 using SetParamsRes = rcl_interfaces::msg::SetParametersResult;
-using ParamService = rclcpp::Service<rcl_interfaces::srv::SetParameters>::SharedPtr;
-using ParamResponse = std::shared_ptr<rcl_interfaces::srv::SetParameters::Response>;
-using ParamRequest = std::shared_ptr<rcl_interfaces::srv::SetParameters::Request>;
 
 
 //COMMENT & UNCOMMENT the define below --> CMAKE LISTS IS IDEAL, BUT THIS FOR NOW

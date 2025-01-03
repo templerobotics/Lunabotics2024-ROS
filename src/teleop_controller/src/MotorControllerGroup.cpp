@@ -3,10 +3,6 @@
 /*
     4 Robot Drivebase motors form 2 groups for DIFF DRIVE robot
     FRC Java drivebase file has MotorControllerGroup class
-    This is ROS not FRC. 
-    We set() motor speeds w/ setVoltage() & setDutyCycle() 
-    at the lowest level. Review how we do that in the code to make sure
-
 */
 
 class MotorControllerGroup {
@@ -34,6 +30,7 @@ public:
         motor2.SetDutyCycle(0.0);
         motor2.SetVoltage(0);
     }
+    
 
 };
 

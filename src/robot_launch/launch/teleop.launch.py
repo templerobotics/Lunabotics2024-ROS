@@ -19,8 +19,8 @@ def generate_launch_description():
         ),
         Node(
             package='teleop_controller',
-            executable='teleop_drivebase',
-            name='teleop_drivebase',
+            executable='teleop_control',
+            name='teleop_control',
             emulate_tty=True,
             output='screen'
         )
