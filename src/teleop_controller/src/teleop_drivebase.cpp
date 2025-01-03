@@ -1,32 +1,34 @@
 #include "core.hpp"
-/*  
-            For Constructor initialization --> NEED HARDWARE SETUP TO TEST
-        ,m_left_front("can0", 1),m_left_rear("can0", 2),m_right_front("can0", 3),m_right_rear("can0", 4)
-*/
 
 class Teleop_Drivebase : public rclcpp::Node{
 public:
-    Teleop_Drivebase() : Node("drivebase")
+    Teleop_Drivebase() : Node("teleop_drivebase")    
+    #ifdef HARDWARE_ENABLED
+    , m_left_front("can0", 1)
+    , m_left_rear("can0", 2)
+    , m_right_front("can0", 3)
+    , m_right_rear("can0", 4)
+    , left_motors("can0", 1, 2)
+    , right_motors("can0", 3, 4)
+    #endif
     {
         ready_client = create_client<std_srvs::srv::Trigger>("state_manager_ready");
         param_client = create_client<teleop_controller::srv::SetParameter>("set_parameter");
         wait_for_state_manager();                               
         prep_robot();
 
-
         sub_xbox = create_subscription<msg_Bool>("robot_state/XBOX", 10,std::bind(&Teleop_Drivebase::callback_xbox, this, std::placeholders::_1)); 
         sub_robot_enabled = create_subscription<msg_Bool>("robot_state/enabled", 10,std::bind(&Teleop_Drivebase::callback_robot_enabled, this, std::placeholders::_1));
         sub_manual_enabled_enabled = create_subscription<msg_Bool>("robot_state/manual_enabled", 10,std::bind(&Teleop_Drivebase::callback_manual_enabled, this, std::placeholders::_1));
         
-        /*
-        CAN'T RUN CODE PERTAINING TO PHYSICAL HARDWARE WITHOUT PHYSICAL HARDWARE ACTUALLY SETUP 
+        #ifdef HARDWARE_ENABLED
         config_motor(m_left_front);
         config_motor(m_left_rear);
         config_motor(m_right_front);
         config_motor(m_right_front);
         m_right_front.SetInverted(true);   ---->  Diff drive robot
         m_right_rear.SetInverted(true);    ----> Diff drive robot
-        */
+        #endif
 
         timer = create_wall_timer(5s, std::bind(&Teleop_Drivebase::callback_motor_heartbeat, this)); 
         cmd_vel_sub = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Drivebase::callback_cmd_vel, this, std::placeholders::_1) );
@@ -36,34 +38,23 @@ public:
     
 private:
 
-    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr ready_client;
-    rclcpp::Client<teleop_controller::srv::SetParameter>::SharedPtr param_client;
-
-    
-    ROBOT_ACTUATION_t robot_actuation;
-    XBOX_JOYSTICK_INPUT_t xbox_input;
-    ROBOTSTATE_t robot_state;
-    ROBOT_LIMITS_t robot_dimensions; //Determine if I want to use robot_limits
-    
-    /*
-    
-    Might have to make MOTOR CONTROLLER GROUP a class honestly
-    
-    MOTOR_CONTROLLER_GROUP_t left_motors;
-    MOTOR_CONTROLLER_GROUP_t right_motors;
-    SparkMax left;
-    SparkMax left2;
-    left_motors(left,left2);
-    left_motors.LEFT_SIDE()
-    
-    */
-
-    /*
+    #ifdef HARDWARE_ENABLED
     SparkMax m_left_front;
     SparkMax m_left_rear;
     SparkMax m_right_front;
     SparkMax m_right_rear;
-    */
+    
+    MotorControllerGroup left_motors;
+    MotorControllerGroup right_motors;    
+    #endif
+
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr ready_client;
+    rclcpp::Client<teleop_controller::srv::SetParameter>::SharedPtr param_client;
+
+    ROBOT_ACTUATION_t robot_actuation;
+    XBOX_JOYSTICK_INPUT_t xbox_input;
+    ROBOTSTATE_t robot_state;
+    ROBOT_LIMITS_t robot_dimensions; //Determine if I want to use robot_limits
 
     BoolSubscriber sub_xbox;
     BoolSubscriber sub_robot_enabled;
@@ -111,8 +102,7 @@ void set_param(const std::string& param_name, bool new_val) {
     
     auto future = param_client->async_send_request(request);
     
-    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) == 
-        rclcpp::FutureReturnCode::SUCCESS) {
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) == rclcpp::FutureReturnCode::SUCCESS) {
         auto response = future.get();
         if (response->success) {
             RCLCPP_INFO(get_logger(), "Set parameter %s: %s", 
@@ -155,9 +145,8 @@ void callback_robot_enabled(const msg_Bool &state_robot_disabled){
     } else {
         RCLCPP_INFO(get_logger(), "Robot is INACTIVE, disabling drive operations");
     }
-
-    
 }
+
 
 void callback_manual_enabled(const msg_Bool &state_manual_enabled){
     robot_state.manual_enabled = state_manual_enabled.data;
@@ -170,8 +159,7 @@ void callback_manual_enabled(const msg_Bool &state_manual_enabled){
 }
 
 void callback_motor_heartbeat(){
-    /*
-        Note:Can't test this without physical hardware, since there's no CAN protocol info being transmitted without hardware
+    #ifdef HARDWARE_ENABLED   
     try{
         m_left_front.Heartbeat();
         m_left_rear.Heartbeat();
@@ -180,20 +168,21 @@ void callback_motor_heartbeat(){
     }catch(const std::exception &e){
         std::cerr << "Motor Heartbeat Error: " << e.what() << std::endl;
     }
-    */
+    #endif
+
     RCLCPP_INFO(get_logger(), "Current States - XBOX: %s, Manual Enabled: %s, Robot Disabled: %s",
     robot_state.XBOX ? "true" : "false",
     robot_state.manual_enabled ? "true" : "false",
     robot_state.robot_disabled ? "true" : "false");
 }
 
-
+#ifdef HARDWARE_ENABLED
 void config_motor(SparkMax& motor){
     motor.SetIdleMode(IdleMode::kBrake);
     motor.SetMotorType(MotorType::kBrushless);
     motor.BurnFlash();
 }
-
+#endif
 
 int get_button(const JoyMsg &joy_msg, const std::initializer_list<int> &mappings) {
     bool xbox_enabled = get_parameter("XBOX").as_bool();
@@ -231,13 +220,13 @@ void control_robot(){
         robot_actuation.wheel_speed_right = xbox_input.joystick_turn_input;
     }
 
-    /*
-    left_wheel_motor_.SetDutyCycle(std::clamp(left_speed_ * speed_multiplier_, -1.0, 1.0));
-    right_wheel_motor_.SetDutyCycle(std::clamp(right_speed_ * speed_multiplier_, -1.0, 1.0));
+    #ifdef HARDWARE_ENABLED
+    left_motors.setSpeed(std::clamp(robot_actuation.wheel_speed_left * robot_actuation.velocity_scaling, -1.0, 1.0));
+    right_motors.setSpeed(std::clamp(robot_actuation.wheel_speed_right * robot_actuation.velocity_scaling, -1.0, 1.0));
     lift_actuator_motor_.SetDutyCycle(std::clamp(lift_actuator_speed_, -1.0, 1.0));
     tilt_actuator_left_motor_.SetDutyCycle(std::clamp(tilt_actuator_speed_, -1.0, 1.0));
     tilt_actuator_right_motor_.SetDutyCycle(std::clamp(tilt_actuator_speed_, -1.0, 1.0));
-    */
+    #endif
     
 }
 
@@ -291,7 +280,9 @@ void callback_joy(const JoyMsg msg){
             }
             else
             {
-                SparkMax::Heartbeat(); //ONLY TRY WITH REAL HARDWARE
+                #ifdef HARDWARE_ENABLED
+                SparkMax::Heartbeat(); 
+                #endif
             }
 
             control_robot(); //teleoperation
@@ -305,42 +296,67 @@ void callback_joy(const JoyMsg msg){
 }
 
 // Note:Make init function for robot_dimensions struct variables as well or URDF 
-void callback_cmd_vel(const geometry_msgs::msg::Twist::SharedPtr msg){
+void callback_cmd_vel(const geometry_msgs::msg::Twist::SharedPtr velocity_msg){
     if(robot_state.robot_disabled == true || robot_state.manual_enabled==false || robot_state.PS4==true || robot_state.XBOX==false){
         RCLCPP_ERROR(get_logger(),"Error in CMD VEL Callback. Robot must be fully enabled correctly to function!\nExiting...");
         std::exit(1);
     }
-    RCLCPP_INFO(get_logger(),"INSIDE CMD VEL CALLBACK %lf",msg->linear.x);
-   
+    RCLCPP_INFO(get_logger(),"INSIDE CMD VEL CALLBACK %lf",velocity_msg->linear.x);
+    #ifdef HARDWARE_ENABLED
    try{
         rclcpp::Parameter param = get_parameter("manual_enabled");
         bool current_state_manual = param.as_bool();
         if(robot_state.manual_enabled == false || current_state_manual == false){ // autonomous
-            SparkMax::Heartbeat();//NEED HARDWARE FOR THIS TO WORK
-            /*
-            replace with struct variables
             
+            SparkMax::Heartbeat();   
             double linear_velocity = velocity_msg->linear.x;
             double angular_velocity = velocity_msg->angular.z;
             robot_dimensions.wheel_radius = robot_state.outdoor_mode ? 0.2 : 0.127;
-            double wheel_distance = 0.5;
             
-            left_wheel_motor_.SetDutyCycle(std::clamp(velocity_left_cmd, -1.0, 1.0));
-            right_wheel_motor_.SetDutyCycle(std::clamp(velocity_right_cmd, -1.0, 1.0));
-            */
+            double velocity_left_cmd = 
+            -0.1 * (linear_velocity - angular_velocity * robot_dimensions.wheel_distance / 2.0) / robot_dimensions.wheel_radius;
+            double velocity_right_cmd = 
+            -0.1 * (linear_velocity + angular_velocity * robot_dimensions.wheel_distance / 2.0) / robot_dimensions.wheel_radius;
+        
+            //Note: Jan 2 10:41PM : I think this is the correct adaptation my C++ class
+            left_motors.setSpeed(std::clamp(velocity_left_cmd, -1.0, 1.0));
+            right_motors.setSpeed(std::clamp(velocity_right_cmd, -1.0, 1.0));          
+
         }
     }
     catch (const std::exception& e) {
             RCLCPP_ERROR(get_logger(),"Error in cmdVelCallback: %s", e.what());
     }
-
+    #endif
 
 }
 
 
 
-};
+#ifdef HARDWARE_ENABLED
+void stop(){    
+    m_left_front.SetVoltage(0);
+    m_left_rear.SetVoltage(0);
+    m_right_front.SetVoltage(0);
+    m_right_rear.SetVoltage(0);
+    
+}
+#endif
 
+
+#ifdef HARDWARE_ENABLED
+void emergency_stop() {
+    #ifdef HARDWARE_ENABLED
+    stop();  
+    #endif 
+    set_param("robot_disabled", true);  
+    robot_state.robot_disabled = true;  
+    RCLCPP_ERROR(get_logger(), "EMERGENCY STOP ACTIVATED! DISABLING ROBOT");
+}
+#endif
+
+
+};
 
 
 int main(int argc, char** argv) {

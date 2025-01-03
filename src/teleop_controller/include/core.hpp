@@ -74,6 +74,9 @@ using ParamResponse = std::shared_ptr<rcl_interfaces::srv::SetParameters::Respon
 using ParamRequest = std::shared_ptr<rcl_interfaces::srv::SetParameters::Request>;
 
 
+//COMMENT & UNCOMMENT the define below --> CMAKE LISTS IS IDEAL, BUT THIS FOR NOW
+
+//#define HARDWARE_ENABLED
 
 typedef struct{
     bool emergency_stop_button;
@@ -107,6 +110,7 @@ typedef struct{
 
 typedef struct{
     double wheel_radius;
+    const double wheel_distance = 0.5;
     double max_velocity;
     double min_velocity;
     double max_angular_velocity;
@@ -114,22 +118,9 @@ typedef struct{
 }ROBOT_LIMITS_t;
 
 
-/*
-4 Robot Drivebase motors form 2 groups for DIFF DRIVE robot
-FRC Java drivebase file has MotorControllerGroup class
-This is ROS not FRC. 
-We set() motor speeds w/ setVoltage() & setDutyCycle() 
-at the lowest level. Review how we do that in the code to make sure
-
-*/
-typedef struct{
-    std::tuple<SparkMax,SparkMax> LEFT_SIDE;
-    std::tuple<SparkMax,SparkMax> RIGHT_SIDE;
-}MOTOR_CONTROLLER_GROUP_t;
-
 enum class RobotSide{
     LEFT,
-    RIGHT
+    RIGHT,
 };
 
 
