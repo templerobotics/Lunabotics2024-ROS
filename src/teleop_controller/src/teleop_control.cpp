@@ -19,7 +19,7 @@ public:
 
         sub_xbox = create_subscription<msg_Bool>("robot_state/XBOX", 10,std::bind(&Teleop_Control::callback_xbox, this, std::placeholders::_1)); 
         sub_robot_enabled = create_subscription<msg_Bool>("robot_state/enabled", 10,std::bind(&Teleop_Control::callback_robot_enabled, this, std::placeholders::_1));
-        sub_manual_enabled_enabled = create_subscription<msg_Bool>("robot_state/manual_enabled", 10,std::bind(&Teleop_Control::callback_manual_enabled, this, std::placeholders::_1));
+        sub_manual_enabled = create_subscription<msg_Bool>("robot_state/manual_enabled", 10,std::bind(&Teleop_Control::callback_manual_enabled, this, std::placeholders::_1));
         
         #ifdef HARDWARE_ENABLED
         config_motor(m_left_front);
@@ -43,7 +43,6 @@ private:
     SparkMax m_left_rear;
     SparkMax m_right_front;
     SparkMax m_right_rear;
-    
     MotorControllerGroup left_motors;
     MotorControllerGroup right_motors;    
     #endif
@@ -54,11 +53,11 @@ private:
     ROBOT_ACTUATION_t robot_actuation;
     XBOX_JOYSTICK_INPUT_t xbox_input;
     ROBOTSTATE_t robot_state;
-    ROBOT_LIMITS_t robot_dimensions; //Determine if I want to use robot_limits
+    // ROBOT_LIMITS_t robot_dimensions; //should we use robot_limits struct?
 
     BoolSubscriber sub_xbox;
     BoolSubscriber sub_robot_enabled;
-    BoolSubscriber sub_manual_enabled_enabled;
+    BoolSubscriber sub_manual_enabled;
     
     rclcpp::TimerBase::SharedPtr timer;
     TwistSubscription velocity_subscriber;

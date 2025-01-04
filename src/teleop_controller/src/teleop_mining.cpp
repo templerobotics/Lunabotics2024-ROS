@@ -9,9 +9,16 @@ public:
     #endif
     {
         init_params();
+        
+        #ifdef HARDWARE_ENABLED
+        config_motor(m_actuator_left);
+        config_motor(m_actuator_right);
+        #endif
+        
         velocity_subscriber = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Mining::callback_cmd_vel, this, std::placeholders::_1) );
         joy_sub = create_subscription<Joy>("joy", 10, std::bind(&Teleop_Mining::callback_joy, this, std::placeholders::_1) );
         timer = create_wall_timer(5s, std::bind(&Teleop_Mining::callback_motor_heartbeat, this)); 
+
     }
     
 private:
@@ -24,6 +31,10 @@ private:
     JoySubscription joy_sub;
     rclcpp::TimerBase::SharedPtr timer;
 
+    #ifdef HARDWARE_ENABLED
+    SparkMax m_actuator_left;
+    SparkMax m_actuator_right;
+    #endif
 
     void init_params(){
         robot_state.XBOX = get_parameter("XBOX").as_bool();
@@ -35,7 +46,18 @@ private:
 
     void callback_cmd_vel(){}
     void callback_joy(){}
-    void control_robot(){}
+    void control_robot(){
+        
+    }
+
+    #ifdef HARDWARE_ENALBED
+    void config_motor(SparkMax& motor){
+        motor.SetIdleMode(IdleMode::kBrake);
+        motor.SetMotorType(MotorType::kBrushless);
+        motor.BurnFlash();
+    }
+    #endif
+
     void callback_motor_heartbeat(){
         #ifdef HARDWARE_ENABLED   
         try{
