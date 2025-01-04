@@ -1,2 +1,8 @@
 log file for errors
 
+Note : 
+
+Not the best choice as this file would need to deleted each time after code is run, 
+unless I code to delete and remake the file each time code is run
+
+

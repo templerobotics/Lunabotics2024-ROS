@@ -31,7 +31,7 @@ public:
         #endif
 
         timer = create_wall_timer(5s, std::bind(&Teleop_Control::callback_motor_heartbeat, this)); 
-        cmd_vel_sub = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Control::callback_cmd_vel, this, std::placeholders::_1) );
+        velocity_subscriber = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Control::callback_cmd_vel, this, std::placeholders::_1) );
         joy_sub = create_subscription<Joy>("joy", 10, std::bind(&Teleop_Control::callback_joy, this, std::placeholders::_1) );
 
     }
@@ -60,9 +60,7 @@ private:
     BoolSubscriber sub_robot_enabled;
     BoolSubscriber sub_manual_enabled_enabled;
     
-    rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub;
     rclcpp::TimerBase::SharedPtr timer;
-
     TwistSubscription velocity_subscriber;
     JoySubscription joy_sub;
 
@@ -201,8 +199,8 @@ double get_axis(const JoyMsg &joy_msg, const std::initializer_list<int> &mapping
 
 void control_robot(){
     if(xbox_input.emergency_stop_button){ set_param("robot_disabled",true) ; robot_state.robot_disabled = true;}
+    
     robot_actuation.velocity_scaling = (xbox_input.x_button && xbox_input.y_button) ? 0.3 : (xbox_input.x_button ? 0.1 : 0.6);
-
     xbox_input.throttle_forward = (1.0 - xbox_input.throttle_forward) / 2.0;
     xbox_input.throttle_backwards = (1.0 - xbox_input.throttle_backwards) / 2.0;
 
@@ -250,8 +248,8 @@ void callback_joy(const JoyMsg msg){
 
         if(xbox_input.manual_mode_button){ 
             if(robot_state.manual_enabled != true){ 
-                set_param("manual_enabled",true);//set in state manager
-                robot_state.manual_enabled = true;//set locally
+                set_param("manual_enabled",true);
+                robot_state.manual_enabled = true;
             }
             RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "MANUAL CONTROL:ENABLED");
         }
@@ -313,7 +311,7 @@ void callback_cmd_vel(const geometry_msgs::msg::Twist::SharedPtr velocity_msg){
             double velocity_right_cmd = 
             -0.1 * (linear_velocity + angular_velocity * robot_dimensions.wheel_distance / 2.0) / robot_dimensions.wheel_radius;
         
-            //Note: Jan 2 10:41PM : I think this is the correct adaptation my C++ class
+            //Note: Jan 2 10:41PM : I think this is the correct adaptation for this C++ class
             left_motors.setSpeed(std::clamp(velocity_left_cmd, -1.0, 1.0));
             right_motors.setSpeed(std::clamp(velocity_right_cmd, -1.0, 1.0));          
 

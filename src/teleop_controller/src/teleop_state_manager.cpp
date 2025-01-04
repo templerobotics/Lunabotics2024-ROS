@@ -11,7 +11,6 @@ public:
         ready_service = create_service<std_srvs::srv::Trigger>("state_manager_ready",std::bind(&Teleop_State_Manager::handle_ready_check, this,std::placeholders::_1, std::placeholders::_2));       
         param_service = create_service<teleop_controller::srv::SetParameter>("set_parameter",std::bind(&Teleop_State_Manager::handle_set_parameter, this,std::placeholders::_1, std::placeholders::_2));
 
-        // parameter callback for param validation --> can try to find a way to incorporate robot_disabled if need be. But other nodes prob don't need that
         param_callback_handle = this->add_on_set_parameters_callback([this](const ParamVector &parameters) {
             return validate_parameters(parameters);
         });
