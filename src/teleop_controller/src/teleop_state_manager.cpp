@@ -142,7 +142,7 @@ void declare_parameters() {
     
     ParamDescriptor outdoor_mode_descriptor;
     outdoor_mode_descriptor.description = "Enable/disable outdoor operation mode";
-    outdoor_mode_descriptor.additional_constraints = "Adjusts robot behavior for outdoor operation";
+    outdoor_mode_descriptor.additional_constraints = "Adjusts robot wheel radius for outdoor operation";
     outdoor_mode_descriptor.read_only = false;
    
     this->declare_parameter("XBOX", true, xbox_descriptor);

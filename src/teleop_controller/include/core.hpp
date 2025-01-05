@@ -45,6 +45,7 @@
 #include <std_srvs/srv/trigger.hpp>
 
 #include "teleop_controller/srv/set_parameter.hpp"  // generated from .srv file
+
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
@@ -62,11 +63,40 @@ using ParamVector = std::vector<rclcpp::Parameter>;
 using ParamDescriptor = rcl_interfaces::msg::ParameterDescriptor;
 using ParamEventHandler = std::shared_ptr<rclcpp::ParameterEventHandler>;
 using SetParamsRes = rcl_interfaces::msg::SetParametersResult;
+using SetParameterClient = rclcpp::Client<teleop_controller::srv::SetParameter>;
+using SetParameterClientSharedPtr = std::shared_ptr<SetParameterClient>;
+
+// Drivebase diff drive Motor Groups
+class MotorControllerGroup {
+private:
+    SparkMax& motor1;
+    SparkMax& motor2;
+
+public:
+    MotorControllerGroup(SparkMax& m1, SparkMax& m2) : motor1(m1), motor2(m2) {}
+    
+    void setSpeed(double speed) {
+        motor1.SetDutyCycle(speed);
+        motor2.SetDutyCycle(speed);
+    }
+    
+    void setInverted(bool inverted) {
+        motor1.SetInverted(inverted);
+        motor2.SetInverted(inverted);
+    }
+
+    void stop_motor_groups() {
+        motor1.SetDutyCycle(0.0);
+        motor1.SetVoltage(0);
+        motor2.SetDutyCycle(0.0);
+        motor2.SetVoltage(0);
+    }
+};
 
 
 //COMMENT & UNCOMMENT the define below --> CMAKE LISTS IS IDEAL, BUT THIS FOR NOW
 
-//#define HARDWARE_ENABLED
+#define HARDWARE_ENABLED
 
 typedef struct{
     bool emergency_stop_button;
