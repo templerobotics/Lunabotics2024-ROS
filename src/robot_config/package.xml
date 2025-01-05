@@ -1,18 +1,17 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>robot_launch</name>
+  <name>robot_config</name>
   <version>0.0.0</version>
-  <description>Launch files for robot</description>
-  <maintainer email="jaseanhow@gmail.com">Jaden Howard</maintainer>
-  <license>TODO</license>
+  <description>TODO: Package description</description>
+  <maintainer email="jaseanhow@gmail.com">jayhaych02</maintainer>
+  <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <exec_depend>teleop_controller</exec_depend>
-  <exec_depend>rclpy</exec_depend>
-  <exec_depend>ros2launch</exec_depend>
-  
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
   <depend>controller_manager</depend>
   <depend>diff_drive_controller</depend>
   <depend>joint_state_broadcaster</depend>
@@ -21,9 +20,8 @@
   <depend>ros2_control</depend>
   <depend>ros2_controllers</depend>
   <depend>xacro</depend>
-    
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>
-
 </package>
