@@ -137,7 +137,7 @@ typedef struct{
     double voltage_limit;
 }ROBOT_LIMITS_t;
 
-
+//Not sure if I'll use this. For now it is unused
 enum class RobotSide{
     LEFT,
     RIGHT,

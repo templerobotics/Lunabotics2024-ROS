@@ -7,12 +7,14 @@ public:
         , m_left_rear("can0", 2)
         , m_right_front("can0", 3)
         , m_right_rear("can0", 4)
-        , m_belt_left("can0", 5)
-        , m_belt_right("can0", 6)
-        , m_leadscrew_left("can0", 7)
-        , m_leadscrew_right("can0", 8)
-        , m_dump_conveyor("can0", 9)
-        , m_dump_latch("can0", 10)
+        , m_actuator_left("can0",5)
+        , m_actuator_right("can0",6)
+        , m_belt_left("can0", 7)
+        , m_belt_right("can0", 8)
+        , m_leadscrew_left("can0", 9)
+        , m_leadscrew_right("can0", 10)
+        , m_dump_conveyor("can0", 11)
+        , m_dump_latch("can0", 12)
         , left_motors(m_left_front, m_left_rear)
         , right_motors(m_right_front, m_right_rear)
     {
@@ -43,6 +45,7 @@ private:
     
     #ifdef HARDWARE_ENABLED
     SparkMax m_left_front, m_left_rear, m_right_front, m_right_rear;
+    SparkMax m_actuator_left, m_actuator_right;
     SparkMax m_belt_left, m_belt_right;
     SparkMax m_leadscrew_left, m_leadscrew_right;
     SparkMax m_dump_conveyor, m_dump_latch;
@@ -135,6 +138,8 @@ private:
         config_motor(m_right_front);
         config_motor(m_right_rear);
         // Config mining motors
+        config_motor(m_actuator_left);
+        config_motor(m_actuator_right);
         config_motor(m_belt_left);
         config_motor(m_belt_right);
         config_motor(m_leadscrew_left);
@@ -199,6 +204,8 @@ private:
             m_right_rear.Heartbeat();
 
             // Mining motors heartbeat
+            m_actuator_left.Heartbeat();
+            m_actuator_right.Heartbeat();
             m_belt_left.Heartbeat();
             m_belt_right.Heartbeat();
             m_leadscrew_left.Heartbeat();
@@ -275,7 +282,6 @@ private:
 
 
 
-
     void parse_controller_input(const JoyMsg& msg) {
         xbox_input.manual_mode_button = get_button(msg, {9, 8, 6});
         xbox_input.autonomous_mode_button = get_button(msg, {10, 9, 7});
@@ -327,13 +333,39 @@ private:
         }
     }
     
+    //Maybe do a while(count<3) decrease down to 0 to act as a kCoast for safety? Prob not necessary though.
     #ifdef HARDWARE_ENABLED
     void stop(){    
+        m_left_front.SetDutyCycle(0.0);
         m_left_front.SetVoltage(0);
+        m_left_rear.SetDutyCycle(0.0);
         m_left_rear.SetVoltage(0);
+        m_right_front.SetDutyCycle(0.0);
         m_right_front.SetVoltage(0);
+        m_right_rear.SetDutyCycle(0.0);
         m_right_rear.SetVoltage(0);
-        
+        stop_mining();
+        stop_digging();
+    }
+    void stop_mining(){
+        m_actuator_left.SetDutyCycle(0.0);
+        m_actuator_left.SetVoltage(0);
+        m_actuator_right.SetDutyCycle(0.0);
+        m_actuator_right.SetVoltage(0);
+        m_belt_left.SetDutyCycle(0.0);
+        m_belt_left.SetVoltage(0);
+        m_belt_right.SetDutyCycle(0.0);
+        m_belt_right.SetVoltage(0);
+        m_leadscrew_left.SetDutyCycle(0.0);
+        m_leadscrew_left.SetVoltage(0);
+        m_leadscrew_right.SetDutyCycle(0.0);
+        m_leadscrew_right.SetVoltage(0);   
+    }
+    void stop_digging(){
+        m_dump_conveyor.SetDutyCycle(0.0);
+        m_dump_conveyor.SetVoltage(0);
+        m_dump_latch.SetDutyCycle(0.0);
+        m_dump_latch.SetVoltage(0);
     }
     #endif
 
@@ -345,12 +377,9 @@ private:
         #endif 
         set_param("robot_disabled", true);  
         robot_state.robot_disabled = true;  
-        RCLCPP_ERROR(get_logger(), "EMERGENCY STOP ACTIVATED! DISABLING ROBOT");
+        RCLCPP_ERROR(get_logger(), "EMERGENCY STOP ACTIVATED! DISABLING ROBOT MOTORS...");
     }
     #endif
-
-
-
 
     void control_robot() {
         if (xbox_input.emergency_stop_button) { emergency_stop(); return;}
@@ -382,37 +411,41 @@ private:
         #endif
     }
 
+    //Verify if linear actuator code makes sense or not
     void control_mining() {
-            // Mining belt control (using bumpers)
-            double belt_speed = 0.0;
-            if (xbox_input.right_bumper) belt_speed = 0.3;  // Forward
-            if (xbox_input.left_bumper) belt_speed = -0.3;  // Reverse for jams
+        robot_actuation.speed_lift_actuator = (xbox_input.dpad_vertical == 1.0) ? -0.3 : (xbox_input.dpad_vertical == -1.0) ? 0.3 : 0.0;
+        robot_actuation.speed_tilt_actuator = (xbox_input.secondary_vertical_input > 0.1) ? -0.3 : (xbox_input.secondary_vertical_input < -0.1) ? 0.3 : 0.0;
 
-            // Leadscrew control (using D-pad vertical)
-            double leadscrew_speed = 0.0;
-            if (xbox_input.dpad_vertical > 0) leadscrew_speed = 0.3;  // Raise
-            if (xbox_input.dpad_vertical < 0) leadscrew_speed = -0.3; // Lower
+        double leadscrew_speed = 0.0;
+        if (xbox_input.dpad_vertical > 0) leadscrew_speed = 0.3;  // Raise
+        if (xbox_input.dpad_vertical < 0) leadscrew_speed = -0.3; // Lower
 
-            #ifdef HARDWARE_ENABLED
-            m_belt_left.SetDutyCycle(belt_speed);
-            m_belt_right.SetDutyCycle(belt_speed);
-            m_leadscrew_left.SetDutyCycle(leadscrew_speed);
-            m_leadscrew_right.SetDutyCycle(leadscrew_speed);
-            #endif
-        }
-
-    void control_dumping() {
-        // Dumping control (using A and B buttons)
-        double conveyor_speed = xbox_input.a_button ? 0.3 : 0.0;
-        double latch_speed = xbox_input.b_button ? 0.3 : 0.0;
+        double belt_speed = 0.0;
+        if (xbox_input.right_bumper) belt_speed = 0.3;  // Forward
+        if (xbox_input.left_bumper) belt_speed = -0.3;  // Reverse
 
         #ifdef HARDWARE_ENABLED
-        m_dump_conveyor.SetDutyCycle(conveyor_speed);
-        m_dump_latch.SetDutyCycle(latch_speed);
+        m_actuator_left.SetDutyCycle(std::clamp(robot_actuation.speed_lift_actuator,-1.0,1.0));
+        m_actuator_left.SetDutyCycle(std::clamp(robot_actuation.speed_tilt_actuator,-1.0,1.0));
+        m_actuator_right.SetDutyCycle(std::clamp(robot_actuation.speed_lift_actuator,-1.0,1.0));
+        m_actuator_left.SetDutyCycle(std::clamp(robot_actuation.speed_tilt_actuator,-1.0,1.0));
+        m_belt_left.SetDutyCycle(std::clamp(belt_speed,-1.0,1.0));
+        m_belt_right.SetDutyCycle(std::clamp(belt_speed,-1.0,1.0));
+        m_leadscrew_left.SetDutyCycle(std::clamp(leadscrew_speed,-1.0,1.0));
+        m_leadscrew_right.SetDutyCycle(std::clamp(leadscrew_speed,-1.0,1.0));
         #endif
     }
 
 
+    
+    void control_dumping() {
+        double conveyor_speed = xbox_input.a_button ? 0.3 : 0.0;
+        double latch_speed = xbox_input.b_button ? 0.3 : 0.0;
+        #ifdef HARDWARE_ENABLED
+        m_dump_conveyor.SetDutyCycle(std::clamp(conveyor_speed,-1.0,1.0));
+        m_dump_latch.SetDutyCycle(std::clamp(latch_speed,-1.0,1.0));
+        #endif
+    }
 
 
 };
