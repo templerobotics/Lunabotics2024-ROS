@@ -94,10 +94,6 @@ public:
 };
 
 
-//COMMENT & UNCOMMENT the define below --> CMAKE LISTS IS IDEAL, BUT THIS FOR NOW
-
-#define HARDWARE_ENABLED
-
 typedef struct{
     bool emergency_stop_button;
     bool manual_mode_button;

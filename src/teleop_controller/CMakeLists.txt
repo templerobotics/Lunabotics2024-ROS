@@ -18,6 +18,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/SetParameter.srv"
 )
 
+# ifdef HARDWARE_ENABLED code
+option(HARDWARE_ENABLED "Enable hardware support" OFF)
+if(HARDWARE_ENABLED)
+    add_definitions(-DHARDWARE_ENABLED)
+endif()
 
 add_executable(teleop_state_manager src/teleop_state_manager.cpp)
 add_executable(teleop_control src/teleop_control.cpp)
