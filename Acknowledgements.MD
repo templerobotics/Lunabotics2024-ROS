@@ -1,6 +1,6 @@
-#Acknowledgements
+# Acknowledgements
 
-##Sparkcan
+## Sparkcan
 - Original author and repository: Grayson Arendt & https://github.com/grayson-arendt/sparkcan
 
 
@@ -9,6 +9,6 @@ Thanks to author Grayson Arendt for creating sparkcan, which enables CAN-bus com
 This contribution is the basis of our own custom ROS-based framework for our NASA Lunabotics autonomous robot 
 
 
-##License
+## License
 
 Please refer to the original sparkcan repository for license information and usage terms 
