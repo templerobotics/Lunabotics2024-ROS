@@ -1,0 +1,8 @@
+<map id="Teleop_Control" name="Teleop_Control">
+<area shape="rect" id="node1" title=" " alt="" coords="291,95,409,121"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,5,108,32"/>
+<area shape="rect" id="node3" href="$structROBOT__LIMITS__t.html" title=" " alt="" coords="133,5,263,32"/>
+<area shape="rect" id="node4" href="$structROBOTSTATE__t.html" title=" " alt="" coords="289,5,408,32"/>
+<area shape="rect" id="node5" href="$structXBOX__JOYSTICK__INPUT__t.html" title=" " alt="" coords="432,5,617,32"/>
+<area shape="rect" id="node6" href="$structROBOT__ACTUATION__t.html" title=" " alt="" coords="642,5,805,32"/>
+</map>

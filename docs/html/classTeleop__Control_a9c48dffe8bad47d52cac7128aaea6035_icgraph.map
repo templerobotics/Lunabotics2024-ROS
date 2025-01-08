@@ -1,0 +1,5 @@
+<map id="Teleop_Control::get_axis" name="Teleop_Control::get_axis">
+<area shape="rect" id="node1" title="Get the axis of button pressed." alt="" coords="471,13,652,39"/>
+<area shape="rect" id="node2" href="$classTeleop__Control.html#a13319932c32185416942861865c94260" title="Sets XBOX controller joystick input, so this file can use it locally." alt="" coords="260,5,423,47"/>
+<area shape="rect" id="node3" href="$classTeleop__Control.html#a492615da50fae67bceb5c5c3ebb1fe69" title="Callback that interprets XBOX controller joystick input." alt="" coords="5,13,212,39"/>
+</map>

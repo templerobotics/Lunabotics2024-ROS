@@ -1,0 +1,21 @@
+\label{index_md__home_jayhaych02_robotics_Lunabotics2024_ROS_README}%
+\Hypertarget{index_md__home_jayhaych02_robotics_Lunabotics2024_ROS_README}%
+ \hypertarget{index_autotoc_md1}{}\doxysection{How to Utilize this repo\+:}\label{index_autotoc_md1}
+\hypertarget{index_autotoc_md2}{}\doxysubsection{Inside your Linux Environment\textquotesingle{}s base path\+: Install Sparkcan}\label{index_autotoc_md2}
+
+\begin{DoxyEnumerate}
+\item sudo add-\/apt-\/repository ppa\+:graysonarendt/sparkcan
+\item sudo apt update
+\item sudo apt install sparkcan
+\end{DoxyEnumerate}\hypertarget{index_autotoc_md3}{}\doxysubsection{After Sparkcan Installation \+: Clone the Main Repo}\label{index_autotoc_md3}
+
+\begin{DoxyEnumerate}
+\item mkdir robotics
+\item cd robotics
+\item git clone \href{https://github.com/templerobotics/Lunabotics2024-ROS.git}{\texttt{ https\+://github.\+com/templerobotics/\+Lunabotics2024-\/\+ROS.\+git}}
+\item cd Lunabotics2024-\/\+ROS
+\item Type, \char`\"{}rm -\/rf build/ install/ log/\char`\"{} while inside of the Lunabotics2024-\/\+ROS directory to clear previous build artifacts
+\item chmod +x install\+\_\+humble.\+sh -\/-\/$>$ The script will appear green in linux
+\item ./install\+\_\+humble.sh
+\item In the Lunabotics2024-\/\+ROS directory type, \char`\"{}colcon build\char`\"{} 
+\end{DoxyEnumerate}

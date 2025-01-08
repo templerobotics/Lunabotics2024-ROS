@@ -1,0 +1,6 @@
+<map id="Teleop_Control::control_robot" name="Teleop_Control::control_robot">
+<area shape="rect" id="node1" title="Emergency Stop functions." alt="" coords="5,71,176,112"/>
+<area shape="rect" id="node2" href="$classTeleop__Control.html#a0088b1dc38c2da500098659975638980" title="Teleop Drivebase Control." alt="" coords="224,5,395,47"/>
+<area shape="rect" id="node3" href="$classTeleop__Control.html#ad327d0210dd5fbbab04b07a2c952f00c" title="Teleop Dumping control." alt="" coords="224,71,395,112"/>
+<area shape="rect" id="node4" href="$classTeleop__Control.html#a6f24f17316a4a9b6f1a77d21e49a5326" title="Teleop Mining Control." alt="" coords="224,136,395,177"/>
+</map>

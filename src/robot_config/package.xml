@@ -20,6 +20,7 @@
   <depend>ros2_control</depend>
   <depend>ros2_controllers</depend>
   <depend>xacro</depend>
+  <depend>rclcpp</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

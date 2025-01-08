@@ -1,0 +1,4 @@
+<map id="Teleop_Control::control_robot" name="Teleop_Control::control_robot">
+<area shape="rect" id="node1" title="Emergency Stop functions." alt="" coords="260,5,431,47"/>
+<area shape="rect" id="node2" href="$classTeleop__Control.html#a492615da50fae67bceb5c5c3ebb1fe69" title="Callback that interprets XBOX controller joystick input." alt="" coords="5,13,212,39"/>
+</map>

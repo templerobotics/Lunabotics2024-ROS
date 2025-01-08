@@ -1,0 +1,4 @@
+<map id="Teleop_Control::configure_all_motors" name="Teleop_Control::configure_all_motors">
+<area shape="rect" id="node1" title="Self&#45;explanatory." alt="" coords="5,5,192,47"/>
+<area shape="rect" id="node2" href="$classTeleop__Control.html#a01d088abe449ed0cc43bae2e2f03d185" title="Configures NEO BLDC Motors." alt="" coords="240,5,405,47"/>
+</map>

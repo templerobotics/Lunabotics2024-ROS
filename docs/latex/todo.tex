@@ -1,0 +1,27 @@
+
+\begin{DoxyRefList}
+\item[Member \mbox{\hyperlink{classTeleop__Control_a721e6f1d7860c134e2425e8b4bf30193}{Teleop\+\_\+\+Control\+::callback\+\_\+cmd\+\_\+vel}} (const geometry\+\_\+msgs\+::msg\+::\+Twist\+::\+Shared\+Ptr velocity\+\_\+msg)]\label{todo__todo000003}%
+\Hypertarget{todo__todo000003}%
+Is the call to Spark\+Max\+::\+Heartbeat() needed or can I delete it?  
+\item[Member \mbox{\hyperlink{classTeleop__Control_a01d088abe449ed0cc43bae2e2f03d185}{Teleop\+\_\+\+Control\+::config\+\_\+motor}} (Spark\+Max \&motor)]\label{todo__todo000001}%
+\Hypertarget{todo__todo000001}%
+Make a version of this function for the smaller NEO motors, unless they are also BLDC;I havent checked. 
+\item[Member \mbox{\hyperlink{classTeleop__Control_a7893cf6649ccd2e9c900fd9d8bb8f92c}{Teleop\+\_\+\+Control\+::configure\+\_\+all\+\_\+motors}} ()]\label{todo__todo000002}%
+\Hypertarget{todo__todo000002}%
+If the smaller NEO motors are NOT BLDC, use their version of \mbox{\hyperlink{classTeleop__Control_a01d088abe449ed0cc43bae2e2f03d185}{config\+\_\+motor()}} inside this function 
+\item[Member \mbox{\hyperlink{classTeleop__Control_a0088b1dc38c2da500098659975638980}{Teleop\+\_\+\+Control\+::control\+\_\+drive}} ()]\label{todo__todo000005}%
+\Hypertarget{todo__todo000005}%
+Can ONLY setting Duty Cycle actuate the robot\textquotesingle{}s motors? Test w/ testbench  
+\item[Member \mbox{\hyperlink{classTeleop__Control_ad327d0210dd5fbbab04b07a2c952f00c}{Teleop\+\_\+\+Control\+::control\+\_\+dumping}} ()]\label{todo__todo000007}%
+\Hypertarget{todo__todo000007}%
+Review the dumping system w/ the team to make additions/changes \& Can ONLY setting Duty Cycle actuate the robot\textquotesingle{}s motors? Test w/ testbench  
+\item[Member \mbox{\hyperlink{classTeleop__Control_a6f24f17316a4a9b6f1a77d21e49a5326}{Teleop\+\_\+\+Control\+::control\+\_\+mining}} ()]\label{todo__todo000006}%
+\Hypertarget{todo__todo000006}%
+Can ONLY setting Duty Cycle actuate the robot\textquotesingle{}s motors? Test w/ testbench  
+\item[Member \mbox{\hyperlink{classTeleop__Control_a9c391a2fd9a145eb03449274e734cdf6}{Teleop\+\_\+\+Control\+::control\+\_\+robot}} ()]\label{todo__todo000004}%
+\Hypertarget{todo__todo000004}%
+Make sure the estop() function is called in an appropriate place in a robot control function if needed  
+\item[Member \mbox{\hyperlink{classTeleop__State__Manager_a97159b47ac56db5f7c81269448a15981}{Teleop\+\_\+\+State\+\_\+\+Manager\+::validate\+\_\+parameters}} (const Param\+Vector \&parameters)]\label{todo__todo000008}%
+\Hypertarget{todo__todo000008}%
+Add check for robot\+\_\+disabled, so the user can NOT disable the robot while its running for no apparent reason 
+\end{DoxyRefList}

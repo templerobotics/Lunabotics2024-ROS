@@ -6,7 +6,7 @@ colcon test --packages-select robot_testing
 ## Verbose - Shows tests results in realtime & return code on failure
 colcon test --packages-select robot_testing --event-handlers console_direct+ --return-code-on-test-failure
 
-## Extrenely verbose
+## Extremely verbose
 colcon test --packages-select robot_testing \
   --event-handlers console_direct+ \
   --return-code-on-test-failure \

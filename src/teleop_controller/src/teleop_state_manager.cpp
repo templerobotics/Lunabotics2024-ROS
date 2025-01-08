@@ -1,3 +1,14 @@
+/**
+ * @file teleop_state_manager.cpp
+ * @author Jaden Howard (jaseanhow@gmail.com or tun85812@temple.edu)
+ * @brief This file handles current Robot State for Teleoperation by behaving as the single source of truth
+ * @version 0.1
+ * @date 2025-01-07
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
 #include "core.hpp"
 
 class Teleop_State_Manager : public rclcpp::Node {
@@ -38,7 +49,12 @@ private:
     OnSetParametersCallbackHandle::SharedPtr param_callback_handle;
     ParamEventHandler param_sub;
 
-
+/**
+ * @brief What teleop_control waits for before initializing parameters. Robot has default states that are set by teleop_control node
+ * 
+ * @param request Request sent by teleop_control node to give the okay to initializing the robot for teleop 
+ * @param response OK reponse sent back to teleop_control, granting it permission to initialize robot state params
+ */
 void handle_ready_check(const std::shared_ptr<std_srvs::srv::Trigger::Request>request,std::shared_ptr<std_srvs::srv::Trigger::Response> response){
     RCLCPP_INFO(get_logger(), "Received ready check request (pointer: %p)", static_cast<void*>(request.get()));
     response->success = true;
@@ -46,6 +62,12 @@ void handle_ready_check(const std::shared_ptr<std_srvs::srv::Trigger::Request>re
     RCLCPP_INFO(get_logger(), "State Manager ready service called");
 }
 
+/**
+ * @brief 
+ * 
+ * @param request Specific Robot State parameter that teleop_control wishes to change
+ * @param response Callback that reports if the parameter that teleop_control wanted to update was successfully updated 
+ */
 void handle_set_parameter(const std::shared_ptr<teleop_controller::srv::SetParameter::Request> request,std::shared_ptr<teleop_controller::srv::SetParameter::Response> response){
     try {
         this->set_parameter(rclcpp::Parameter(request->param_name, request->new_value));
@@ -75,7 +97,10 @@ void handle_set_parameter(const std::shared_ptr<teleop_controller::srv::SetParam
 
 }
 
-
+/**
+ * @brief Attaches/assigns callbacks related to Robot States to ParameterEventHandler object 
+ * 
+ */
 void init_param_event_subscriber(){
     
     // Subscribe to parameter events for actual state updates. Allows all params to be able to be triggered when set(), byassigning each param a callback() 
@@ -119,6 +144,10 @@ void init_param_event_subscriber(){
     param_sub->add_parameter_callback("outdoor_mode", outdoor_mode_cb);
 }
 
+/**
+ * @brief Initializes Robot States as the 1st action upon startup
+ * 
+ */
 void declare_parameters() {
     ParamDescriptor xbox_descriptor;
     xbox_descriptor.description = "Enable/disable XBOX controller";
@@ -152,6 +181,10 @@ void declare_parameters() {
     this->declare_parameter("outdoor_mode", false, outdoor_mode_descriptor);
 }
 
+/**
+ * @brief Updates "local/internal" Robot State variables. This class/teleop control have: (1)Local state & (2)Source of truth state(this class)
+ * 
+ */
 void init_internal_state_from_params() {
     robot_state.XBOX = this->get_parameter("XBOX").as_bool();
     robot_state.PS4 = this->get_parameter("PS4").as_bool();
@@ -160,12 +193,18 @@ void init_internal_state_from_params() {
     robot_state.robot_disabled = this->get_parameter("robot_disabled").as_bool();
 }
 
+/**
+ * @brief Maintains crucial Robot State paramaters during runtime. 
+ * @todo Add check for robot_disabled, so the user can NOT disable the robot while its running for no apparent reason
+ * @param parameters 
+ * @return rcl_interfaces::msg::SetParametersResult 
+ */
 rcl_interfaces::msg::SetParametersResult validate_parameters(const ParamVector &parameters) {
     
     SetParamsRes result;
     result.successful = true;
     
-    /*robot HAS to enabled for anything to work ie -----> robot_disabled = FALSE for anything on the robot to function*/
+    /*robot HAS to enabled for anything to work ie -----> robot_disabled = FALSE for anything on the robot to function ---> might need to implement conditional here*/
     for (const auto &param : parameters) {
         if (param.get_name() == "XBOX" && param.as_bool() && this->get_parameter("PS4").as_bool()) {
             result.successful = false;
@@ -185,7 +224,10 @@ rcl_interfaces::msg::SetParametersResult validate_parameters(const ParamVector &
 }
 
 
-
+/**
+ * @brief Publishes all Robot States to the terminal every 5 seconds
+ * 
+ */
 void callback_publish_states() {
         auto msg = msg_Bool();
         msg.data = robot_state.robot_disabled;

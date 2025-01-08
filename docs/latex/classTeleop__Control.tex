@@ -1,0 +1,525 @@
+\hypertarget{classTeleop__Control}{}\doxysection{Teleop\+\_\+\+Control Class Reference}
+\label{classTeleop__Control}\index{Teleop\_Control@{Teleop\_Control}}
+
+
+Inheritance diagram for Teleop\+\_\+\+Control\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=169pt]{classTeleop__Control__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Teleop\+\_\+\+Control\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_a697d90a695bcb37ba2d841341370c1d1}\label{classTeleop__Control_a697d90a695bcb37ba2d841341370c1d1}} 
+void \mbox{\hyperlink{classTeleop__Control_a697d90a695bcb37ba2d841341370c1d1}{wait\+\_\+for\+\_\+state\+\_\+manager}} ()
+\begin{DoxyCompactList}\small\item\em Halts teleop control until state manager fully completes the \char`\"{}bringup\char`\"{}/robot initialization step. Honestly probably too redundant \& not necessary. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_a4a4e33b91e385294462adf5507bd7ab3}{set\+\_\+param}} (const std\+::string \&param\+\_\+name, bool new\+\_\+val)
+\begin{DoxyCompactList}\small\item\em Sets the param argument to the intended new boolean value. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classTeleop__Control_ad4489001ff99ee87e6aa3304e1aba3d0}\label{classTeleop__Control_ad4489001ff99ee87e6aa3304e1aba3d0}} 
+void \mbox{\hyperlink{classTeleop__Control_ad4489001ff99ee87e6aa3304e1aba3d0}{prep\+\_\+robot}} ()
+\begin{DoxyCompactList}\small\item\em Initializes Robot XBOX Teleoperation Control parameters, so the single source of truth(state\+\_\+mananger.\+cpp) publishes them. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_a01d088abe449ed0cc43bae2e2f03d185}{config\+\_\+motor}} (Spark\+Max \&motor)
+\begin{DoxyCompactList}\small\item\em Configures NEO BLDC Motors. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_a7893cf6649ccd2e9c900fd9d8bb8f92c}{configure\+\_\+all\+\_\+motors}} ()
+\begin{DoxyCompactList}\small\item\em Self-\/explanatory. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_af7146c15923990d419477adbbc5668a7}{callback\+\_\+ps4}} (const msg\+\_\+\+Bool \&state\+\_\+\+PS4)
+\begin{DoxyCompactList}\small\item\em Saves the currently publishing PS4 state param to this file\textquotesingle{}s LOCAL state. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_a86ec09c9b5c5a5ff8add13597621e7af}{callback\+\_\+xbox}} (const msg\+\_\+\+Bool \&state\+\_\+\+XBOX)
+\begin{DoxyCompactList}\small\item\em Saves the currently publishing XBOX state param to this file\textquotesingle{}s LOCAL state. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_a51c370875bee2c54fac836793f231d56}{callback\+\_\+robot\+\_\+enabled}} (const msg\+\_\+\+Bool \&state\+\_\+robot\+\_\+disabled)
+\begin{DoxyCompactList}\small\item\em Saves the currently publishing robot\+\_\+disabled state param to this file\textquotesingle{}s LOCAL state. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_af201bd9ffc39d40b9070c82a9aed1006}{callback\+\_\+manual\+\_\+enabled}} (const msg\+\_\+\+Bool \&state\+\_\+manual\+\_\+enabled)
+\begin{DoxyCompactList}\small\item\em Saves the currently publishing manual\+\_\+enalbed state param to this file\textquotesingle{}s LOCAL state. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_a78f0bd48e3eddc004c0c7223ed126469}{callback\+\_\+outdoor\+\_\+mode}} (const msg\+\_\+\+Bool \&state\+\_\+outdoor\+\_\+mode)
+\begin{DoxyCompactList}\small\item\em Saves the currently publishing outdoor\+\_\+mode state param to this file\textquotesingle{}s LOCAL state. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classTeleop__Control_a0bdf560e4703a91b1aa6de80f03ee819}\label{classTeleop__Control_a0bdf560e4703a91b1aa6de80f03ee819}} 
+void \mbox{\hyperlink{classTeleop__Control_a0bdf560e4703a91b1aa6de80f03ee819}{callback\+\_\+motor\+\_\+heartbeat}} ()
+\begin{DoxyCompactList}\small\item\em Periodically sends a heartbeat signal to keep all SPARK controllers active. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_a492615da50fae67bceb5c5c3ebb1fe69}{callback\+\_\+joy}} (const Joy\+Msg msg)
+\begin{DoxyCompactList}\small\item\em Callback that interprets XBOX controller joystick input. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_a721e6f1d7860c134e2425e8b4bf30193}{callback\+\_\+cmd\+\_\+vel}} (const geometry\+\_\+msgs\+::msg\+::\+Twist\+::\+Shared\+Ptr velocity\+\_\+msg)
+\begin{DoxyCompactList}\small\item\em Callback that calculates velocity commands to give the 4 Drivebase robot motors. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_a13319932c32185416942861865c94260}{parse\+\_\+controller\+\_\+input}} (const Joy\+Msg \&msg)
+\begin{DoxyCompactList}\small\item\em Sets XBOX controller joystick input, so this file can use it locally. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{classTeleop__Control_a67ddf642fdc6fc0730b7c4ff5e1eaf45}{get\+\_\+button}} (const Joy\+Msg \&joy\+\_\+msg, const std\+::initializer\+\_\+list$<$ int $>$ \&mappings)
+\begin{DoxyCompactList}\small\item\em Get the button pressed by XBOX Controller. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{classTeleop__Control_a9c48dffe8bad47d52cac7128aaea6035}{get\+\_\+axis}} (const Joy\+Msg \&joy\+\_\+msg, const std\+::initializer\+\_\+list$<$ int $>$ \&mappings)
+\begin{DoxyCompactList}\small\item\em Get the axis of button pressed. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classTeleop__Control_a50a2468e185284b579d9450deff18f2e}\label{classTeleop__Control_a50a2468e185284b579d9450deff18f2e}} 
+void \mbox{\hyperlink{classTeleop__Control_a50a2468e185284b579d9450deff18f2e}{handle\+\_\+mode\+\_\+switches}} ()
+\begin{DoxyCompactList}\small\item\em Sets/notifies source of truth(state\+\_\+manager.\+cpp) that we want Teleop Mode or Autonomous Mode. If Autonomous mode, no teleoperation should function. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_a9c391a2fd9a145eb03449274e734cdf6}{control\+\_\+robot}} ()
+\begin{DoxyCompactList}\small\item\em Emergency Stop functions. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_a0088b1dc38c2da500098659975638980}{control\+\_\+drive}} ()
+\begin{DoxyCompactList}\small\item\em Teleop Drivebase Control. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_a6f24f17316a4a9b6f1a77d21e49a5326}{control\+\_\+mining}} ()
+\begin{DoxyCompactList}\small\item\em Teleop Mining Control. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTeleop__Control_ad327d0210dd5fbbab04b07a2c952f00c}{control\+\_\+dumping}} ()
+\begin{DoxyCompactList}\small\item\em Teleop Dumping control. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_a9d479eaf4d1edabb53c12f06bae3ab9b}\label{classTeleop__Control_a9d479eaf4d1edabb53c12f06bae3ab9b}} 
+rclcpp\+::\+Client$<$ std\+\_\+srvs\+::srv\+::\+Trigger $>$\+::Shared\+Ptr {\bfseries ready\+\_\+client}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_ab855af65b83b35f8ad9bfea672a7eb80}\label{classTeleop__Control_ab855af65b83b35f8ad9bfea672a7eb80}} 
+Set\+Parameter\+Client\+Shared\+Ptr {\bfseries param\+\_\+client}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_acb1ef9d0f128ba52b459f26539f10633}\label{classTeleop__Control_acb1ef9d0f128ba52b459f26539f10633}} 
+Bool\+Subscriber {\bfseries sub\+\_\+xbox}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_ac4f19c88bac071e85dfd16b9c061939b}\label{classTeleop__Control_ac4f19c88bac071e85dfd16b9c061939b}} 
+Bool\+Subscriber {\bfseries sub\+\_\+robot\+\_\+enabled}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_aa8dce9e913dea9c742e93b09ed678bc8}\label{classTeleop__Control_aa8dce9e913dea9c742e93b09ed678bc8}} 
+Bool\+Subscriber {\bfseries sub\+\_\+manual\+\_\+enabled}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_a8b61e88869be61bfab540125a66a54ed}\label{classTeleop__Control_a8b61e88869be61bfab540125a66a54ed}} 
+Bool\+Subscriber {\bfseries sub\+\_\+outdoor\+\_\+mode}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_acf6d5ae7902897d02bb1d92181189969}\label{classTeleop__Control_acf6d5ae7902897d02bb1d92181189969}} 
+Bool\+Subscriber {\bfseries sub\+\_\+ps4}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_a395af71f6b389faf3b1ab316d8e5657b}\label{classTeleop__Control_a395af71f6b389faf3b1ab316d8e5657b}} 
+rclcpp\+::\+Timer\+Base\+::\+Shared\+Ptr {\bfseries timer}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_ac0a32fbd7c3f7b46caa16472e7aa2613}\label{classTeleop__Control_ac0a32fbd7c3f7b46caa16472e7aa2613}} 
+Twist\+Subscription {\bfseries velocity\+\_\+subscriber}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_a960035fad83c9ab1802fd7dd6ac537fc}\label{classTeleop__Control_a960035fad83c9ab1802fd7dd6ac537fc}} 
+Joy\+Subscription {\bfseries joy\+\_\+sub}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_aa1e539aee2d5d94b289f78a6618e2191}\label{classTeleop__Control_aa1e539aee2d5d94b289f78a6618e2191}} 
+\mbox{\hyperlink{structROBOT__ACTUATION__t}{ROBOT\+\_\+\+ACTUATION\+\_\+t}} {\bfseries robot\+\_\+actuation}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_a2c88e6d6f836e51327a006af190052fa}\label{classTeleop__Control_a2c88e6d6f836e51327a006af190052fa}} 
+\mbox{\hyperlink{structXBOX__JOYSTICK__INPUT__t}{XBOX\+\_\+\+JOYSTICK\+\_\+\+INPUT\+\_\+t}} {\bfseries xbox\+\_\+input}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_a8bc9c0520cd23c486b9649aea145cf1b}\label{classTeleop__Control_a8bc9c0520cd23c486b9649aea145cf1b}} 
+\mbox{\hyperlink{structROBOTSTATE__t}{ROBOTSTATE\+\_\+t}} {\bfseries robot\+\_\+state}
+\item 
+\mbox{\Hypertarget{classTeleop__Control_a50f76d7a6e3fed098bc498a827e672ac}\label{classTeleop__Control_a50f76d7a6e3fed098bc498a827e672ac}} 
+\mbox{\hyperlink{structROBOT__LIMITS__t}{ROBOT\+\_\+\+LIMITS\+\_\+t}} {\bfseries robot\+\_\+dimensions}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classTeleop__Control_a721e6f1d7860c134e2425e8b4bf30193}\label{classTeleop__Control_a721e6f1d7860c134e2425e8b4bf30193}} 
+\index{Teleop\_Control@{Teleop\_Control}!callback\_cmd\_vel@{callback\_cmd\_vel}}
+\index{callback\_cmd\_vel@{callback\_cmd\_vel}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{callback\_cmd\_vel()}{callback\_cmd\_vel()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::callback\+\_\+cmd\+\_\+vel (\begin{DoxyParamCaption}\item[{const geometry\+\_\+msgs\+::msg\+::\+Twist\+::\+Shared\+Ptr}]{velocity\+\_\+msg }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Callback that calculates velocity commands to give the 4 Drivebase robot motors. 
+
+\begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000003}{Todo}}]Is the call to Spark\+Max\+::\+Heartbeat() needed or can I delete it? \end{DoxyRefDesc}
+
+\begin{DoxyParams}{Parameters}
+{\em velocity\+\_\+msg} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classTeleop__Control_a492615da50fae67bceb5c5c3ebb1fe69}\label{classTeleop__Control_a492615da50fae67bceb5c5c3ebb1fe69}} 
+\index{Teleop\_Control@{Teleop\_Control}!callback\_joy@{callback\_joy}}
+\index{callback\_joy@{callback\_joy}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{callback\_joy()}{callback\_joy()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::callback\+\_\+joy (\begin{DoxyParamCaption}\item[{const Joy\+Msg}]{msg }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Callback that interprets XBOX controller joystick input. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em msg} & \\
+\hline
+\end{DoxyParams}
+
+
+References control\+\_\+robot(), handle\+\_\+mode\+\_\+switches(), and parse\+\_\+controller\+\_\+input().
+
+Here is the call graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_a492615da50fae67bceb5c5c3ebb1fe69_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classTeleop__Control_af201bd9ffc39d40b9070c82a9aed1006}\label{classTeleop__Control_af201bd9ffc39d40b9070c82a9aed1006}} 
+\index{Teleop\_Control@{Teleop\_Control}!callback\_manual\_enabled@{callback\_manual\_enabled}}
+\index{callback\_manual\_enabled@{callback\_manual\_enabled}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{callback\_manual\_enabled()}{callback\_manual\_enabled()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::callback\+\_\+manual\+\_\+enabled (\begin{DoxyParamCaption}\item[{const msg\+\_\+\+Bool \&}]{state\+\_\+manual\+\_\+enabled }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Saves the currently publishing manual\+\_\+enalbed state param to this file\textquotesingle{}s LOCAL state. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em state\+\_\+manual\+\_\+enabled} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classTeleop__Control_a78f0bd48e3eddc004c0c7223ed126469}\label{classTeleop__Control_a78f0bd48e3eddc004c0c7223ed126469}} 
+\index{Teleop\_Control@{Teleop\_Control}!callback\_outdoor\_mode@{callback\_outdoor\_mode}}
+\index{callback\_outdoor\_mode@{callback\_outdoor\_mode}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{callback\_outdoor\_mode()}{callback\_outdoor\_mode()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::callback\+\_\+outdoor\+\_\+mode (\begin{DoxyParamCaption}\item[{const msg\+\_\+\+Bool \&}]{state\+\_\+outdoor\+\_\+mode }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Saves the currently publishing outdoor\+\_\+mode state param to this file\textquotesingle{}s LOCAL state. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em state\+\_\+outdoor\+\_\+mode} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classTeleop__Control_af7146c15923990d419477adbbc5668a7}\label{classTeleop__Control_af7146c15923990d419477adbbc5668a7}} 
+\index{Teleop\_Control@{Teleop\_Control}!callback\_ps4@{callback\_ps4}}
+\index{callback\_ps4@{callback\_ps4}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{callback\_ps4()}{callback\_ps4()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::callback\+\_\+ps4 (\begin{DoxyParamCaption}\item[{const msg\+\_\+\+Bool \&}]{state\+\_\+\+PS4 }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Saves the currently publishing PS4 state param to this file\textquotesingle{}s LOCAL state. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em state\+\_\+\+PS4} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classTeleop__Control_a51c370875bee2c54fac836793f231d56}\label{classTeleop__Control_a51c370875bee2c54fac836793f231d56}} 
+\index{Teleop\_Control@{Teleop\_Control}!callback\_robot\_enabled@{callback\_robot\_enabled}}
+\index{callback\_robot\_enabled@{callback\_robot\_enabled}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{callback\_robot\_enabled()}{callback\_robot\_enabled()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::callback\+\_\+robot\+\_\+enabled (\begin{DoxyParamCaption}\item[{const msg\+\_\+\+Bool \&}]{state\+\_\+robot\+\_\+disabled }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Saves the currently publishing robot\+\_\+disabled state param to this file\textquotesingle{}s LOCAL state. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em state\+\_\+robot\+\_\+disabled} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classTeleop__Control_a86ec09c9b5c5a5ff8add13597621e7af}\label{classTeleop__Control_a86ec09c9b5c5a5ff8add13597621e7af}} 
+\index{Teleop\_Control@{Teleop\_Control}!callback\_xbox@{callback\_xbox}}
+\index{callback\_xbox@{callback\_xbox}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{callback\_xbox()}{callback\_xbox()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::callback\+\_\+xbox (\begin{DoxyParamCaption}\item[{const msg\+\_\+\+Bool \&}]{state\+\_\+\+XBOX }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Saves the currently publishing XBOX state param to this file\textquotesingle{}s LOCAL state. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em state\+\_\+\+XBOX} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classTeleop__Control_a01d088abe449ed0cc43bae2e2f03d185}\label{classTeleop__Control_a01d088abe449ed0cc43bae2e2f03d185}} 
+\index{Teleop\_Control@{Teleop\_Control}!config\_motor@{config\_motor}}
+\index{config\_motor@{config\_motor}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{config\_motor()}{config\_motor()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::config\+\_\+motor (\begin{DoxyParamCaption}\item[{Spark\+Max \&}]{motor }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Configures NEO BLDC Motors. 
+
+\begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000001}{Todo}}]Make a version of this function for the smaller NEO motors, unless they are also BLDC;I havent checked.\end{DoxyRefDesc}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em motor} & \\
+\hline
+\end{DoxyParams}
+
+
+Referenced by configure\+\_\+all\+\_\+motors().
+
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_a01d088abe449ed0cc43bae2e2f03d185_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classTeleop__Control_a7893cf6649ccd2e9c900fd9d8bb8f92c}\label{classTeleop__Control_a7893cf6649ccd2e9c900fd9d8bb8f92c}} 
+\index{Teleop\_Control@{Teleop\_Control}!configure\_all\_motors@{configure\_all\_motors}}
+\index{configure\_all\_motors@{configure\_all\_motors}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{configure\_all\_motors()}{configure\_all\_motors()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::configure\+\_\+all\+\_\+motors (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Self-\/explanatory. 
+
+\begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000002}{Todo}}]If the smaller NEO motors are NOT BLDC, use their version of \mbox{\hyperlink{classTeleop__Control_a01d088abe449ed0cc43bae2e2f03d185}{config\+\_\+motor()}} inside this function\end{DoxyRefDesc}
+
+
+References config\+\_\+motor().
+
+Here is the call graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_a7893cf6649ccd2e9c900fd9d8bb8f92c_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classTeleop__Control_a0088b1dc38c2da500098659975638980}\label{classTeleop__Control_a0088b1dc38c2da500098659975638980}} 
+\index{Teleop\_Control@{Teleop\_Control}!control\_drive@{control\_drive}}
+\index{control\_drive@{control\_drive}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{control\_drive()}{control\_drive()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::control\+\_\+drive (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Teleop Drivebase Control. 
+
+\begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000005}{Todo}}]Can ONLY setting Duty Cycle actuate the robot\textquotesingle{}s motors? Test w/ testbench \end{DoxyRefDesc}
+
+
+Referenced by control\+\_\+robot().
+
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_a0088b1dc38c2da500098659975638980_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classTeleop__Control_ad327d0210dd5fbbab04b07a2c952f00c}\label{classTeleop__Control_ad327d0210dd5fbbab04b07a2c952f00c}} 
+\index{Teleop\_Control@{Teleop\_Control}!control\_dumping@{control\_dumping}}
+\index{control\_dumping@{control\_dumping}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{control\_dumping()}{control\_dumping()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::control\+\_\+dumping (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Teleop Dumping control. 
+
+\begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000007}{Todo}}]Review the dumping system w/ the team to make additions/changes \& Can ONLY setting Duty Cycle actuate the robot\textquotesingle{}s motors? Test w/ testbench \end{DoxyRefDesc}
+
+
+Referenced by control\+\_\+robot().
+
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_ad327d0210dd5fbbab04b07a2c952f00c_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classTeleop__Control_a6f24f17316a4a9b6f1a77d21e49a5326}\label{classTeleop__Control_a6f24f17316a4a9b6f1a77d21e49a5326}} 
+\index{Teleop\_Control@{Teleop\_Control}!control\_mining@{control\_mining}}
+\index{control\_mining@{control\_mining}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{control\_mining()}{control\_mining()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::control\+\_\+mining (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Teleop Mining Control. 
+
+\begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000006}{Todo}}]Can ONLY setting Duty Cycle actuate the robot\textquotesingle{}s motors? Test w/ testbench \end{DoxyRefDesc}
+
+
+Referenced by control\+\_\+robot().
+
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_a6f24f17316a4a9b6f1a77d21e49a5326_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classTeleop__Control_a9c391a2fd9a145eb03449274e734cdf6}\label{classTeleop__Control_a9c391a2fd9a145eb03449274e734cdf6}} 
+\index{Teleop\_Control@{Teleop\_Control}!control\_robot@{control\_robot}}
+\index{control\_robot@{control\_robot}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{control\_robot()}{control\_robot()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::control\+\_\+robot (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Emergency Stop functions. 
+
+\begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000004}{Todo}}]Make sure the estop() function is called in an appropriate place in a robot control function if needed \end{DoxyRefDesc}
+
+
+Wrapper that encapsulates all 3 subsystems of robotic control for teleoperation 
+
+References control\+\_\+drive(), control\+\_\+dumping(), and control\+\_\+mining().
+
+
+
+Referenced by callback\+\_\+joy().
+
+Here is the call graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_a9c391a2fd9a145eb03449274e734cdf6_cgraph}
+\end{center}
+\end{figure}
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_a9c391a2fd9a145eb03449274e734cdf6_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classTeleop__Control_a9c48dffe8bad47d52cac7128aaea6035}\label{classTeleop__Control_a9c48dffe8bad47d52cac7128aaea6035}} 
+\index{Teleop\_Control@{Teleop\_Control}!get\_axis@{get\_axis}}
+\index{get\_axis@{get\_axis}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{get\_axis()}{get\_axis()}}
+{\footnotesize\ttfamily double Teleop\+\_\+\+Control\+::get\+\_\+axis (\begin{DoxyParamCaption}\item[{const Joy\+Msg \&}]{joy\+\_\+msg,  }\item[{const std\+::initializer\+\_\+list$<$ int $>$ \&}]{mappings }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Get the axis of button pressed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em joy\+\_\+msg} & \\
+\hline
+{\em mappings} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+double 
+\end{DoxyReturn}
+
+
+Referenced by parse\+\_\+controller\+\_\+input().
+
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_a9c48dffe8bad47d52cac7128aaea6035_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classTeleop__Control_a67ddf642fdc6fc0730b7c4ff5e1eaf45}\label{classTeleop__Control_a67ddf642fdc6fc0730b7c4ff5e1eaf45}} 
+\index{Teleop\_Control@{Teleop\_Control}!get\_button@{get\_button}}
+\index{get\_button@{get\_button}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{get\_button()}{get\_button()}}
+{\footnotesize\ttfamily int Teleop\+\_\+\+Control\+::get\+\_\+button (\begin{DoxyParamCaption}\item[{const Joy\+Msg \&}]{joy\+\_\+msg,  }\item[{const std\+::initializer\+\_\+list$<$ int $>$ \&}]{mappings }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Get the button pressed by XBOX Controller. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em joy\+\_\+msg} & \\
+\hline
+{\em mappings} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int 
+\end{DoxyReturn}
+
+
+Referenced by parse\+\_\+controller\+\_\+input().
+
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_a67ddf642fdc6fc0730b7c4ff5e1eaf45_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classTeleop__Control_a13319932c32185416942861865c94260}\label{classTeleop__Control_a13319932c32185416942861865c94260}} 
+\index{Teleop\_Control@{Teleop\_Control}!parse\_controller\_input@{parse\_controller\_input}}
+\index{parse\_controller\_input@{parse\_controller\_input}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{parse\_controller\_input()}{parse\_controller\_input()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::parse\+\_\+controller\+\_\+input (\begin{DoxyParamCaption}\item[{const Joy\+Msg \&}]{msg }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Sets XBOX controller joystick input, so this file can use it locally. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em msg} & \\
+\hline
+\end{DoxyParams}
+
+
+References get\+\_\+axis(), and get\+\_\+button().
+
+
+
+Referenced by callback\+\_\+joy().
+
+Here is the call graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_a13319932c32185416942861865c94260_cgraph}
+\end{center}
+\end{figure}
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_a13319932c32185416942861865c94260_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classTeleop__Control_a4a4e33b91e385294462adf5507bd7ab3}\label{classTeleop__Control_a4a4e33b91e385294462adf5507bd7ab3}} 
+\index{Teleop\_Control@{Teleop\_Control}!set\_param@{set\_param}}
+\index{set\_param@{set\_param}!Teleop\_Control@{Teleop\_Control}}
+\doxysubsubsection{\texorpdfstring{set\_param()}{set\_param()}}
+{\footnotesize\ttfamily void Teleop\+\_\+\+Control\+::set\+\_\+param (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{param\+\_\+name,  }\item[{bool}]{new\+\_\+val }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}
+
+
+
+Sets the param argument to the intended new boolean value. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em param\+\_\+name} & \\
+\hline
+{\em new\+\_\+val} & \\
+\hline
+\end{DoxyParams}
+
+
+Referenced by handle\+\_\+mode\+\_\+switches(), and prep\+\_\+robot().
+
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classTeleop__Control_a4a4e33b91e385294462adf5507bd7ab3_icgraph}
+\end{center}
+\end{figure}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/jayhaych02/robotics/\+Lunabotics2024-\/\+ROS/src/teleop\+\_\+controller/src/\mbox{\hyperlink{teleop__control_8cpp}{teleop\+\_\+control.\+cpp}}\end{DoxyCompactItemize}

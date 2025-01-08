@@ -1,0 +1,6 @@
+<map id="Teleop_Control::set_param" name="Teleop_Control::set_param">
+<area shape="rect" id="node1" title="Sets the param argument to the intended new boolean value." alt="" coords="479,39,625,80"/>
+<area shape="rect" id="node2" href="$classTeleop__Control.html#a50a2468e185284b579d9450deff18f2e" title="Sets/notifies source of truth(state_manager.cpp) that we want Teleop Mode or Autonomous Mode...." alt="" coords="260,5,431,47"/>
+<area shape="rect" id="node4" href="$classTeleop__Control.html#ad4489001ff99ee87e6aa3304e1aba3d0" title="Initializes Robot XBOX Teleoperation Control parameters, so the single source of truth(state_mananger..." alt="" coords="268,71,423,112"/>
+<area shape="rect" id="node3" href="$classTeleop__Control.html#a492615da50fae67bceb5c5c3ebb1fe69" title="Callback that interprets XBOX controller joystick input." alt="" coords="5,13,212,39"/>
+</map>

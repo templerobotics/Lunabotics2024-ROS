@@ -1,0 +1,12 @@
+<map id="Teleop_Control::callback_joy" name="Teleop_Control::callback_joy">
+<area shape="rect" id="node1" title="Callback that interprets XBOX controller joystick input." alt="" coords="5,207,212,234"/>
+<area shape="rect" id="node2" href="$classTeleop__Control.html#a9c391a2fd9a145eb03449274e734cdf6" title="Emergency Stop functions." alt="" coords="260,103,431,144"/>
+<area shape="rect" id="node6" href="$classTeleop__Control.html#a50a2468e185284b579d9450deff18f2e" title="Sets/notifies source of truth(state_manager.cpp) that we want Teleop Mode or Autonomous Mode...." alt="" coords="260,200,431,241"/>
+<area shape="rect" id="node8" href="$classTeleop__Control.html#a13319932c32185416942861865c94260" title="Sets XBOX controller joystick input, so this file can use it locally." alt="" coords="264,265,427,307"/>
+<area shape="rect" id="node3" href="$classTeleop__Control.html#a0088b1dc38c2da500098659975638980" title="Teleop Drivebase Control." alt="" coords="484,5,655,47"/>
+<area shape="rect" id="node4" href="$classTeleop__Control.html#ad327d0210dd5fbbab04b07a2c952f00c" title="Teleop Dumping control." alt="" coords="484,71,655,112"/>
+<area shape="rect" id="node5" href="$classTeleop__Control.html#a6f24f17316a4a9b6f1a77d21e49a5326" title="Teleop Mining Control." alt="" coords="484,136,655,177"/>
+<area shape="rect" id="node7" href="$classTeleop__Control.html#a4a4e33b91e385294462adf5507bd7ab3" title="Sets the param argument to the intended new boolean value." alt="" coords="496,201,643,243"/>
+<area shape="rect" id="node9" href="$classTeleop__Control.html#a9c48dffe8bad47d52cac7128aaea6035" title="Get the axis of button pressed." alt="" coords="479,270,660,297"/>
+<area shape="rect" id="node10" href="$classTeleop__Control.html#a67ddf642fdc6fc0730b7c4ff5e1eaf45" title="Get the button pressed by XBOX Controller." alt="" coords="496,321,643,363"/>
+</map>

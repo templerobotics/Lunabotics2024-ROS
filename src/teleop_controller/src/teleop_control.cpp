@@ -1,3 +1,14 @@
+/**
+ * @file teleop_control.cpp
+ * @author Jaden Howard (jaseanhow@gmail.com or tun85812@temple.edu)
+ * @brief Teleoperated control of our ROS2 robot
+ * @version 0.1
+ * @date 2025-01-07
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
 #include "core.hpp"
 
 class Teleop_Control : public rclcpp::Node {
@@ -69,6 +80,10 @@ private:
     ROBOTSTATE_t robot_state;
     ROBOT_LIMITS_t robot_dimensions;
 
+/**
+ * @brief Halts teleop control until state manager fully completes the "bringup"/robot initialization step. Honestly probably too redundant & not necessary
+ * 
+ */
     void wait_for_state_manager() {
         while (!ready_client->wait_for_service(1s)) {
             if (!rclcpp::ok()) {
@@ -92,6 +107,12 @@ private:
         }
     }
 
+/**
+ * @brief Sets the param argument to the intended new boolean value
+ * 
+ * @param param_name 
+ * @param new_val 
+ */
     void set_param(const std::string& param_name, bool new_val) {
         if (!param_client->wait_for_service(1s)) {
             RCLCPP_ERROR(get_logger(), "Parameter service not available");
@@ -114,6 +135,10 @@ private:
         }
     }
 
+/**
+ * @brief Initializes Robot XBOX Teleoperation Control parameters, so the single source of truth(state_mananger.cpp) publishes them
+ * 
+ */
     void prep_robot() {
         RCLCPP_INFO(get_logger(), "Initializing robot parameters...");
         set_param("robot_disabled", false);
@@ -124,14 +149,28 @@ private:
         RCLCPP_INFO(get_logger(), "Robot parameters initialized");
     }
 
-    #ifdef HARDWARE_ENABLED
+
+/**
+ * @brief Configures NEO BLDC Motors
+ * @todo Make a version of this function for the smaller NEO motors, unless they are also BLDC;I havent checked.
+ * 
+ * @param motor 
+ */
     void config_motor(SparkMax& motor) {
+        #ifdef HARDWARE_ENABLED
         motor.SetIdleMode(IdleMode::kBrake);
         motor.SetMotorType(MotorType::kBrushless);
         motor.BurnFlash();
+        #endif
     }
 
+/**
+ * @brief Self-explanatory
+ * @todo If the smaller NEO motors are NOT BLDC, use their version of config_motor() inside this function
+ * 
+ */
     void configure_all_motors() {
+        #ifdef HARDWARE_ENABLED
         // Config drive motors
         config_motor(m_left_front);
         config_motor(m_left_rear);
@@ -149,10 +188,15 @@ private:
         config_motor(m_dump_latch);
         m_right_front.SetInverted(true);
         m_right_rear.SetInverted(true);
+        #endif
     }   
-    #endif
+    
 
-    //Arbitrary : only If we use a PS4 controller or some other controller for some reason
+/**
+ * @brief Saves the currently publishing PS4 state param to this file's LOCAL state 
+ * 
+ * @param state_PS4 
+ */
     void callback_ps4(const msg_Bool &state_PS4){
         robot_state.PS4 = state_PS4.data;
         RCLCPP_INFO(get_logger(), "XBOX Controller State: %s", robot_state.PS4 ? "true" : "false");
@@ -163,6 +207,12 @@ private:
         } 
     }
 
+/**
+ * @brief Saves the currently publishing XBOX state param to this file's LOCAL state
+ * 
+ * @param state_XBOX 
+ */
+
     void callback_xbox(const msg_Bool &state_XBOX) {
         robot_state.XBOX = state_XBOX.data;
         RCLCPP_INFO(get_logger(), "XBOX Controller State: %s", robot_state.XBOX ? "true" : "false");
@@ -172,6 +222,12 @@ private:
             RCLCPP_INFO(get_logger(), "XBOX Controller is Inactive");
         }
     }
+
+/**
+ * @brief Saves the currently publishing robot_disabled state param to this file's LOCAL state
+ * 
+ * @param state_robot_disabled 
+ */
 
     void callback_robot_enabled(const msg_Bool &state_robot_disabled) {
         robot_state.robot_disabled = state_robot_disabled.data;
@@ -184,16 +240,31 @@ private:
         }
     }
 
+/**
+ * @brief Saves the currently publishing manual_enalbed state param to this file's LOCAL state
+ * 
+ * @param state_manual_enabled 
+ */
     void callback_manual_enabled(const msg_Bool &state_manual_enabled) {
         robot_state.manual_enabled = state_manual_enabled.data;
         RCLCPP_INFO(get_logger(), "Manual Control State: %s", robot_state.manual_enabled ? "true" : "false");
     }
 
+/**
+ * @brief Saves the currently publishing outdoor_mode state param to this file's LOCAL state
+ * 
+ * @param state_outdoor_mode 
+ */
     void callback_outdoor_mode(const msg_Bool &state_outdoor_mode){
         robot_state.outdoor_mode = state_outdoor_mode.data;
         RCLCPP_INFO(get_logger(), "Outdoor Mode State: %s", robot_state.outdoor_mode ? "true" : "false");
     }
 
+
+/**
+ * @brief Periodically sends a heartbeat signal to keep all SPARK controllers active
+ * 
+ */
     void callback_motor_heartbeat() {
         #ifdef HARDWARE_ENABLED   
         try {
@@ -226,6 +297,11 @@ private:
             !robot_state.robot_disabled ? "true" : "false");
     }
 
+/**
+ * @brief Callback that interprets XBOX controller joystick input
+ * 
+ * @param msg 
+ */
     void callback_joy(const JoyMsg msg) {
         if (robot_state.robot_disabled || !robot_state.manual_enabled || robot_state.PS4 || !robot_state.XBOX) {
             RCLCPP_ERROR(get_logger(), "Error in Joy Callback. Robot must be fully enabled correctly to function!");
@@ -245,6 +321,11 @@ private:
         }
     }
 
+/**
+ * @brief Callback that calculates velocity commands to give the 4 Drivebase robot motors.
+ * @todo Is the call to SparkMax::Heartbeat() needed or can I delete it?
+ * @param velocity_msg 
+ */
     void callback_cmd_vel(const geometry_msgs::msg::Twist::SharedPtr velocity_msg) {
     if (robot_state.robot_disabled || !robot_state.manual_enabled || 
         robot_state.PS4 || !robot_state.XBOX) {
@@ -278,10 +359,11 @@ private:
     #endif
 }
 
-
-
-
-
+/**
+ * @brief Sets XBOX controller joystick input, so this file can use it locally
+ * 
+ * @param msg 
+ */
     void parse_controller_input(const JoyMsg& msg) {
         xbox_input.manual_mode_button = get_button(msg, {9, 8, 6});
         xbox_input.autonomous_mode_button = get_button(msg, {10, 9, 7});
@@ -303,6 +385,13 @@ private:
         xbox_input.throttle_forward = msg->axes[5];
     }
 
+/**
+ * @brief Get the button pressed by XBOX Controller
+ * 
+ * @param joy_msg 
+ * @param mappings 
+ * @return int 
+ */
     int get_button(const JoyMsg &joy_msg, const std::initializer_list<int> &mappings) {
         bool xbox_enabled = get_parameter("XBOX").as_bool();
         bool ps4_enabled = get_parameter("PS4").as_bool();
@@ -310,13 +399,23 @@ private:
         return joy_msg->buttons[*(mappings.begin() + index)];
     }
 
+/**
+ * @brief Get the axis of button pressed
+ * 
+ * @param joy_msg 
+ * @param mappings 
+ * @return double 
+ */
     double get_axis(const JoyMsg &joy_msg, const std::initializer_list<int> &mappings) {
         bool xbox_enabled = get_parameter("XBOX").as_bool();
         bool ps4_enabled = get_parameter("PS4").as_bool();
         size_t index = xbox_enabled ? 2 : ps4_enabled ? 1 : 0;
         return joy_msg->axes[*(mappings.begin() + index)];
     }
-
+/**
+ * @brief Sets/notifies source of truth(state_manager.cpp) that we want Teleop Mode or Autonomous Mode. If Autonomous mode, no teleoperation should function
+ * 
+ */
     void handle_mode_switches() {
         auto clock = rclcpp::Clock();
         
@@ -333,6 +432,12 @@ private:
         }
     }
     
+   
+/**
+ * @brief Emergency Stop functions.
+ * @todo  Make sure the estop() function is called in an appropriate place in a robot control function if needed 
+ * 
+ */
     //Maybe do a while(count<3) decrease down to 0 to act as a kCoast for safety? Prob not necessary though.
     #ifdef HARDWARE_ENABLED
     void stop(){    
@@ -369,18 +474,20 @@ private:
     }
     #endif
 
-
     #ifdef HARDWARE_ENABLED
     void emergency_stop() {
         #ifdef HARDWARE_ENABLED
-        stop();  
+        stop(); 
         #endif 
         set_param("robot_disabled", true);  
         robot_state.robot_disabled = true;  
         RCLCPP_ERROR(get_logger(), "EMERGENCY STOP ACTIVATED! DISABLING ROBOT MOTORS...");
     }
     #endif
-
+/**
+ * @brief Wrapper that encapsulates all 3 subsystems of robotic control for teleoperation
+ * 
+ */
     void control_robot() {
         if (xbox_input.emergency_stop_button) { emergency_stop(); return;}
         control_drive();
@@ -388,6 +495,10 @@ private:
         control_dumping();
     }
 
+/**
+ * @brief Teleop Drivebase Control
+ * @todo  Can ONLY setting Duty Cycle actuate the robot's motors? Test w/ testbench
+ */
     void control_drive() {
         robot_actuation.velocity_scaling = (xbox_input.x_button && xbox_input.y_button) ? 0.3 : (xbox_input.x_button ? 0.1 : 0.6);
         xbox_input.throttle_forward = (1.0 - xbox_input.throttle_forward) / 2.0;
@@ -411,6 +522,10 @@ private:
         #endif
     }
 
+/**
+ * @brief Teleop Mining Control
+ * @todo Can ONLY setting Duty Cycle actuate the robot's motors? Test w/ testbench
+ */
     //Verify if linear actuator code makes sense or not
     void control_mining() {
         robot_actuation.speed_lift_actuator = (xbox_input.dpad_vertical == 1.0) ? -0.3 : (xbox_input.dpad_vertical == -1.0) ? 0.3 : 0.0;
@@ -436,8 +551,10 @@ private:
         #endif
     }
 
-
-    
+/**
+ * @brief Teleop Dumping control
+ * @todo Review the dumping system w/ the team to make additions/changes & Can ONLY setting Duty Cycle actuate the robot's motors? Test w/ testbench
+ */
     void control_dumping() {
         double conveyor_speed = xbox_input.a_button ? 0.3 : 0.0;
         double latch_speed = xbox_input.b_button ? 0.3 : 0.0;

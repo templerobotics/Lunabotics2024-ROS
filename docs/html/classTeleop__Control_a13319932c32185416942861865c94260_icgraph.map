@@ -1,0 +1,4 @@
+<map id="Teleop_Control::parse_controller_input" name="Teleop_Control::parse_controller_input">
+<area shape="rect" id="node1" title="Sets XBOX controller joystick input, so this file can use it locally." alt="" coords="260,5,423,47"/>
+<area shape="rect" id="node2" href="$classTeleop__Control.html#a492615da50fae67bceb5c5c3ebb1fe69" title="Callback that interprets XBOX controller joystick input." alt="" coords="5,13,212,39"/>
+</map>
