@@ -28,7 +28,6 @@ if(BUILD_TESTING)
   
   find_package(ament_cmake_gtest REQUIRED)
   find_package(GTest REQUIRED)
-  find_package(GMock REQUIRED)
   
   include(GoogleTest)
 
@@ -44,12 +43,12 @@ if(BUILD_TESTING)
   )
 
   target_link_libraries(teleop_tests
-    GTest::gtest
-    GTest::gtest_main
-    GTest::gmock
+    GTest::GTest
+    GTest::Main
+    gmock
+    gmock_main
   )
 
-  
   ament_target_dependencies(teleop_tests
     rclcpp
     teleop_controller
