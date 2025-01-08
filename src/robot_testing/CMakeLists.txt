@@ -28,6 +28,8 @@ if(BUILD_TESTING)
   
   find_package(ament_cmake_gtest REQUIRED)
   find_package(GTest REQUIRED)
+  find_package(GMock REQUIRED)
+  
   include(GoogleTest)
 
   message(STATUS "Building ROS 2 teleop tests...")

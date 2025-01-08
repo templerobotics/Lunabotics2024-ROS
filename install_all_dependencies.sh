@@ -19,7 +19,30 @@ install_ros2_humble() {
     sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
     sudo apt-get update
-    sudo apt-get install -y ros-humble-desktop python3-rosdep python3-colcon-common-extensions
+    sudo apt-get install -y \
+        ros-humble-desktop \
+        python3-rosdep \
+        python3-colcon-common-extensions \
+        ros-humble-xacro \
+        ros-humble-urdf \
+        ros-humble-robot-state-publisher \
+        ros-humble-joint-state-publisher-gui \
+        ros-humble-controller-manager \
+        ros-humble-ros2-control \
+        ros-humble-ros2-controllers \
+        ros-humble-gazebo-ros2-control
+}
+
+install_system_dependencies() {
+    print_status "Installing system and testing dependencies"
+    sudo apt-get install -y \
+        python3-rosdep \
+        python3-colcon-common-extensions \
+        python3-vcstool \
+        build-essential \
+        libgtest-dev \
+        libgmock-dev \
+        python3-pytest
 }
 
 install_sparkcan() {
@@ -73,6 +96,7 @@ main() {
     sudo apt update && sudo apt upgrade -y
     
     install_ros2_humble
+    install_system_dependencies
     install_sparkcan
     install_ros_dependencies
     setup_environment
