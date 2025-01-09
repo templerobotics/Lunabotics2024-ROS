@@ -45,7 +45,7 @@ public:
         #endif
 
         timer = create_wall_timer(5s, std::bind(&Teleop_Control::callback_motor_heartbeat, this));
-        velocity_subscriber = create_subscription<Twist>("cmd_vel", 10, std::bind(&Teleop_Control::callback_cmd_vel, this, std::placeholders::_1));
+        cmd_vel_pub = create_publisher<Twist>("cmd_vel", 10);
         joy_sub = create_subscription<Joy>("joy", 10, std::bind(&Teleop_Control::callback_joy, this, std::placeholders::_1));
 
         RCLCPP_INFO(get_logger(), "Teleop Control initialized and ready");
@@ -72,13 +72,33 @@ private:
     BoolSubscriber sub_ps4;
  
     rclcpp::TimerBase::SharedPtr timer;
-    TwistSubscription velocity_subscriber;
     JoySubscription joy_sub;
+    VelocityPublisher cmd_vel_pub;
 
     ROBOT_ACTUATION_t robot_actuation;
     XBOX_JOYSTICK_INPUT_t xbox_input;
     ROBOTSTATE_t robot_state;
     ROBOT_LIMITS_t robot_dimensions;
+
+    void createSubscribers() {
+        sub_xbox = create_subscription<msg_Bool>("robot_state/XBOX", 10, std::bind(&TeleopControl::callback_xbox, this, std::placeholders::_1));
+        sub_robot_enabled = create_subscription<msg_Bool>("robot_state/enabled", 10,std::bind(&TeleopControl::callback_robot_enabled, this, std::placeholders::_1));
+        sub_manual_enabled = create_subscription<msg_Bool>("robot_state/manual_enabled", 10,std::bind(&TeleopControl::callback_manual_enabled, this, std::placeholders::_1));      
+        sub_outdoor_mode = create_subscription<msg_Bool>("robot_state/outdoor_mode", 10,std::bind(&TeleopControl::callback_outdoor_mode, this, std::placeholders::_1));     
+        sub_ps4 = create_subscription<msg_Bool>("robot_state/PS4", 10,std::bind(&TeleopControl::callback_ps4, this, std::placeholders::_1));   
+        
+        joy_sub = create_subscription<Joy>("joy", 10, std::bind(&TeleopControl::callback_joy, this, std::placeholders::_1));
+    }
+
+    void createPublishers() {
+        cmd_vel_pub = create_publisher<Twist>("cmd_vel", 10);
+    }
+
+    void createTimers() {
+        heartbeat_timer = create_wall_timer(5s, std::bind(&TeleopControl::callback_motor_heartbeat, this));
+    }
+
+
 
 /**
  * @brief Halts teleop control until state manager fully completes the "bringup"/robot initialization step. Honestly probably too redundant & not necessary
@@ -297,70 +317,11 @@ private:
             !robot_state.robot_disabled ? "true" : "false");
     }
 
-/**
- * @brief Callback that interprets XBOX controller joystick input
- * 
- * @param msg 
- */
-    void callback_joy(const JoyMsg msg) {
-        if (robot_state.robot_disabled || !robot_state.manual_enabled || robot_state.PS4 || !robot_state.XBOX) {
-            RCLCPP_ERROR(get_logger(), "Error in Joy Callback. Robot must be fully enabled correctly to function!");
-            return;
-        }
 
-        auto clock = rclcpp::Clock();
-        try {
-            parse_controller_input(msg);
-            handle_mode_switches();
-            
-            if (get_parameter("manual_enabled").as_bool()) {
-                control_robot();
-            }
-        } catch (const std::exception& e) {
-            RCLCPP_ERROR(get_logger(), "Error in joy callback: %s", e.what());
-        }
-    }
+
 
 /**
- * @brief Callback that calculates velocity commands to give the 4 Drivebase robot motors.
- * @todo Is the call to SparkMax::Heartbeat() needed or can I delete it?
- * @param velocity_msg 
- */
-    void callback_cmd_vel(const geometry_msgs::msg::Twist::SharedPtr velocity_msg) {
-    if (robot_state.robot_disabled || !robot_state.manual_enabled || 
-        robot_state.PS4 || !robot_state.XBOX) {
-        RCLCPP_ERROR(get_logger(),
-            "Error in CMD VEL Callback. Robot must be fully enabled correctly to function!");
-        return;
-    }
-
-    RCLCPP_INFO(get_logger(), "INSIDE CMD VEL CALLBACK %lf", velocity_msg->linear.x);
-    
-    #ifdef HARDWARE_ENABLED
-    try {
-        rclcpp::Parameter param = get_parameter("manual_enabled");
-        bool current_state_manual = param.as_bool();
-        
-        if (!robot_state.manual_enabled || !current_state_manual) {  // autonomous mode
-            SparkMax::Heartbeat();   
-            double linear_velocity = velocity_msg->linear.x;
-            double angular_velocity = velocity_msg->angular.z;
-            robot_dimensions.wheel_radius = robot_state.outdoor_mode ? 0.2 : 0.127;
-            
-            double velocity_left_cmd = -0.1 * (linear_velocity - angular_velocity * robot_dimensions.wheel_distance / 2.0) / robot_dimensions.wheel_radius;
-            double velocity_right_cmd = -0.1 * (linear_velocity + angular_velocity * robot_dimensions.wheel_distance / 2.0) / robot_dimensions.wheel_radius;
-        
-            left_motors.setSpeed(std::clamp(velocity_left_cmd, -1.0, 1.0));
-            right_motors.setSpeed(std::clamp(velocity_right_cmd, -1.0, 1.0));          
-        }
-    } catch (const std::exception& e) {
-        RCLCPP_ERROR(get_logger(), "Error in cmdVelCallback: %s", e.what());
-    }
-    #endif
-}
-
-/**
- * @brief Sets XBOX controller joystick input, so this file can use it locally
+ * @brief Interprets & sets XBOX controller joystick input.Saved locally to this node in struct variable
  * 
  * @param msg 
  */
@@ -386,7 +347,7 @@ private:
     }
 
 /**
- * @brief Get the button pressed by XBOX Controller
+ * @brief Fetch the button pressed by XBOX Controller
  * 
  * @param joy_msg 
  * @param mappings 
@@ -412,78 +373,74 @@ private:
         size_t index = xbox_enabled ? 2 : ps4_enabled ? 1 : 0;
         return joy_msg->axes[*(mappings.begin() + index)];
     }
-/**
- * @brief Sets/notifies source of truth(state_manager.cpp) that we want Teleop Mode or Autonomous Mode. If Autonomous mode, no teleoperation should function
- * 
- */
-    void handle_mode_switches() {
-        auto clock = rclcpp::Clock();
-        
-        if (xbox_input.manual_mode_button) {
-            set_param("manual_enabled", true);
-            robot_state.manual_enabled = true;
-            RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "MANUAL CONTROL: ENABLED");
-        }
-        
-        if (xbox_input.autonomous_mode_button) {
-            set_param("manual_enabled", false);
-            robot_state.manual_enabled = false;
-            RCLCPP_INFO_THROTTLE(get_logger(), clock, 1000, "AUTONOMOUS CONTROL: ENABLED");
-        }
-    }
-    
+
+  
    
 /**
- * @brief Emergency Stop functions.
- * @todo  Make sure the estop() function is called in an appropriate place in a robot control function if needed 
+ * @brief Callback that interprets XBOX controller joystick input
+ * 
+ * @param msg 
+ */
+    void callback_joy(const JoyMsg& msg) {
+        if (robot_state.robot_disabled || robot_state.manual_enabled == false) {
+            RCLCPP_ERROR(get_logger(), "Error in Joy Callback. Robot must be fully enabled correctly to function!");
+            return;
+        }
+        parse_controller_input(msg);
+        publishTwistFromJoy();
+    }
+
+
+/**
+ * @brief Publishes velocity msgs to send to the Robot. Step 2
+ * @todo restructure the twist msg equations for linearx and angular z... I think
  * 
  */
-    //Maybe do a while(count<3) decrease down to 0 to act as a kCoast for safety? Prob not necessary though.
-    #ifdef HARDWARE_ENABLED
-    void stop(){    
-        m_left_front.SetDutyCycle(0.0);
-        m_left_front.SetVoltage(0);
-        m_left_rear.SetDutyCycle(0.0);
-        m_left_rear.SetVoltage(0);
-        m_right_front.SetDutyCycle(0.0);
-        m_right_front.SetVoltage(0);
-        m_right_rear.SetDutyCycle(0.0);
-        m_right_rear.SetVoltage(0);
-        stop_mining();
-        stop_digging();
-    }
-    void stop_mining(){
-        m_actuator_left.SetDutyCycle(0.0);
-        m_actuator_left.SetVoltage(0);
-        m_actuator_right.SetDutyCycle(0.0);
-        m_actuator_right.SetVoltage(0);
-        m_belt_left.SetDutyCycle(0.0);
-        m_belt_left.SetVoltage(0);
-        m_belt_right.SetDutyCycle(0.0);
-        m_belt_right.SetVoltage(0);
-        m_leadscrew_left.SetDutyCycle(0.0);
-        m_leadscrew_left.SetVoltage(0);
-        m_leadscrew_right.SetDutyCycle(0.0);
-        m_leadscrew_right.SetVoltage(0);   
-    }
-    void stop_digging(){
-        m_dump_conveyor.SetDutyCycle(0.0);
-        m_dump_conveyor.SetVoltage(0);
-        m_dump_latch.SetDutyCycle(0.0);
-        m_dump_latch.SetVoltage(0);
-    }
-    #endif
+//reminder to apply scaling factor aka speed multiplier for setting motors
+    void publishTwistFromJoy() {
+        auto twist_msg = geometry_msgs::msg::Twist();
+        robot_actuation.speed_multipler_drivebase = (xbox_input.x_button && xbox_input.y_button) ? 0.3 : (xbox_input.x_button ? 0.1 : 0.6);
+        double linear_x = 0.0;
 
-    #ifdef HARDWARE_ENABLED
-    void emergency_stop() {
-        #ifdef HARDWARE_ENABLED
-        stop(); 
-        #endif 
-        set_param("robot_disabled", true);  
-        robot_state.robot_disabled = true;  
-        RCLCPP_ERROR(get_logger(), "EMERGENCY STOP ACTIVATED! DISABLING ROBOT MOTORS...");
+        if (xbox_input.throttle_forward != 0.0) {
+            linear_x = xbox_input.throttle_forward;
+        } else if (xbox_input.throttle_backwards != 0.0) {
+            linear_x = -xbox_input.throttle_backwards;
+        }
+
+        twist_msg.linear.x = linear_x * robot_actuation.speed_multipler_drivebase ;
+        twist_msg.angular.z = -xbox_input.joystick_turn_input * robot_actuation.speed_multipler_drivebase;
+        cmd_vel_pub->publish(twist_msg);
+
+        /*
+        twist_msg.linear.x = linear_x * robot_actuation.velocity_scaling;// change this. 
+        twist_msg.angular.z = -xbox_input.joystick_turn_input * robot_actuation.velocity_scaling;
+        cmd_vel_pub->publish(twist_msg);
+        */
+       
     }
-    #endif
+
+/**
+ * @brief Handles incoming velocities published . Step 3
+ * @todo redo this function and the brief about it. Use motor controller group SetSpeed() function for motor groups
+ * @param velocity_msg Linear X and Angular Z Velocities
+ */
+    void handleVelocityCommand(const geometry_msgs::msg::Twist::SharedPtr velocity_msg) {
+        double linear_velocity = velocity_msg->linear.x;
+        double angular_velocity = velocity_msg->angular.z;
+        
+        // Convert to left/right wheel speeds
+        double left_motor_speeds = (linear_velocity - angular_velocity * wheel_distance / 2.0);
+        double right_motor_speeds = (linear_velocity + angular_velocity * wheel_distance / 2.0);
+        
+        //finally Set motor speeds --> Use motor controller group SetSpeed() function I made
+        left_motors.SetDutyCycle(std::clamp(left_motor_speeds, -1.0, 1.0));
+        right_motors.SetDutyCycle(std::clamp(right_motor_speeds, -1.0, 1.0));
+    }
+
+
+
+
 /**
  * @brief Wrapper that encapsulates all 3 subsystems of robotic control for teleoperation
  * 
@@ -563,6 +520,79 @@ private:
         m_dump_latch.SetDutyCycle(std::clamp(latch_speed,-1.0,1.0));
         #endif
     }
+
+/**
+ * @brief Sets/notifies source of truth(state_manager.cpp) that we want Teleop Mode or Autonomous Mode. If Autonomous mode, no teleoperation should function
+ * 
+ */
+void handle_mode_switches() {
+        
+        if (xbox_input.manual_mode_button) {
+            set_param("manual_enabled", true);
+            robot_state.manual_enabled = true;
+            RCLCPP_INFO(get_logger(), "MANUAL CONTROL: ENABLED");
+        }
+        
+        if (xbox_input.autonomous_mode_button) {
+            set_param("manual_enabled", false);
+            robot_state.manual_enabled = false;
+            RCLCPP_INFO(get_logger() "AUTONOMOUS CONTROL: ENABLED");
+        }
+    }
+
+
+/**
+ * @brief Emergency Stop functions.
+ * @todo  Make sure the estop() function is called in an appropriate place in a robot control function if needed 
+ * 
+ */
+    //Maybe do a while(count<3) decrease down to 0 to act as a kCoast for safety? Prob not necessary though.
+    #ifdef HARDWARE_ENABLED
+    void stop(){    
+        m_left_front.SetDutyCycle(0.0);
+        m_left_front.SetVoltage(0);
+        m_left_rear.SetDutyCycle(0.0);
+        m_left_rear.SetVoltage(0);
+        m_right_front.SetDutyCycle(0.0);
+        m_right_front.SetVoltage(0);
+        m_right_rear.SetDutyCycle(0.0);
+        m_right_rear.SetVoltage(0);
+        stop_mining();
+        stop_digging();
+    }
+    void stop_mining(){
+        m_actuator_left.SetDutyCycle(0.0);
+        m_actuator_left.SetVoltage(0);
+        m_actuator_right.SetDutyCycle(0.0);
+        m_actuator_right.SetVoltage(0);
+        m_belt_left.SetDutyCycle(0.0);
+        m_belt_left.SetVoltage(0);
+        m_belt_right.SetDutyCycle(0.0);
+        m_belt_right.SetVoltage(0);
+        m_leadscrew_left.SetDutyCycle(0.0);
+        m_leadscrew_left.SetVoltage(0);
+        m_leadscrew_right.SetDutyCycle(0.0);
+        m_leadscrew_right.SetVoltage(0);   
+    }
+    void stop_digging(){
+        m_dump_conveyor.SetDutyCycle(0.0);
+        m_dump_conveyor.SetVoltage(0);
+        m_dump_latch.SetDutyCycle(0.0);
+        m_dump_latch.SetVoltage(0);
+    }
+    #endif
+
+    #ifdef HARDWARE_ENABLED
+    void emergency_stop() {
+        #ifdef HARDWARE_ENABLED
+        stop(); 
+        #endif 
+        set_param("robot_disabled", true);  
+        robot_state.robot_disabled = true;  
+        RCLCPP_ERROR(get_logger(), "EMERGENCY STOP ACTIVATED! DISABLING ROBOT MOTORS...");
+    }
+    #endif
+
 
 
 };

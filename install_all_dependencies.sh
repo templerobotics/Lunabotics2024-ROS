@@ -92,6 +92,7 @@ setup_environment() {
 }
 
 main() {
+    
     print_status "Updating system packages"
     sudo apt update && sudo apt upgrade -y
     

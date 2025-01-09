@@ -54,6 +54,7 @@ using Joy = sensor_msgs::msg::Joy;
 using JoySubscription = rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr;
 using Twist = geometry_msgs::msg::Twist;
 using TwistSubscription = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr;
+using VelocityPublisher = rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr
 
 using BoolPublisher = rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr;
 using BoolSubscriber = rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr;
@@ -112,7 +113,12 @@ typedef struct{
 typedef struct{
     double speed_lift_actuator;
     double speed_tilt_actuator;
-    double velocity_scaling;
+
+    double speed_multiplier_drivebase; // actuating via trigger can be wonky. So user can use x/y along with trigger to drive at certain speeds
+    double speed_multiplier_mining; 
+    double speed_multiplier_dumping;
+    
+    double velocity_scaling = 0.75;
     double wheel_speed_left, wheel_speed_right;
 }ROBOT_ACTUATION_t;
 
@@ -126,10 +132,7 @@ typedef struct{
 
 typedef struct{
     double wheel_radius;
-    const double wheel_distance = 0.5;
-    double max_velocity;
-    double min_velocity;
-    double max_angular_velocity;
+    const double wheel_distance = 16; // inches 
     double voltage_limit;
 }ROBOT_LIMITS_t;
 
