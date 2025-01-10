@@ -1,12 +1,12 @@
 /**
  * @file teleop_control.cpp
  * @author Jaden Howard (jaseanhow@gmail.com or tun85812@temple.edu)
- * @brief Teleoperated control of our ROS2 robot
+ * @brief XBOX Teleoperated control for our ROS2 robot
  * @version 0.1
  * @date 2025-01-07
  * 
  * @copyright Copyright (c) 2025
- * 
+ * @todo Can ONLY coding SetDutyCycle() actuate the robot's motors? Test w/ testbench
  */
 
 #include "core.hpp"
@@ -34,19 +34,13 @@ public:
         param_client = create_client<teleop_controller::srv::SetParameter>("set_parameter");
         wait_for_state_manager();                               
         prep_robot();
+        createPublishers();
+        createSubscribers();
+        createTimers();
 
-        sub_xbox = create_subscription<msg_Bool>("robot_state/XBOX", 10,std::bind(&Teleop_Control::callback_xbox, this, std::placeholders::_1));
-        sub_robot_enabled = create_subscription<msg_Bool>("robot_state/enabled", 10,std::bind(&Teleop_Control::callback_robot_enabled, this, std::placeholders::_1));
-        sub_manual_enabled = create_subscription<msg_Bool>("robot_state/manual_enabled", 10,std::bind(&Teleop_Control::callback_manual_enabled, this, std::placeholders::_1));
-        sub_outdoor_mode = create_subscription<msg_Bool>("robot_state/outdoor_mode", 10,std::bind(&Teleop_Control::callback_outdoor_mode, this, std::placeholders::_1));
-        sub_ps4 = create_subscription<msg_Bool>("robot_state/PS4", 10,std::bind(&Teleop_Control::callback_ps4, this, std::placeholders::_1));
         #ifdef HARDWARE_ENABLED
         configure_all_motors();
         #endif
-
-        timer = create_wall_timer(5s, std::bind(&Teleop_Control::callback_motor_heartbeat, this));
-        cmd_vel_pub = create_publisher<Twist>("cmd_vel", 10);
-        joy_sub = create_subscription<Joy>("joy", 10, std::bind(&Teleop_Control::callback_joy, this, std::placeholders::_1));
 
         RCLCPP_INFO(get_logger(), "Teleop Control initialized and ready");
 
@@ -65,15 +59,17 @@ private:
 
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr ready_client;
     SetParameterClientSharedPtr param_client;
+
     BoolSubscriber sub_xbox;
     BoolSubscriber sub_robot_enabled;
     BoolSubscriber sub_manual_enabled;
     BoolSubscriber sub_outdoor_mode;
     BoolSubscriber sub_ps4;
  
-    rclcpp::TimerBase::SharedPtr timer;
+    rclcpp::TimerBase::SharedPtr heartbeat_timer;
     JoySubscription joy_sub;
     VelocityPublisher cmd_vel_pub;
+    VelocitySubscriber velocity_subscriber;
 
     ROBOT_ACTUATION_t robot_actuation;
     XBOX_JOYSTICK_INPUT_t xbox_input;
@@ -86,8 +82,8 @@ private:
         sub_manual_enabled = create_subscription<msg_Bool>("robot_state/manual_enabled", 10,std::bind(&TeleopControl::callback_manual_enabled, this, std::placeholders::_1));      
         sub_outdoor_mode = create_subscription<msg_Bool>("robot_state/outdoor_mode", 10,std::bind(&TeleopControl::callback_outdoor_mode, this, std::placeholders::_1));     
         sub_ps4 = create_subscription<msg_Bool>("robot_state/PS4", 10,std::bind(&TeleopControl::callback_ps4, this, std::placeholders::_1));   
-        
-        joy_sub = create_subscription<Joy>("joy", 10, std::bind(&TeleopControl::callback_joy, this, std::placeholders::_1));
+        velocity_subscriber = create_subscription<Twist>("cmd_vel", 10, std::bind(&TeleopControl::handleVelocityCommand, this, std::placeholders::_1));
+        joy_sub = create_subscription<Joy>("joy", 10, std::bind(&Teleop_Control::callback_joy, this, std::placeholders::_1));
     }
 
     void createPublishers() {
@@ -129,9 +125,8 @@ private:
 
 /**
  * @brief Sets the param argument to the intended new boolean value
- * 
- * @param param_name 
- * @param new_val 
+ * @param param_name from declared params in State Manager
+ * @param new_val 0 or 1 
  */
     void set_param(const std::string& param_name, bool new_val) {
         if (!param_client->wait_for_service(1s)) {
@@ -173,8 +168,7 @@ private:
 /**
  * @brief Configures NEO BLDC Motors
  * @todo Make a version of this function for the smaller NEO motors, unless they are also BLDC;I havent checked.
- * 
- * @param motor 
+ * @param motor SparkMax instance
  */
     void config_motor(SparkMax& motor) {
         #ifdef HARDWARE_ENABLED
@@ -187,7 +181,6 @@ private:
 /**
  * @brief Self-explanatory
  * @todo If the smaller NEO motors are NOT BLDC, use their version of config_motor() inside this function
- * 
  */
     void configure_all_motors() {
         #ifdef HARDWARE_ENABLED
@@ -229,7 +222,6 @@ private:
 
 /**
  * @brief Saves the currently publishing XBOX state param to this file's LOCAL state
- * 
  * @param state_XBOX 
  */
 
@@ -245,7 +237,6 @@ private:
 
 /**
  * @brief Saves the currently publishing robot_disabled state param to this file's LOCAL state
- * 
  * @param state_robot_disabled 
  */
 
@@ -262,7 +253,6 @@ private:
 
 /**
  * @brief Saves the currently publishing manual_enalbed state param to this file's LOCAL state
- * 
  * @param state_manual_enabled 
  */
     void callback_manual_enabled(const msg_Bool &state_manual_enabled) {
@@ -272,7 +262,6 @@ private:
 
 /**
  * @brief Saves the currently publishing outdoor_mode state param to this file's LOCAL state
- * 
  * @param state_outdoor_mode 
  */
     void callback_outdoor_mode(const msg_Bool &state_outdoor_mode){
@@ -283,7 +272,6 @@ private:
 
 /**
  * @brief Periodically sends a heartbeat signal to keep all SPARK controllers active
- * 
  */
     void callback_motor_heartbeat() {
         #ifdef HARDWARE_ENABLED   
@@ -321,8 +309,7 @@ private:
 
 
 /**
- * @brief Interprets & sets XBOX controller joystick input.Saved locally to this node in struct variable
- * 
+ * @brief Interprets & sets XBOX controller joystick input.Saved locally to this node in struct variable.  Part 2
  * @param msg 
  */
     void parse_controller_input(const JoyMsg& msg) {
@@ -348,7 +335,6 @@ private:
 
 /**
  * @brief Fetch the button pressed by XBOX Controller
- * 
  * @param joy_msg 
  * @param mappings 
  * @return int 
@@ -362,7 +348,6 @@ private:
 
 /**
  * @brief Get the axis of button pressed
- * 
  * @param joy_msg 
  * @param mappings 
  * @return double 
@@ -377,8 +362,7 @@ private:
   
    
 /**
- * @brief Callback that interprets XBOX controller joystick input
- * 
+ * @brief Callback that interprets XBOX controller joystick input. Part 1 
  * @param msg 
  */
     void callback_joy(const JoyMsg& msg) {
@@ -386,20 +370,17 @@ private:
             RCLCPP_ERROR(get_logger(), "Error in Joy Callback. Robot must be fully enabled correctly to function!");
             return;
         }
-        parse_controller_input(msg);
+        parse_controller_input(msg); 
         publishTwistFromJoy();
     }
 
 
 /**
- * @brief Publishes velocity msgs to send to the Robot. Step 2
- * @todo restructure the twist msg equations for linearx and angular z... I think
- * 
+ * @brief Publishes velocity msgs to send to the Robot. Part 3
  */
-//reminder to apply scaling factor aka speed multiplier for setting motors
     void publishTwistFromJoy() {
         auto twist_msg = geometry_msgs::msg::Twist();
-        robot_actuation.speed_multipler_drivebase = (xbox_input.x_button && xbox_input.y_button) ? 0.3 : (xbox_input.x_button ? 0.1 : 0.6);
+        robot_actuation.speed_scaling_factor_drivebase = (xbox_input.x_button && xbox_input.y_button) ? 0.3 : (xbox_input.x_button ? 0.1 : 0.6);
         double linear_x = 0.0;
 
         if (xbox_input.throttle_forward != 0.0) {
@@ -408,82 +389,46 @@ private:
             linear_x = -xbox_input.throttle_backwards;
         }
 
-        twist_msg.linear.x = linear_x * robot_actuation.speed_multipler_drivebase ;
-        twist_msg.angular.z = -xbox_input.joystick_turn_input * robot_actuation.speed_multipler_drivebase;
+        twist_msg.linear.x = linear_x * robot_actuation.speed_scaling_factor_drivebase ;
+        twist_msg.angular.z = -xbox_input.joystick_turn_input * robot_actuation.speed_scaling_factor_drivebase;
         cmd_vel_pub->publish(twist_msg);
 
-        /*
-        twist_msg.linear.x = linear_x * robot_actuation.velocity_scaling;// change this. 
-        twist_msg.angular.z = -xbox_input.joystick_turn_input * robot_actuation.velocity_scaling;
-        cmd_vel_pub->publish(twist_msg);
-        */
-       
     }
 
 /**
- * @brief Handles incoming velocities published . Step 3
- * @todo redo this function and the brief about it. Use motor controller group SetSpeed() function for motor groups
- * @param velocity_msg Linear X and Angular Z Velocities
+ * @brief Actuates motors based on incoming published velocities . Step 3
+ * @param velocity_msg incoming published velocities
+ * @note see publishTwistFromJoy() to see how motor speed scaling factors to Twist velocities are applied.
  */
     void handleVelocityCommand(const geometry_msgs::msg::Twist::SharedPtr velocity_msg) {
         double linear_velocity = velocity_msg->linear.x;
         double angular_velocity = velocity_msg->angular.z;
         
-        // Convert to left/right wheel speeds
-        double left_motor_speeds = (linear_velocity - angular_velocity * wheel_distance / 2.0);
-        double right_motor_speeds = (linear_velocity + angular_velocity * wheel_distance / 2.0);
+        robot_actuation.wheel_speed_left =  ( linear_velocity - angular_velocity * robot_dimensions.wheel_distance / 2.0 );
+        robot_actuation.wheel_speed_right = ( linear_velocity + angular_velocity * robot_dimensions.wheel_distance / 2.0 );
         
-        //finally Set motor speeds --> Use motor controller group SetSpeed() function I made
-        left_motors.SetDutyCycle(std::clamp(left_motor_speeds, -1.0, 1.0));
-        right_motors.SetDutyCycle(std::clamp(right_motor_speeds, -1.0, 1.0));
+        left_motors.SetSpeed(std::clamp(robot_actuation.wheel_speed_left, -1.0, 1.0));
+        right_motors.SetSpeed(std::clamp( robot_actuation.wheel_speed_right, -1.0, 1.0));
+
     }
 
 
-
-
 /**
- * @brief Wrapper that encapsulates all 3 subsystems of robotic control for teleoperation
+ * @brief Wrapper that encapsulates robotic mining & dumping for teleoperation
  * 
  */
     void control_robot() {
         if (xbox_input.emergency_stop_button) { emergency_stop(); return;}
-        control_drive();
         control_mining();
         control_dumping();
     }
 
-/**
- * @brief Teleop Drivebase Control
- * @todo  Can ONLY setting Duty Cycle actuate the robot's motors? Test w/ testbench
- */
-    void control_drive() {
-        robot_actuation.velocity_scaling = (xbox_input.x_button && xbox_input.y_button) ? 0.3 : (xbox_input.x_button ? 0.1 : 0.6);
-        xbox_input.throttle_forward = (1.0 - xbox_input.throttle_forward) / 2.0;
-        xbox_input.throttle_backwards = (1.0 - xbox_input.throttle_backwards) / 2.0;
 
-        if (xbox_input.throttle_forward != 0.0) {
-            robot_actuation.wheel_speed_left = xbox_input.throttle_forward - xbox_input.joystick_turn_input;
-            robot_actuation.wheel_speed_right = xbox_input.throttle_forward + xbox_input.joystick_turn_input;
-
-        } else if (xbox_input.throttle_backwards != 0.0) {
-            robot_actuation.wheel_speed_left = -(xbox_input.throttle_backwards - xbox_input.joystick_turn_input);
-            robot_actuation.wheel_speed_right = -(xbox_input.throttle_backwards + xbox_input.joystick_turn_input);
-
-        } else {
-            robot_actuation.wheel_speed_left = -xbox_input.joystick_turn_input;
-            robot_actuation.wheel_speed_right = xbox_input.joystick_turn_input;
-        }
-        #ifdef HARDWARE_ENABLED
-        left_motors.setSpeed(std::clamp(robot_actuation.wheel_speed_left * robot_actuation.velocity_scaling, -1.0, 1.0));
-        right_motors.setSpeed(std::clamp(robot_actuation.wheel_speed_right * robot_actuation.velocity_scaling, -1.0, 1.0));
-        #endif
-    }
 
 /**
- * @brief Teleop Mining Control
- * @todo Can ONLY setting Duty Cycle actuate the robot's motors? Test w/ testbench
+ * @brief Teleop Mining Control 
+ * @todo Limit Switches/ LeadScrew State / Encoder Usage / PID instead of duty cycle / Temperature & Current Monitoring
  */
-    //Verify if linear actuator code makes sense or not
     void control_mining() {
         robot_actuation.speed_lift_actuator = (xbox_input.dpad_vertical == 1.0) ? -0.3 : (xbox_input.dpad_vertical == -1.0) ? 0.3 : 0.0;
         robot_actuation.speed_tilt_actuator = (xbox_input.secondary_vertical_input > 0.1) ? -0.3 : (xbox_input.secondary_vertical_input < -0.1) ? 0.3 : 0.0;
@@ -499,8 +444,6 @@ private:
         #ifdef HARDWARE_ENABLED
         m_actuator_left.SetDutyCycle(std::clamp(robot_actuation.speed_lift_actuator,-1.0,1.0));
         m_actuator_left.SetDutyCycle(std::clamp(robot_actuation.speed_tilt_actuator,-1.0,1.0));
-        m_actuator_right.SetDutyCycle(std::clamp(robot_actuation.speed_lift_actuator,-1.0,1.0));
-        m_actuator_left.SetDutyCycle(std::clamp(robot_actuation.speed_tilt_actuator,-1.0,1.0));
         m_belt_left.SetDutyCycle(std::clamp(belt_speed,-1.0,1.0));
         m_belt_right.SetDutyCycle(std::clamp(belt_speed,-1.0,1.0));
         m_leadscrew_left.SetDutyCycle(std::clamp(leadscrew_speed,-1.0,1.0));
@@ -510,7 +453,7 @@ private:
 
 /**
  * @brief Teleop Dumping control
- * @todo Review the dumping system w/ the team to make additions/changes & Can ONLY setting Duty Cycle actuate the robot's motors? Test w/ testbench
+ * @todo Review the dumping system w/ the team to make additions/changes
  */
     void control_dumping() {
         double conveyor_speed = xbox_input.a_button ? 0.3 : 0.0;
@@ -544,9 +487,8 @@ void handle_mode_switches() {
 /**
  * @brief Emergency Stop functions.
  * @todo  Make sure the estop() function is called in an appropriate place in a robot control function if needed 
- * 
+ * @note Maybe do a while(count<3) decrease down to 0 to act as a kCoast for safety? Prob not necessary though.
  */
-    //Maybe do a while(count<3) decrease down to 0 to act as a kCoast for safety? Prob not necessary though.
     #ifdef HARDWARE_ENABLED
     void stop(){    
         m_left_front.SetDutyCycle(0.0);

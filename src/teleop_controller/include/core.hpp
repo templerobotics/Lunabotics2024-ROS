@@ -55,6 +55,7 @@ using JoySubscription = rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr;
 using Twist = geometry_msgs::msg::Twist;
 using TwistSubscription = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr;
 using VelocityPublisher = rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr
+using VelocitySubscriber = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr
 
 using BoolPublisher = rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr;
 using BoolSubscriber = rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr;
@@ -113,11 +114,9 @@ typedef struct{
 typedef struct{
     double speed_lift_actuator;
     double speed_tilt_actuator;
-
-    double speed_multiplier_drivebase; // actuating via trigger can be wonky. So user can use x/y along with trigger to drive at certain speeds
+    double speed_scaling_factor_drivebase; // actuating via trigger can be wonky. So user can use x/y along with trigger to drive at certain speeds
     double speed_multiplier_mining; 
     double speed_multiplier_dumping;
-    
     double velocity_scaling = 0.75;
     double wheel_speed_left, wheel_speed_right;
 }ROBOT_ACTUATION_t;
@@ -136,7 +135,12 @@ typedef struct{
     double voltage_limit;
 }ROBOT_LIMITS_t;
 
-//Not sure if I'll use this. For now it is unused
+enum class MiningState {
+    Extended,
+    Retracted,
+    Traveling
+};
+
 enum class RobotSide{
     LEFT,
     RIGHT,
