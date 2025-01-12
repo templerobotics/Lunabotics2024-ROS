@@ -43,8 +43,9 @@
 #include "rcl_interfaces/srv/set_parameters.hpp"  
 #include "rcl_interfaces/msg/parameter_descriptor.hpp"
 #include <std_srvs/srv/trigger.hpp>
-
 #include "teleop_controller/srv/set_parameter.hpp"  // generated from .srv file
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "lifecycle_msgs/msg/state.hpp"
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -56,7 +57,10 @@ using Twist = geometry_msgs::msg::Twist;
 using TwistSubscription = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr;
 using VelocityPublisher = rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr
 using VelocitySubscriber = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr
+using Float64Publisher = rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr
+using Float64Subscriber = rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr
 
+using Float64 = std_msgs::msg::Float64
 using BoolPublisher = rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr;
 using BoolSubscriber = rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr;
 using msg_Bool = std_msgs::msg::Bool;
@@ -68,32 +72,6 @@ using SetParamsRes = rcl_interfaces::msg::SetParametersResult;
 using SetParameterClient = rclcpp::Client<teleop_controller::srv::SetParameter>;
 using SetParameterClientSharedPtr = std::shared_ptr<SetParameterClient>;
 
-// Drivebase diff drive Motor Groups
-class MotorControllerGroup {
-private:
-    SparkMax& motor1;
-    SparkMax& motor2;
-
-public:
-    MotorControllerGroup(SparkMax& m1, SparkMax& m2) : motor1(m1), motor2(m2) {}
-    
-    void setSpeed(double speed) {
-        motor1.SetDutyCycle(speed);
-        motor2.SetDutyCycle(speed);
-    }
-    
-    void setInverted(bool inverted) {
-        motor1.SetInverted(inverted);
-        motor2.SetInverted(inverted);
-    }
-
-    void stop_motor_groups() {
-        motor1.SetDutyCycle(0.0);
-        motor1.SetVoltage(0);
-        motor2.SetDutyCycle(0.0);
-        motor2.SetVoltage(0);
-    }
-};
 
 
 typedef struct{
@@ -106,15 +84,20 @@ typedef struct{
     bool y_button;
     double joystick_turn_input;
     double joystick_forward_input;
-    double secondary_vertical_input;
+    //double secondary_vertical_input;
     double left_bumper, right_bumper,throttle_backwards, throttle_forward;
     double dpad_horizontal, dpad_vertical;
 }XBOX_JOYSTICK_INPUT_t;
 
+
+/**
+ * @note Drivebase Scaling Factor: Actuating via trigger can be wonky, so user can use x/y along with trigger to drive at certain speeds 
+ * 
+ */
 typedef struct{
     double speed_lift_actuator;
     double speed_tilt_actuator;
-    double speed_scaling_factor_drivebase; // actuating via trigger can be wonky. So user can use x/y along with trigger to drive at certain speeds
+    double speed_scaling_factor_drivebase; //
     double speed_multiplier_mining; 
     double speed_multiplier_dumping;
     double velocity_scaling = 0.75;
@@ -126,27 +109,36 @@ typedef struct{
     bool robot_disabled; 
     bool outdoor_mode;
     bool XBOX;
-    bool PS4;
 }ROBOTSTATE_t;
 
+/**
+ * @note wheel distance value is arbitrary as of Jan 10, 2025. Waiting for final robot design
+ * 
+ */
 typedef struct{
     double wheel_radius;
-    const double wheel_distance = 16; // inches 
+    const double wheel_distance = 16; 
     double voltage_limit;
 }ROBOT_LIMITS_t;
 
-enum class MiningState {
+/* Make Leadscrews/Limit switches C++ classes or this is enough? */
+enum class LeadScrewMiningState {
     Extended,
     Retracted,
-    Traveling
+    Traveling,
+    FullyExtended
 };
+
 
 enum class RobotSide{
     LEFT,
     RIGHT,
 };
 
-
+enum class MechanismPosition{
+    TOP,
+    BOTTOM
+};
 
 /*END : XBOX Teleoperation*/
 

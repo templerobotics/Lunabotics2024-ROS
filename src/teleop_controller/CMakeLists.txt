@@ -25,7 +25,7 @@ if(HARDWARE_ENABLED)
 endif()
 
 add_executable(teleop_state_manager src/teleop_state_manager.cpp)
-add_executable(teleop_control src/teleop_control.cpp)
+add_executable(DrivebaseControl src/DrivebaseControl.cpp)
 
 ament_target_dependencies(teleop_state_manager 
   rclcpp 
@@ -36,7 +36,7 @@ ament_target_dependencies(teleop_state_manager
   std_srvs
 )
 
-ament_target_dependencies(teleop_control 
+ament_target_dependencies(DrivebaseControl 
   rclcpp 
   sensor_msgs 
   geometry_msgs 
@@ -45,18 +45,29 @@ ament_target_dependencies(teleop_control
   std_srvs
 )
 
+
+
+
+# Create library
+add_library(${PROJECT_NAME}_lib
+  src/DiggingLeadscrew.cpp
+  src/MotorControllerGroup.cpp
+)
+
+
+
 # Link against generated service interfaces using the new method
 rosidl_get_typesupport_target(cpp_typesupport_target 
   ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 target_link_libraries(teleop_state_manager "${cpp_typesupport_target}")
-target_link_libraries(teleop_control "${cpp_typesupport_target}")
+target_link_libraries(DrivebaseControl "${cpp_typesupport_target}")
 
 include_directories(include)
 
 install(TARGETS
   teleop_state_manager
-  teleop_control
+  DrivebaseControl
   DESTINATION lib/${PROJECT_NAME}
 )
 

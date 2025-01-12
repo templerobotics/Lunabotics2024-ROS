@@ -3,7 +3,7 @@
 <package format="3">
   <name>teleop_controller</name>
   <version>1.0.0</version>
-  <description>Robot Teleoperationn</description>
+  <description>Robot Teleoperation</description>
   <maintainer email="jaseanhow@gmail.com">jayhaych02</maintainer>
   <license>TODO: License declaration</license>
 

@@ -1,4 +1,4 @@
-log file for errors
+potential log file for errors
 
 Note : 
 

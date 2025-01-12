@@ -29,7 +29,6 @@ public:
         pub_robot_enabled = this->create_publisher<msg_Bool>("robot_state/robot_disabled", 10);
         pub_manual_enabled = this->create_publisher<msg_Bool>("robot_state/manual_enabled", 10);
         pub_xbox = this->create_publisher<msg_Bool>("robot_state/XBOX", 10);
-        pub_ps4 = this->create_publisher<msg_Bool>("robot_state/PS4", 10);
         pub_outdoor_mode = this->create_publisher<msg_Bool>("robot_state/outdoor_mode", 10);
         
         timer = this->create_wall_timer(5000ms, std::bind(&Teleop_State_Manager::callback_publish_states, this));
@@ -43,7 +42,6 @@ private:
     BoolPublisher pub_robot_enabled;
     BoolPublisher pub_manual_enabled;
     BoolPublisher pub_xbox;
-    BoolPublisher pub_ps4;
     BoolPublisher pub_outdoor_mode;
     rclcpp::TimerBase::SharedPtr timer;
     OnSetParametersCallbackHandle::SharedPtr param_callback_handle;
@@ -63,7 +61,7 @@ void handle_ready_check(const std::shared_ptr<std_srvs::srv::Trigger::Request>re
 }
 
 /**
- * @brief 
+ * @brief Update internal state
  * 
  * @param request Specific Robot State parameter that teleop_control wishes to change
  * @param response Callback that reports if the parameter that teleop_control wanted to update was successfully updated 
@@ -71,13 +69,11 @@ void handle_ready_check(const std::shared_ptr<std_srvs::srv::Trigger::Request>re
 void handle_set_parameter(const std::shared_ptr<teleop_controller::srv::SetParameter::Request> request,std::shared_ptr<teleop_controller::srv::SetParameter::Response> response){
     try {
         this->set_parameter(rclcpp::Parameter(request->param_name, request->new_value));
-        // Update internal state
+       
         if (request->param_name == "robot_disabled") {
             robot_state.robot_disabled = request->new_value;
         } else if (request->param_name == "XBOX") {
             robot_state.XBOX = request->new_value;
-        } else if (request->param_name == "PS4") {
-            robot_state.PS4 = request->new_value;
         } else if (request->param_name == "manual_enabled") {
             robot_state.manual_enabled = request->new_value;
         } else if (request->param_name == "outdoor_mode") {
@@ -85,79 +81,59 @@ void handle_set_parameter(const std::shared_ptr<teleop_controller::srv::SetParam
         }
         response->success = true;
         response->message = "Parameter set successfully";
-        RCLCPP_INFO(get_logger(), "Parameter %s set to %s", 
-                    request->param_name.c_str(), 
-                    request->new_value ? "true" : "false");
+        RCLCPP_INFO(get_logger(), "Parameter %s set to %s", request->param_name.c_str(), request->new_value ? "true" : "false");
     } catch (const std::exception& e) {
         response->success = false;
         response->message = std::string("Failed to set parameter: ") + e.what();
-        RCLCPP_ERROR(get_logger(), "Failed to set parameter %s: %s", 
-                    request->param_name.c_str(), e.what());
+        RCLCPP_ERROR(get_logger(), "Failed to set parameter %s: %s", request->param_name.c_str(), e.what());
     }
 
 }
 
 /**
  * @brief Attaches/assigns callbacks related to Robot States to ParameterEventHandler object 
- * 
+ * @note Subscribe to parameter events for actual state updates. Allows all params to be able to be triggered when set(), by assigning each param a callback() 
  */
 void init_param_event_subscriber(){
     
-    // Subscribe to parameter events for actual state updates. Allows all params to be able to be triggered when set(), byassigning each param a callback() 
+    
     param_sub = std::make_shared<rclcpp::ParameterEventHandler>(this);
     
     auto xbox_cb = [this](const rclcpp::Parameter & p) {
         robot_state.XBOX = p.as_bool();
         RCLCPP_INFO(get_logger(), "XBOX state updated to: %s", robot_state.XBOX ? "true" : "false");
     };
-    param_sub->add_parameter_callback("XBOX", xbox_cb);
-    
-    
-    auto ps4_cb = [this](const rclcpp::Parameter & p) {
-        robot_state.PS4 = p.as_bool();
-        RCLCPP_INFO(get_logger(), "PS4 state updated to: %s", robot_state.PS4 ? "true" : "false");
-    };
-    param_sub->add_parameter_callback("PS4", ps4_cb);
-    
+    param_sub->add_parameter_callback("XBOX", xbox_cb); 
     
     auto robot_disabled_cb = [this](const rclcpp::Parameter & p) {
         robot_state.robot_disabled = p.as_bool();
-        RCLCPP_INFO(get_logger(), "Robot disabled state updated to: %s", 
-                    robot_state.robot_disabled ? "true" : "false");
+        RCLCPP_INFO(get_logger(), "Robot disabled state updated to: %s", robot_state.robot_disabled ? "true" : "false");
     };
     param_sub->add_parameter_callback("robot_disabled", robot_disabled_cb);
 
     
     auto manual_enabled_cb = [this](const rclcpp::Parameter & p) {
         robot_state.manual_enabled = p.as_bool();
-        RCLCPP_INFO(get_logger(), "Manual mode state updated to: %s", 
-                    robot_state.manual_enabled ? "true" : "false");
+        RCLCPP_INFO(get_logger(), "Manual mode state updated to: %s", robot_state.manual_enabled ? "true" : "false");
     };
     param_sub->add_parameter_callback("manual_enabled", manual_enabled_cb);
 
     
     auto outdoor_mode_cb = [this](const rclcpp::Parameter & p) {
         robot_state.outdoor_mode = p.as_bool();
-        RCLCPP_INFO(get_logger(), "Outdoor mode state updated to: %s", 
-                    robot_state.outdoor_mode ? "true" : "false");
+        RCLCPP_INFO(get_logger(), "Outdoor mode state updated to: %s", robot_state.outdoor_mode ? "true" : "false");
     };
     param_sub->add_parameter_callback("outdoor_mode", outdoor_mode_cb);
 }
 
 /**
  * @brief Initializes Robot States as the 1st action upon startup
- * 
  */
 void declare_parameters() {
     ParamDescriptor xbox_descriptor;
     xbox_descriptor.description = "Enable/disable XBOX controller";
     xbox_descriptor.additional_constraints = "Only one controller can be active at a time";
     xbox_descriptor.read_only = false;
-    
-    ParamDescriptor ps4_descriptor;
-    ps4_descriptor.description = "Enable/disable PS4 controller";
-    ps4_descriptor.additional_constraints = "Only one controller can be active at a time";
-    ps4_descriptor.read_only = false;
     
     ParamDescriptor robot_disabled_descriptor;
     robot_disabled_descriptor.description = "Enable/disable robot operation";
@@ -175,7 +151,6 @@ void declare_parameters() {
     outdoor_mode_descriptor.read_only = false;
    
     this->declare_parameter("XBOX", true, xbox_descriptor);
-    this->declare_parameter("PS4", false, ps4_descriptor);
     this->declare_parameter("robot_disabled", true, robot_disabled_descriptor);
     this->declare_parameter("manual_enabled", true, manual_enabled_descriptor);
     this->declare_parameter("outdoor_mode", false, outdoor_mode_descriptor);
@@ -183,50 +158,39 @@ void declare_parameters() {
 
 /**
  * @brief Updates "local/internal" Robot State variables. This class/teleop control have: (1)Local state & (2)Source of truth state(this class)
- * 
  */
 void init_internal_state_from_params() {
     robot_state.XBOX = this->get_parameter("XBOX").as_bool();
-    robot_state.PS4 = this->get_parameter("PS4").as_bool();
     robot_state.manual_enabled = this->get_parameter("manual_enabled").as_bool();
     robot_state.outdoor_mode = this->get_parameter("outdoor_mode").as_bool();
     robot_state.robot_disabled = this->get_parameter("robot_disabled").as_bool();
 }
 
 /**
- * @brief Maintains crucial Robot State paramaters during runtime. 
- * @todo Add check for robot_disabled, so the user can NOT disable the robot while its running for no apparent reason
+ * @brief Maintains crucial Robot State paramaters during runtime by blocking state changes that could be dangerous
  * @param parameters 
  * @return rcl_interfaces::msg::SetParametersResult 
  */
 rcl_interfaces::msg::SetParametersResult validate_parameters(const ParamVector &parameters) {
-    
     SetParamsRes result;
     result.successful = true;
     
-    /*robot HAS to enabled for anything to work ie -----> robot_disabled = FALSE for anything on the robot to function ---> might need to implement conditional here*/
     for (const auto &param : parameters) {
-        if (param.get_name() == "XBOX" && param.as_bool() && this->get_parameter("PS4").as_bool()) {
-            result.successful = false;
-            result.reason = "Cannot enable XBOX while PS4 is active";
-            return result;
+        if (!robot_state.robot_disabled) {
+            if (param.get_name() == "robot_disabled" || param.get_name() == "outdoor_mode" || param.get_name() == "manual_enabled") {
+                result.successful = false;
+                result.reason = "Cannot change critical robot states while robot is enabled";
+                return result;
+            }
         }
-        else if (param.get_name() == "PS4" && param.as_bool() && this->get_parameter("XBOX").as_bool()) {
-            result.successful = false;
-            result.reason = "Cannot enable PS4 while XBOX is active";
-            return result;
-        }   
-        
-        // Validate manual mode constraints if needed
-        // Add any other validation logic here
     }
+    
     return result;
 }
 
 
 /**
- * @brief Publishes all Robot States to the terminal every 5 seconds
- * 
+ * @brief Publishes all Robot States to the terminal every 5 seconds 
  */
 void callback_publish_states() {
         auto msg = msg_Bool();
@@ -246,11 +210,9 @@ void callback_publish_states() {
         RCLCPP_INFO(this->get_logger(), "Publishing: XBOX [ %s]", msg.data ? "true" : "false");
         pub_xbox->publish(msg);
 
-        msg.data = robot_state.PS4;
-        RCLCPP_INFO(this->get_logger(), "Publishing: PS4 [ %s ]", msg.data ? "true" : "false");
-        pub_ps4->publish(msg);
-    
 }
+
+
 
 
 
