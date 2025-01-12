@@ -74,7 +74,9 @@ private:
     ROBOTSTATE_t robot_state;
     ROBOT_LIMITS_t robot_dimensions;
     
-    rclcpp::TimerBase::SharedPtr heartbeat_timer;
+    rclcpp::TimerBase::SharedPtr timer_heartbeat;
+    rclcpp::TimerBase::SharedPtr timer_temp_monitor;
+    rclcpp::TimerBase::SharedPtr timer_motor_integrity;
 
     void waitForStateManager() {
         while (!ready_client->wait_for_service(1s)) {
@@ -114,7 +116,7 @@ private:
         auto sub_xbox = create_subscription<msg_Bool>("robot_state/XBOX", 10,std::bind(&DrivebaseControl::updateXboxState, this, std::placeholders::_1));
 
         joy_sub = create_subscription<Joy>("joy", 10, std::bind(&DrivebaseControl::handleJoystickInput, this, std::placeholders::_1));
-        velocity_sub = create_subscription<Twist>("cmd_vel", 10,std::bind(&DrivebaseControl::drivebase_HandleVelocityCommand, this, std::placeholders::_1));
+        velocity_sub = create_subscription<Twist>("cmd_vel", 10,std::bind(&DrivebaseControl::drivebase_HandleVelocityCommand, this, _1));
         
         state_subscribers.push_back(sub_robot_enabled);
         state_subscribers.push_back(sub_manual_enabled);
@@ -130,7 +132,9 @@ private:
     }
 
     void createTimers() {
-        heartbeat_timer = create_wall_timer(5s, std::bind(&DrivebaseControl::sendMotorHeartbeat, this));
+        timer_heartbeat = create_wall_timer(3s, std::bind(&DrivebaseControl::sendMotorHeartbeat, this));
+        timer_temp_monitor = create_wall_timer(3s, std::bind(&DrivebaseControl::monitorTemperatures, this));
+        timer_motor_integrity = create_wall_timer(3s, std::bind(&DrivebaseControl::checkMotorFaults, this));
     }
 
    void configureDrivebase() {
@@ -141,11 +145,11 @@ private:
         };
         
         for (SparkMax& motor : motors) {
-            motor.SetIdleMode(IdleMode::kBrake);
+            motor.SetIdleMode(IdleMode::kCoast);
             motor.SetMotorType(MotorType::kBrushless);
             motor.BurnFlash();
         }
-
+        //verify this in JAVA FRC code
         m_right_front.SetInverted(true);
         m_right_rear.SetInverted(true);
         #endif
@@ -177,6 +181,7 @@ private:
         xbox_input.dpad_vertical = msg->axes[7];
         xbox_input.a_button = msg->buttons[0];
         xbox_input.b_button = msg->buttons[1];
+        xbox_input.y_button = msg->buttons[2];
     }
 
 
@@ -203,8 +208,8 @@ private:
         robot_actuation.wheel_speed_left =  ( linear_velocity - angular_velocity * robot_dimensions.wheel_distance / 2.0 );
         robot_actuation.wheel_speed_right = ( linear_velocity + angular_velocity * robot_dimensions.wheel_distance / 2.0 );
         
-        left_motors.SetSpeed(std::clamp(robot_actuation.wheel_speed_left, -1.0, 1.0));
-        right_motors.SetSpeed(std::clamp( robot_actuation.wheel_speed_right, -1.0, 1.0));
+        left_motors.setSpeed(std::clamp(robot_actuation.wheel_speed_left, -1.0, 1.0));
+        right_motors.setSpeed(std::clamp( robot_actuation.wheel_speed_right, -1.0, 1.0));
     }
 
     /**
@@ -218,10 +223,11 @@ private:
 /**
  * @brief Mining Belt & Leadscrew joystick interpretations
  * @note Prevents code duplication, by interpreting joystick input inside mining node
+ * @details In DiggingBelt.cpp we increase belt speed with : right/left bumpers, WHILE mining w/ Y & A in this class
  */
     void publishMiningCommands() {
         auto belt_speed = std_msgs::msg::Float64();
-        belt_speed.data = (xbox_input.right_bumper) ? 0.3 : (xbox_input.left_bumper) ? -0.3 : 0.0;
+        belt_speed.data = (xbox_input.y_button) ? 0.3 : (xbox_input.a_button) ? -0.3 : 0.0;
         RCLCPP_INFO(get_logger(),"Sending mining belt float command");
         mining_belt_pub->publish(belt_speed);
 
@@ -292,8 +298,8 @@ private:
      */
     void stopAllMotors() {
         #ifdef HARDWARE_ENABLED
-        left_motors.SetSpeed(0.0);
-        right_motors.SetSpeed(0.0);
+        left_motors.setSpeed(0.0);
+        right_motors.setSpeed(0.0);
         #endif
     }
 

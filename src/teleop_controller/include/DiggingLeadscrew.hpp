@@ -9,11 +9,12 @@
  * 
  */
 
-#pragma once
+#ifndef DIGGING_LEADSCREW_HPP
+#define DIGGING_LEADSCREW_HPP
 
 #include "core.hpp"
 
-class DiggingLeadscrew : public rclcpp::Node {
+class DiggingLeadscrew {
 public:
     /**
      * @todo Change leadscrew CAN ID to reflect their ACTUAL values
@@ -62,9 +63,6 @@ private:
     SparkMax m_leadscrew1;
     SparkMax m_leadscrew2;
     
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_publisher;
-    rclcpp::TimerBase::SharedPtr timer_;
-
     LeadscrewState leadscrew_state = LeadscrewState::Traveling;
     bool leadscrew_initialized = false;
     const double LEADSCREW_MAX_ERROR = 0.1;
@@ -76,4 +74,7 @@ private:
     void checkLimits();
     void publishState();
     std::string stateToString(LeadscrewState state);
+
 };
+
+#endif

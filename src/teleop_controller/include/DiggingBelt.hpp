@@ -8,32 +8,30 @@
  * @copyright Copyright (c) 2025
  * 
  */
-#pragma once
+
+#ifndef DIGGING_BELT_HPP
+#define DIGGING_BELT_HPP
 
 #include "core.hpp"
 
-class DiggingBelt : public rclcpp::Node {
+class DiggingBelt {
 public:
 
     const uint8_t BELT_1_CAN_ID = 5;
     const uint8_t BELT_2_CAN_ID = 6;
+    bool belt_running = false;
     DiggingBelt();
+
 
     void setBeltSpeed(double speed);
     void runBelt(bool reverse);
     void stopBelt();
-    bool isBeltRunning() const { return belt_running_; }
+    bool isBeltRunning() const { return belt_running; }
 
 private:
     SparkMax m_belt1;
     SparkMax m_belt2;
-    std::unique_ptr<PIDController> p_belt;
     
-    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr velocity_publisher;
-    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr temperature_publisher;
-    rclcpp::TimerBase::SharedPtr timer_;
-
-    bool belt_running = false;
     int belt_speed = 11000;  // Default speed
     
     /**
@@ -50,4 +48,8 @@ private:
     void periodic();
     void reportSensors();
     void configurePID();
+
 };
+
+
+#endif
