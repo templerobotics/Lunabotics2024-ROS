@@ -1,3 +1,12 @@
+/**
+ * @file core.hpp
+ * @author Jaden Howard (jaseanhow@gmail.com or tun85812@temple.edu)
+ * @brief Defines main Teleop : Constants / Imports / Enums & Structs
+ * @version 0.1
+ * @date 2025-01-13
+ * @copyright Copyright (c) 2025
+ */
+
 #pragma once
 
 /*  ROS2 Headers  */
@@ -24,6 +33,7 @@
 #include <SparkBase.hpp> 
 #include <SparkFlex.hpp>
 #include <SparkMax.hpp>
+#include <PIDController.hpp>
 
 
 /* START : XBOX Teleoperation */
@@ -37,15 +47,13 @@
 #include <std_srvs/srv/trigger.hpp>
 #include "teleop_controller/srv/set_parameter.hpp"  // generated from .srv file
 
-#include "DiggingLeadscrew.hpp"
-#include "DiggingBelt.hpp"
-#include "MotorControllerGroup.hpp"
-#include "PIDController.hpp"
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
+
 using JoyMsg = sensor_msgs::msg::Joy::SharedPtr;
 using Joy = sensor_msgs::msg::Joy;
+using JoyShared = sensor_msgs::msg::Joy::SharedPtr;
 using JoySubscription = rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr;
 using Twist = geometry_msgs::msg::Twist;
 using TwistSubscription = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr;
@@ -54,7 +62,7 @@ using VelocitySubscriber = rclcpp::Subscription<geometry_msgs::msg::Twist>::Shar
 using Float64Publisher = rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr;
 using Float64Subscriber = rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr;
 using Float64 = std_msgs::msg::Float64;
-
+using Float64Shared = std_msgs::msg::Float64::SharedPtr;
 using BoolPublisher = rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr;
 using BoolSubscriber = rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr;
 using msg_Bool = std_msgs::msg::Bool;
@@ -67,7 +75,6 @@ using SetParameterClient = rclcpp::Client<teleop_controller::srv::SetParameter>;
 using SetParameterClientSharedPtr = std::shared_ptr<SetParameterClient>;
 
 
-
 typedef struct{
     bool emergency_stop_button;
     bool manual_mode_button;
@@ -78,20 +85,18 @@ typedef struct{
     bool y_button;
     double joystick_turn_input;
     double joystick_forward_input;
-    //double secondary_vertical_input;
     double left_bumper, right_bumper,throttle_backwards, throttle_forward;
     double dpad_horizontal, dpad_vertical;
 }XBOX_JOYSTICK_INPUT_t;
 
 
 /**
- * @note Drivebase Scaling Factor: Actuating via trigger can be wonky, so user can use x/y along with trigger to drive at certain speeds 
- * 
+ * @note Drivebase Scaling Factor: Precise driving via trigger can be hard. Driver can use x/y along with trigger to drive at certain speeds 
  */
 typedef struct{
     double speed_lift_actuator;
     double speed_tilt_actuator;
-    double speed_scaling_factor_drivebase; //
+    double speed_scaling_factor_drivebase; 
     double speed_multiplier_mining; 
     double speed_multiplier_dumping;
     double velocity_scaling = 0.75;
@@ -106,8 +111,8 @@ typedef struct{
 }ROBOTSTATE_t;
 
 /**
- * @note wheel distance value is arbitrary as of Jan 10, 2025. Waiting for final robot design
- * 
+ * @note wheel distance value is arbitrary as of Jan 10, 2025. Wait for final robot design to determine this value
+ * @note wheel_radius might be a constant, but check FRC JAVA code & grayson's teleop usage to determine.
  */
 typedef struct{
     double wheel_radius;
@@ -115,15 +120,34 @@ typedef struct{
     double voltage_limit;
 }ROBOT_LIMITS_t;
 
-/* Question : Make Leadscrews/Limit switches C++ classes or this is enough? */
-enum class LeadScrewState {
-    Extended,
-    Retracted,
-    Traveling,
-    FullyExtended
-};
 
 
+
+
+/**
+ * @todo Change CAN IDs to reflect their ACTUAL values based on the robot final model
+ */
+constexpr uint8_t LEADSCREW_1_CAN_ID = 7;
+constexpr uint8_t LEADSCREW_2_CAN_ID = 8;
+constexpr uint8_t BELT_1_CAN_ID = 5;
+constexpr uint8_t BELT_2_CAN_ID = 6;
+constexpr double LEADSCREW_MAX_ERROR = 0.1;
+constexpr double LEADSCREW_MAX_TRAVEL = 10.0;
+
+/**
+ * @todo Get the ACTUAL PID constants or if they exist in some version of the FRC JAVA code, use those constants.
+*/
+const double BELT_VELOCITY_SCALAR = 1.0;
+const double BELT_kP = 0.0; 
+const double BELT_kI = 0.0;
+const double BELT_kD = 0.0;
+const double BELT_kIZ = 0.0;
+const double BELT_kFF = 0.0;
+
+
+/**
+ * @todo Decide if RobotSide & MechanismPosition enums are needed. Consult FRC JAVA code
+ */
 enum class RobotSide{
     LEFT,
     RIGHT,

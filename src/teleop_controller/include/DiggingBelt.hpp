@@ -1,55 +1,47 @@
-/**
- * @file DiggingBelt.hpp
- * @author Jaden Howard (jaseanhow@gmail.com or tun85812@temple.edu)
- * @brief Digging Belt Header file --> Mimics FRC Java
- * @version 0.1
- * @date 2025-01-11
- * 
- * @copyright Copyright (c) 2025
- * 
- */
-
-#ifndef DIGGING_BELT_HPP
-#define DIGGING_BELT_HPP
+#pragma once
 
 #include "core.hpp"
 
-class DiggingBelt {
+class DiggingBelt : public rclcpp::Node {
 public:
-
-    const uint8_t BELT_1_CAN_ID = 5;
-    const uint8_t BELT_2_CAN_ID = 6;
-    bool belt_running = false;
     DiggingBelt();
-
-
     void setBeltSpeed(double speed);
     void runBelt(bool reverse);
     void stopBelt();
-    bool isBeltRunning() const { return belt_running; }
+    bool isRunning() const { return belt_running; }
 
 private:
+    /**
+     * @brief required hardware
+     */
     SparkMax m_belt1;
     SparkMax m_belt2;
-    
-    int belt_speed = 11000;  // Default speed
+    std::unique_ptr<PIDController> p_belt;
     
     /**
-     * @todo Add PID constants
+     * @brief state variables
      */
-    const double BELT_VELOCITY_SCALAR = 1.0;
-    const double BELT_kP = 0.0; 
-    const double BELT_kI = 0.0;
-    const double BELT_kD = 0.0;
-    const double BELT_kIZ = 0.0;
-    const double BELT_kFF = 0.0;
+    double current_speed{0.0};
+    double belt_speed{0.5};
+    const double SPEED_INCREMENT{0.1};
+    bool belt_running{false};  // Keep only one declaration
+    XBOX_JOYSTICK_INPUT_t xbox_input;
 
+    /**
+    * @brief core functionality
+    */
     void configureBelts();
-    void periodic();
-    void reportSensors();
     void configurePID();
+    void reportSensors();
+    void handleSpeedCommand(const Float64Shared msg);
+    void OperatorDigging(const JoyShared msg);
+    void periodic();
 
+protected:
+    Float64Publisher velocity_pub;
+    Float64Publisher temperature_pub;
+    Float64Subscriber mining_belt_speed_sub;
+    JoySubscription alter_mining_belt_speed;
+    rclcpp::TimerBase::SharedPtr timer_diagnostics;
+   
 };
-
-
-#endif

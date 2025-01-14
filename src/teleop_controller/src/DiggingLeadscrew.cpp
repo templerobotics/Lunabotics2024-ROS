@@ -11,20 +11,19 @@
 
 #include "core.hpp"
 #include "DiggingLeadscrew.hpp"
+#include "DiggingBelt.hpp"
 
-class DiggingLeadscrew : public rclcpp::Node{ 
+DiggingLeadscrew::DiggingLeadscrew()
 
 public: 
-    DiggingLeadscrew()
     : Node("digging_leadscrew")
     , m_leadscrew1("can0", LEADSCREW_1_CAN_ID)
     , m_leadscrew2("can0", LEADSCREW_2_CAN_ID)
 {
     configureLimitSwitches();
     
-    // Set up follower config
     m_leadscrew2.SetFollowerID(LEADSCREW_1_CAN_ID);
-    m_leadscrew2.SetFollowerConfig(1);  // Basic follower mode
+    m_leadscrew2.SetFollowerConfig(1);  // follower mode
     
     m_leadscrew1.BurnFlash();
     m_leadscrew2.BurnFlash();
@@ -37,20 +36,17 @@ public:
     RCLCPP_INFO(get_logger(), "Digging Leadscrew initialized");
 }
 
-
 private:
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub;
-    rclcpp::TimerBase::SharedPtr timer_diagnostics;
-    Float64Subscriber leadscrew_speed_sub;
-    Float64Subscriber belt_speed_sub;    
-
-    void handleMiningLeadscrewSpeedCommand(const std_msgs::msg::Float64::SharedPtr msg) {
+    
+    void handleMiningLeadscrewSpeedCommand(const Float64Shared msg) {
         setLeadscrewSpeed(msg->data); 
     }
 
-    //review if this implementation makes sense or not
-    void handleMiningBeltSpeed(const std_msgs::msg::Float64::SharedPtr msg){
-        DiggingBelt::setBeltSpeed(msg->data);
+    /**
+     * @todo have the setBeltFunction() accept the Belt as an argument
+     */
+    void handleMiningBeltSpeed(const Float64Shared msg){
+        setBeltSpeed(msg->data);
     }
 
     void DiggingLeadscrew::configureLimitSwitches() {
@@ -156,7 +152,7 @@ private:
         return leadscrew_state;
     }
 
-};
+
 
 int main(int argc, char* argv[]) {
     rclcpp::init(argc, argv);

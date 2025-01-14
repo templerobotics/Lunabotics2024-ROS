@@ -1,7 +1,7 @@
 /**
  * @file MotorControllerGroup.hpp
  * @author Jaden Howard (jaseanhow@gmail.com or tun85812@temple.edu)
- * @brief Motor Controller Group Header file --> Mimic FRC Java
+ * @brief Motor Controller Group Header file --> Mimic FRC Java. Drivebase diff drive Motor Groups
  * @version 0.1
  * @date 2025-01-11
  * 
@@ -9,12 +9,11 @@
  * 
  */
 
-#ifndef MOTOR_CONTROLLER_GROUP_HPP
-#define MOTOR_CONTROLLER_GROUP_HPP
+#pragma once
 
 #include "core.hpp"
 
-// Drivebase diff drive Motor Groups
+
 class MotorControllerGroup {
 private:
     SparkMax& motor1;
@@ -48,6 +47,3 @@ public:
         motor2.SetVoltage(0);
     }
 };
-
-
-#endif

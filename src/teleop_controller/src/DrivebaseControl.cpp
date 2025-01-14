@@ -17,6 +17,7 @@
  */
 
 #include "core.hpp"
+#include "MotorControllerGroup.hpp"
 
 class DrivebaseControl : public rclcpp::Node {
 public:
@@ -48,7 +49,10 @@ public:
 
 private:
     //drivebase core
-    SparkMax m_left_front, m_left_rear, m_right_front, m_right_rear;
+    SparkMax m_left_front;
+    SparkMax m_left_rear;
+    SparkMax m_right_front;
+    SparkMax m_right_rear;
     MotorControllerGroup left_motors, right_motors;
 
     //communication interfaces
@@ -157,7 +161,7 @@ private:
 
     void handleJoystickInput(const JoyMsg& msg) {
         if (!isRobotOperational()) {
-            return RCLCPP_ERROR(get_logger(),"ERROR! Robot is NOT operational!");
+            RCLCPP_ERROR(get_logger(),"ERROR! Robot is NOT operational!");
         }
 
         parseControllerInput(msg);
