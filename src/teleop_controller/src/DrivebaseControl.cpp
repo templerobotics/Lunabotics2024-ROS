@@ -159,7 +159,7 @@ private:
         #endif
     }
 
-    void handleJoystickInput(const JoyMsg& msg) {
+    void handleJoystickInput(const JoyMsg msg) {
         if (!isRobotOperational()) {
             RCLCPP_ERROR(get_logger(),"ERROR! Robot is NOT operational!");
         }
@@ -173,7 +173,7 @@ private:
         return !robot_state.robot_disabled && robot_state.manual_enabled && robot_state.XBOX;
     }
 
-    void parseControllerInput(const JoyMsg& msg) {
+    void parseControllerInput(const JoyMsg msg) {
         xbox_input.joystick_turn_input = msg->axes[0];
         xbox_input.joystick_forward_input = msg->axes[1];
         xbox_input.throttle_backwards = msg->axes[2];

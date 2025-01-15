@@ -146,7 +146,8 @@ const double BELT_kFF = 0.0;
 
 
 /**
- * @todo Decide if RobotSide & MechanismPosition enums are needed. Consult FRC JAVA code
+ * @note Used to set LeadScrew Speed 
+ * @todo add Leadscrew function set raw speed based on DiggingLeadscew.java in FRC JAVA code
  */
 enum class RobotSide{
     LEFT,

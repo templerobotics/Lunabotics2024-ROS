@@ -65,13 +65,14 @@ private:
     void periodic();
     void checkLimits();
     void publishState();
+    void handleMiningLeadscrewSpeed(const Float64Shared msg);
     std::string stateToString(LeadscrewState state);
 
 protected:
+    
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub;
     rclcpp::TimerBase::SharedPtr timer_diagnostics;
     Float64Subscriber leadscrew_speed_sub;
-    Float64Subscriber belt_speed_sub;  
 
 };
 
