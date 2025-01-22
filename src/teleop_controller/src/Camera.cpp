@@ -10,7 +10,7 @@ public:
     Camera() 
     : Node("camera_livestream")
     {
-
+        
     }
 
 
