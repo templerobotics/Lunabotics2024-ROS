@@ -133,7 +133,8 @@ constexpr uint8_t BELT_1_CAN_ID = 5;
 constexpr uint8_t BELT_2_CAN_ID = 6;
 constexpr double LEADSCREW_MAX_ERROR = 0.1;
 constexpr double LEADSCREW_MAX_TRAVEL = 10.0;
-
+constexpr uint8_t DUMPING_LEFT_CAN_ID = 13;
+constexpr uint8_t DUMPING_RIGHT_CAN_ID = 14;
 /**
  * @todo Get the ACTUAL PID constants or if they exist in some version of the FRC JAVA code, use those constants.
 */
@@ -143,6 +144,12 @@ const double BELT_kI = 0.0;
 const double BELT_kD = 0.0;
 const double BELT_kIZ = 0.0;
 const double BELT_kFF = 0.0;
+
+
+
+enum class LinearActuatorState {
+		Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded
+};
 
 
 /**

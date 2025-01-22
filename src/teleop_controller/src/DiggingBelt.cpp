@@ -18,20 +18,12 @@ DiggingBelt::DiggingBelt()
 {
     velocity_pub = this->create_publisher<Float64>("belt/velocity", 10);
     temperature_pub = this->create_publisher<Float64>("belt/temperature", 10);
-    
     timer_diagnostics = this->create_wall_timer(100ms, std::bind(&DiggingBelt::periodic, this));
+     /**
+     * @brief sub to published topic from Drivebase Control
+     */
+    mining_belt_speed_sub = this->create_subscription<Float64>("mining/belt_speed", 10,std::bind(&DiggingBelt::handleDiggingSpeed, this, std::placeholders::_1));
     
-    mining_belt_speed_sub = this->create_subscription<Float64>(
-        "mining/belt_speed", 
-        10,std::bind(&DiggingBelt::handleSpeedCommand, this, std::placeholders::_1)
-    );
-    
-    alter_mining_belt_speed = this->create_subscription<Joy>(
-        "joy", 
-        10, 
-        std::bind(&DiggingBelt::OperatorDigging, this, std::placeholders::_1)
-    );
-
     configureBelts();
     configurePID();
     
@@ -66,25 +58,8 @@ void DiggingBelt::periodic() {
     reportSensors();
 }
 
-void DiggingBelt::OperatorDigging(const JoyShared msg) {
-    xbox_input.left_bumper = msg->buttons[4];
-    xbox_input.right_bumper = msg->buttons[5];
-    xbox_input.y_button = msg->buttons[3];
-    xbox_input.a_button = msg->buttons[0];
 
-    if(xbox_input.right_bumper && xbox_input.y_button) {
-        current_speed = std::min(1.0, current_speed + SPEED_INCREMENT);
-    } else if(xbox_input.left_bumper && xbox_input.y_button) {
-        current_speed = std::max(-1.0, current_speed - SPEED_INCREMENT);
-    } else if(xbox_input.a_button && xbox_input.right_bumper) {
-        current_speed = std::min(1.0, current_speed + SPEED_INCREMENT);
-    } else if(xbox_input.a_button && xbox_input.left_bumper) {
-        current_speed = std::max(-1.0, current_speed - SPEED_INCREMENT);
-    }
-    setBeltSpeed(current_speed);
-}
-
-void DiggingBelt::handleSpeedCommand(const Float64Shared msg) {
+void DiggingBelt::handleDiggingSpeed(const Float64Shared msg) {
     setBeltSpeed(msg->data);  
 }
 

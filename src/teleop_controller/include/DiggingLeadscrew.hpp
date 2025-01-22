@@ -15,7 +15,7 @@
 
 /**
  * @brief Fault IDs based on REV documentation
- * @todo Are these values anything more than an error library in FRC? I'd assume these are tied to physical hardware. Do research
+ * @todo Are these values anything more than an error library in FRC? I'd assume these are tied to physical hardware. Do research to determine if these are "needed"
  */
 enum class FaultBits : uint16_t {
     kHardLimitFwd = 0,    // Forward limit switch

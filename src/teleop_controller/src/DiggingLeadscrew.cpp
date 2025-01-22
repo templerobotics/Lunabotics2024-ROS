@@ -28,11 +28,14 @@ DiggingLeadscrew::DiggingLeadscrew()
 
     state_pub = create_publisher<std_msgs::msg::String>("leadscrew/state", 10);
     timer_diagnostics = create_wall_timer(std::chrono::milliseconds(100), std::bind(&DiggingLeadscrew::periodic, this));
+     /**
+     * @brief sub to published topic from Drivebase Control
+     */
     leadscrew_speed_sub = create_subscription<Float64>("mining/leadscrew_speed", 10,std::bind(&DiggingLeadscrew::handleMiningLeadscrewSpeed, this, std::placeholders::_1));
     
     RCLCPP_INFO(get_logger(), "Digging Leadscrew initialized");
 }
-
+    
     void DiggingLeadscrew::handleMiningLeadscrewSpeed(const Float64Shared msg){
         auto temp = msg->data;
         printf("LEADSCREW SPEED = [%f]/n",temp);

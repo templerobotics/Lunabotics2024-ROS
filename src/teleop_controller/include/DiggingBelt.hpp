@@ -33,15 +33,13 @@ private:
     void configureBelts();
     void configurePID();
     void reportSensors();
-    void handleSpeedCommand(const Float64Shared msg);
-    void OperatorDigging(const JoyShared msg);
+    void handleDiggingSpeed(const Float64Shared msg);
     void periodic();
 
 protected:
     Float64Publisher velocity_pub;
     Float64Publisher temperature_pub;
     Float64Subscriber mining_belt_speed_sub;
-    JoySubscription alter_mining_belt_speed;
     rclcpp::TimerBase::SharedPtr timer_diagnostics;
    
 };

@@ -159,6 +159,10 @@ private:
         #endif
     }
 
+    /**
+     * @brief interprets XBOX commands for drivebase & robot subsystems like : Mining/Digging & Dumping(conveyor belt & latch)
+     * @note I tried to call wrap these function calls within this function to prevent having to interpret JoyMSG commands in every single subsystem file
+     */
     void handleJoystickInput(const JoyMsg msg) {
         if (!isRobotOperational()) {
             RCLCPP_ERROR(get_logger(),"ERROR! Robot is NOT operational!");
@@ -242,7 +246,7 @@ private:
     }
 
     /**
-     * @brief Dumping System float commands sent
+     * @brief Dumping System commands sent packaged as a float.
      * @note Prevents code duplication, by interpreting joystick input inside dumping node
      */
     void publishDumpingCommands() {
