@@ -46,7 +46,8 @@
 #include "rcl_interfaces/msg/parameter_descriptor.hpp"
 #include <std_srvs/srv/trigger.hpp>
 #include "teleop_controller/srv/set_parameter.hpp"  // generated from .srv file
-
+#include "sensor_msgs/msg/camera_info.hpp"
+#include "sensor_msgs/msg/image.hpp"
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -73,7 +74,7 @@ using ParamEventHandler = std::shared_ptr<rclcpp::ParameterEventHandler>;
 using SetParamsRes = rcl_interfaces::msg::SetParametersResult;
 using SetParameterClient = rclcpp::Client<teleop_controller::srv::SetParameter>;
 using SetParameterClientSharedPtr = std::shared_ptr<SetParameterClient>;
-
+using CameraImageSub = rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr;
 
 typedef struct{
     bool emergency_stop_button;
@@ -121,20 +122,17 @@ typedef struct{
 }ROBOT_LIMITS_t;
 
 
-
-
-
 /**
  * @todo Change CAN IDs to reflect their ACTUAL values based on the robot final model
  */
-constexpr uint8_t LEADSCREW_1_CAN_ID = 7;
-constexpr uint8_t LEADSCREW_2_CAN_ID = 8;
-constexpr uint8_t BELT_1_CAN_ID = 5;
-constexpr uint8_t BELT_2_CAN_ID = 6;
-constexpr double LEADSCREW_MAX_ERROR = 0.1;
-constexpr double LEADSCREW_MAX_TRAVEL = 10.0;
-constexpr uint8_t DUMPING_LEFT_CAN_ID = 13;
-constexpr uint8_t DUMPING_RIGHT_CAN_ID = 14;
+const uint8_t LEADSCREW_1_CAN_ID = 7;
+const uint8_t LEADSCREW_2_CAN_ID = 8;
+const uint8_t BELT_1_CAN_ID = 5;
+const uint8_t BELT_2_CAN_ID = 6;
+const double LEADSCREW_MAX_ERROR = 0.1;
+const double LEADSCREW_MAX_TRAVEL = 10.0;
+const uint8_t DUMPING_LEFT_CAN_ID = 13;
+const uint8_t DUMPING_RIGHT_CAN_ID = 14;
 /**
  * @todo Get the ACTUAL PID constants or if they exist in some version of the FRC JAVA code, use those constants.
 */
@@ -145,12 +143,9 @@ const double BELT_kD = 0.0;
 const double BELT_kIZ = 0.0;
 const double BELT_kFF = 0.0;
 
-
-
 enum class LinearActuatorState {
 		Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded
 };
-
 
 /**
  * @note Used to set LeadScrew Speed 
@@ -165,6 +160,14 @@ enum class MechanismPosition{
     TOP,
     BOTTOM
 };
+
+
+typedef struct{
+    std::string path;
+    uint8_t cam_id;
+}Camera_t;
+
+
 
 /*END : XBOX Teleoperation*/
 
