@@ -75,6 +75,8 @@ using SetParamsRes = rcl_interfaces::msg::SetParametersResult;
 using SetParameterClient = rclcpp::Client<teleop_controller::srv::SetParameter>;
 using SetParameterClientSharedPtr = std::shared_ptr<SetParameterClient>;
 using CameraImageSub = rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr;
+using CameraImagePub = rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr;
+
 
 typedef struct{
     bool emergency_stop_button;

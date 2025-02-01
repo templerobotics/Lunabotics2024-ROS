@@ -1,3 +1,9 @@
+/**
+ * @brief Node pertaining to our Robot's dumping conveyor belt
+ * @note Conveyor belt speed should be LESS than mining belt speed, which is 10.
+ * @details mining_belt_pub = create_publisher<Float64>("mining/belt_speed", 10);
+ * @todo Review the function " void publishDumpingCommands() " in DrivebaseControl.cpp file. Might want to move functionality to this file. IDK yet
+ */
 #include "core.hpp"
 #include "Dumping.hpp"
 

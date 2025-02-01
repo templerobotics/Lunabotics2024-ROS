@@ -4,7 +4,8 @@
  * @brief Robot Mining Subsystem - Belt / Leadscrews / Limit Switches
  * @version 0.1
  * @date 2025-01-12
- * 
+ * @todo FaultBits carry the same significance/meaning in my code as it does the WPILIB FRC Java? 
+ * @todo Verifiy that code that's used at runtime in FRC is used in this ROS code as well
  * @copyright Copyright (c) 2025
  * 
  */

@@ -9,23 +9,19 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    # Declare launch arguments
     use_sim_time = DeclareLaunchArgument(
         'use_sim_time',
         default_value='true',
         description='Use simulation (Gazebo) clock if true'
     )
 
-    # Get directories
     robot_description_pkg = get_package_share_directory('robot_description')
     gazebo_ros_pkg = get_package_share_directory('gazebo_ros')
     
-    # Get file paths - updated for your package structure
     urdf_path = os.path.join(robot_description_pkg, 'urdf', 'david.urdf.xacro')
     controller_config_path = os.path.join(robot_description_pkg, 'config', 'gazebo_robot_params.yaml')
     gazebo_launch_path = os.path.join(gazebo_ros_pkg, 'launch', 'gazebo.launch.py')
     
-    # Robot state publisher
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -36,7 +32,7 @@ def generate_launch_description():
         output='screen'
     )
     
-    # Gazebo
+    
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(gazebo_launch_path),
         launch_arguments={
@@ -45,7 +41,6 @@ def generate_launch_description():
         }.items()
     )
     
-    # Spawn robot
     spawn_robot = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
@@ -57,7 +52,6 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Joint state broadcaster
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
@@ -68,7 +62,6 @@ def generate_launch_description():
         output='screen'
     )
     
-    # Differential drive controller
     diff_drive_controller_spawner = Node(
         package='controller_manager',
         executable='spawner',
@@ -92,7 +85,6 @@ def generate_launch_description():
         }]
     )
     
-    # Teleop state manager
     teleop_state_manager = Node(
         package='teleop_controller',
         executable='teleop_state_manager',
@@ -107,7 +99,6 @@ def generate_launch_description():
         output='screen'
     )
     
-    # Teleop control node
     teleop_control = Node(
         package='teleop_controller',
         executable='teleop_control',
