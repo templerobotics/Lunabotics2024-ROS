@@ -12,9 +12,7 @@ public:
     Camera() 
     : Node("cameras")
     {     
-
         config_cameras();
-
     }
 
 private:
