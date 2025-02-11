@@ -151,6 +151,7 @@ private:
         for (SparkMax& motor : motors) {
             motor.SetIdleMode(IdleMode::kCoast);
             motor.SetMotorType(MotorType::kBrushless);
+            motor.SetVoltage(0.0);
             motor.BurnFlash();
         }
         //verify this in JAVA FRC code
@@ -178,18 +179,19 @@ private:
     }
 
     void parseControllerInput(const JoyMsg msg) {
-        xbox_input.joystick_turn_input = msg->axes[0];
-        xbox_input.joystick_forward_input = msg->axes[1];
-        xbox_input.throttle_backwards = msg->axes[2];
-        xbox_input.throttle_forward = msg->axes[5];
-        
+        xbox_input.joystick_turn_input = msg->axes[0];        // Left Stick X (Horizontal) - Turn input
+        xbox_input.joystick_forward_input = msg->axes[1];     // Left Stick Y (Vertical) - Forward input
+        xbox_input.throttle_backwards = msg->axes[2];         // Left Trigger - Throttle backwards (Negative)
+        xbox_input.throttle_forward = msg->axes[3];           // Right Trigger - Throttle forward (Positive)
+
         // Parse other inputs for subsystem control
-        xbox_input.right_bumper = msg->buttons[5];
-        xbox_input.left_bumper = msg->buttons[4];
-        xbox_input.dpad_vertical = msg->axes[7];
-        xbox_input.a_button = msg->buttons[0];
-        xbox_input.b_button = msg->buttons[1];
-        xbox_input.y_button = msg->buttons[2];
+        xbox_input.right_bumper = msg->buttons[5];            // Right Bumper (Button 5)
+        xbox_input.left_bumper = msg->buttons[4];             // Left Bumper (Button 4)
+        xbox_input.dpad_vertical = msg->axes[7];              // D-pad vertical (Up/Down)
+        xbox_input.a_button = msg->buttons[0];                // A Button
+        xbox_input.b_button = msg->buttons[1];                // B Button
+        xbox_input.y_button = msg->buttons[2];                // Y Button
+
     }
 
 
@@ -218,6 +220,7 @@ private:
         
         left_motors.setSpeed(std::clamp(robot_actuation.wheel_speed_left, -1.0, 1.0));
         right_motors.setSpeed(std::clamp( robot_actuation.wheel_speed_right, -1.0, 1.0));
+        
     }
 
     /**
@@ -308,6 +311,10 @@ private:
         #ifdef HARDWARE_ENABLED
         left_motors.setSpeed(0.0);
         right_motors.setSpeed(0.0);
+        m_left_front.SetVoltage(0.0);
+        m_left_rear.SetVoltage(0.0);
+        m_right_front.SetVoltage(0.0);
+        m_right_rear.SetVoltage(0.0);
         #endif
     }
 

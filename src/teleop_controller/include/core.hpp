@@ -123,6 +123,7 @@ typedef struct{
     double voltage_limit;
 }ROBOT_LIMITS_t;
 
+const uint8_t MAX_VOLTAGE = 12;
 
 /**
  * @todo Change CAN IDs to reflect their ACTUAL values based on the robot final model
@@ -144,6 +145,7 @@ const double BELT_kI = 0.0;
 const double BELT_kD = 0.0;
 const double BELT_kIZ = 0.0;
 const double BELT_kFF = 0.0;
+
 
 enum class LinearActuatorState {
 		Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded

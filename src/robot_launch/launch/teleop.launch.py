@@ -5,19 +5,6 @@ from launch.substitutions import LaunchConfiguration
 import subprocess
 
 def generate_launch_description():
-    # CAN interface setup commands. Need to mirrow how Sparkcan initializes CAN interface
-    can_setup_cmd = ExecuteProcess(
-        cmd=['bash', '-c', """
-            sudo modprobe can
-            sudo modprobe can_raw
-            sudo modprobe peak_usb
-            sudo ip link set can0 type can bitrate 1000000
-            sudo ip link set up can0
-        """],
-        shell=True,
-        output='screen'
-    )
-
     hardware_enabled = DeclareLaunchArgument(
         'hardware_enabled',
         default_value='true',
@@ -48,7 +35,6 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        can_setup_cmd,
         hardware_enabled,
         teleop_state_manager,
         drivebase_control

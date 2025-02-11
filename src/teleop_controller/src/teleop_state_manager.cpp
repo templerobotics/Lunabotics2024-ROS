@@ -31,7 +31,7 @@ public:
         pub_xbox = this->create_publisher<msg_Bool>("robot_state/XBOX", 10);
         pub_outdoor_mode = this->create_publisher<msg_Bool>("robot_state/outdoor_mode", 10);
         
-        timer = this->create_wall_timer(5000ms, std::bind(&Teleop_State_Manager::callback_publish_states, this));
+        timer = this->create_wall_timer(20000ms, std::bind(&Teleop_State_Manager::callback_publish_states, this));
     }
 
 private:
