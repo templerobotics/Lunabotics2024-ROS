@@ -24,6 +24,13 @@ def generate_launch_description():
         output='screen'
     )
 
+    joy_node_jaden = Node(
+            package='joy',
+            executable='joy_node',
+            name='joy_node',
+            output='screen',
+        )
+
     drivebase_control = Node(
         package='teleop_controller',
         executable='drivebase_control',
@@ -37,5 +44,6 @@ def generate_launch_description():
     return LaunchDescription([
         hardware_enabled,
         teleop_state_manager,
-        drivebase_control
+        drivebase_control,
+        joy_node_jaden
     ])

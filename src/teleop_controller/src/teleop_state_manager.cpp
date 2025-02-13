@@ -195,19 +195,19 @@ rcl_interfaces::msg::SetParametersResult validate_parameters(const ParamVector &
 void callback_publish_states() {
         auto msg = msg_Bool();
         msg.data = robot_state.robot_disabled;
-        RCLCPP_INFO(this->get_logger(), "Publishing: ROBOT DISABLED [ %s ]", msg.data ? "true" : "false");
+        //RCLCPP_INFO(this->get_logger(), "Publishing: ROBOT DISABLED [ %s ]", msg.data ? "true" : "false");
         pub_robot_enabled->publish(msg);
 
         msg.data = robot_state.manual_enabled;
-        RCLCPP_INFO(this->get_logger(), "Publishing: MANUAL ENABLED [ %s ]", msg.data ? "true" : "false");
+        //RCLCPP_INFO(this->get_logger(), "Publishing: MANUAL ENABLED [ %s ]", msg.data ? "true" : "false");
         pub_manual_enabled->publish(msg);
 
         msg.data = robot_state.outdoor_mode;
-        RCLCPP_INFO(this->get_logger(), "Publishing: OUTDOOR MODE [ %s ]", msg.data ? "true" : "false");
+        //RCLCPP_INFO(this->get_logger(), "Publishing: OUTDOOR MODE [ %s ]", msg.data ? "true" : "false");
         pub_outdoor_mode->publish(msg);
 
         msg.data = robot_state.XBOX;
-        RCLCPP_INFO(this->get_logger(), "Publishing: XBOX [ %s]", msg.data ? "true" : "false");
+        //RCLCPP_INFO(this->get_logger(), "Publishing: XBOX [ %s]", msg.data ? "true" : "false");
         pub_xbox->publish(msg);
 
 }

@@ -168,7 +168,7 @@ private:
         if (!isRobotOperational()) {
             RCLCPP_ERROR(get_logger(),"ERROR! Robot is NOT operational!");
         }
-
+        RCLCPP_INFO(get_logger(),"ROBOT IS OPERATING SUCCESSFULLY!PARSING CONTROLLER INPUT NOW");
         parseControllerInput(msg);
         drivebase_PubTwistFromJoy();  
         publishSubsystemCommands();
@@ -178,23 +178,31 @@ private:
         return !robot_state.robot_disabled && robot_state.manual_enabled && robot_state.XBOX;
     }
 
+/**
+ * @brief JoyMSG 
+ * @details Every button is correctly defined. I tested by running joy_node + ros2 topic echo
+ */
     void parseControllerInput(const JoyMsg msg) {
-        xbox_input.joystick_turn_input = msg->axes[0];        // Left Stick X (Horizontal) - Turn input
-        xbox_input.joystick_forward_input = msg->axes[1];     // Left Stick Y (Vertical) - Forward input
-        xbox_input.throttle_backwards = msg->axes[2];         // Left Trigger - Throttle backwards (Negative)
-        xbox_input.throttle_forward = msg->axes[3];           // Right Trigger - Throttle forward (Positive)
+        
+        xbox_input.joystick_turn_input = msg->axes[0];          // Left Stick X (Horizontal) - Turn input
+        xbox_input.joystick_forward_input = msg->axes[1];       // Left Stick Y (Vertical) - Forward input
+        xbox_input.throttle_backwards = msg->axes[2];           // Left Trigger - Throttle backwards (Negative)
+        xbox_input.throttle_forward = msg->axes[5];             // Right Trigger - Throttle forward (Positive)
 
-        // Parse other inputs for subsystem control
-        xbox_input.right_bumper = msg->buttons[5];            // Right Bumper (Button 5)
-        xbox_input.left_bumper = msg->buttons[4];             // Left Bumper (Button 4)
-        xbox_input.dpad_vertical = msg->axes[7];              // D-pad vertical (Up/Down)
-        xbox_input.a_button = msg->buttons[0];                // A Button
-        xbox_input.b_button = msg->buttons[1];                // B Button
-        xbox_input.y_button = msg->buttons[2];                // Y Button
+        xbox_input.right_bumper = msg->buttons[5];              // Right Bumper (Button 5)
+        xbox_input.left_bumper = msg->buttons[4];               // Left Bumper (Button 4)
+        xbox_input.dpad_vertical = msg->axes[7];                // D-pad vertical (Up/Down)
+
+        xbox_input.a_button = msg->buttons[0];                  // A Button
+        xbox_input.b_button = msg->buttons[1];                  // B Button
+        xbox_input.x_button = msg->buttons[2];                  // X Button
+        xbox_input.y_button = msg->buttons[3];                  // Y Button
 
     }
-
-
+    /**
+     * @todo Examine this function. I don't think it works correctly
+     * @todo Remove speed dampening & examine every single button mapping in the joy pipeline.  
+     */
     void drivebase_PubTwistFromJoy(){
         auto twist_msg = geometry_msgs::msg::Twist();
         robot_actuation.speed_scaling_factor_drivebase = (xbox_input.x_button && xbox_input.y_button) ? 0.3 : (xbox_input.x_button ? 0.1 : 0.6);
@@ -220,7 +228,6 @@ private:
         
         left_motors.setSpeed(std::clamp(robot_actuation.wheel_speed_left, -1.0, 1.0));
         right_motors.setSpeed(std::clamp( robot_actuation.wheel_speed_right, -1.0, 1.0));
-        
     }
 
     /**
@@ -238,7 +245,7 @@ private:
  */
     void publishMiningCommands() {
         auto belt_speed = std_msgs::msg::Float64();
-        belt_speed.data = (xbox_input.y_button) ? 0.3 : (xbox_input.a_button) ? -0.3 : 0.0;
+        belt_speed.data = (xbox_input.x_button) ? 0.3 : (xbox_input.a_button) ? -0.3 : 0.0;
         RCLCPP_INFO(get_logger(),"Sending mining belt float command");
         mining_belt_pub->publish(belt_speed);
 
@@ -262,8 +269,13 @@ private:
         dump_cmd_dump_latch.data = xbox_input.b_button ? 0.3 : 0.0;
         RCLCPP_INFO(get_logger(),"Sending dumping latch float command");
         dump_latch_pub->publish(dump_cmd_dump_latch);
+        
     }
 
+/**
+ * @brief Examine this function. Might be incorrect. Honestly do not like the vector ref wrapper stuff. 
+ * @todo examine if/when this function is called
+ */
     void sendMotorHeartbeat() {
         #ifdef HARDWARE_ENABLED
         try {
@@ -283,7 +295,6 @@ private:
         RCLCPP_DEBUG(get_logger(), "Current robot state - Manual: %s, Enabled: %s",robot_state.manual_enabled ? "true" : "false",!robot_state.robot_disabled ? "true" : "false");
     }
 
-    // State update callbacks
     void updateRobotEnabled(const msg_Bool& msg) {
         robot_state.robot_disabled = msg.data;
         if (robot_state.robot_disabled) {
@@ -338,7 +349,9 @@ private:
         }
     }
 
-
+/**
+ * @brief Examine this function. Same thing as the other function using reference wrapper.
+ */
     bool checkMotorFaults() {
         #ifdef HARDWARE_ENABLED
         std::vector<std::reference_wrapper<SparkMax>> motors = {
