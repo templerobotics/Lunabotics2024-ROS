@@ -21,7 +21,7 @@ find_package(rosidl_default_generators REQUIRED)
 # MACRO for hardware enabled. Precursor to implementing Gazebo simulation for our teleop robot. 
 # If hardware was OFF, then sim would be used to control virtual robot. NEED to add simulation specific code for that to work properly as of Jan 22 2025
 
-option(HARDWARE_ENABLED "Enable hardware support" OFF)
+option(HARDWARE_ENABLED "Enable hardware support" ON)
 if(HARDWARE_ENABLED)
     add_definitions(-DHARDWARE_ENABLED)
 endif()

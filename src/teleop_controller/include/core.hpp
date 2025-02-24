@@ -102,7 +102,7 @@ typedef struct{
     double speed_scaling_factor_drivebase; 
     double speed_multiplier_mining; 
     double speed_multiplier_dumping;
-    double velocity_scaling = 0.75;
+    double velocity_scaling = 1.0;//Was 0.75, might revert back to 0.75 later
     double wheel_speed_left, wheel_speed_right;
 }ROBOT_ACTUATION_t;
 

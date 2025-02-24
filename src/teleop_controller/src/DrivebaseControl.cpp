@@ -14,6 +14,13 @@
  *          At runtime all nodes are launched via launch file, but drivebase is the one that 
  *          interprets joystick input & publishes to subsystems: Mining & Dumping
  *          These subsystems then do their work. Would prevent duplicate code that interprets joystick input I think
+ * 
+ * 
+ * 
+ * 
+ * 
+ * @todo DEFINE THE ARRAY OF SPARKMAX MOTORS AS A GLOBAL VARIABLE FOR EACH CLASS. 
+ * @details ConfigureDrivebase() and SendMotorHeartbeat() are NOT referencing the same motors. Just use a global and it fixes this 
  */
 
 #include "core.hpp"
@@ -54,6 +61,7 @@ private:
     SparkMax m_right_front;
     SparkMax m_right_rear;
     MotorControllerGroup left_motors, right_motors;
+    
 
     //communication interfaces
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr ready_client;
@@ -141,38 +149,35 @@ private:
         timer_motor_integrity = create_wall_timer(3s, std::bind(&DrivebaseControl::checkMotorFaults, this));
     }
 
+    /**
+     * @brief initializes all 4 SparkMax & 4 NEO needed for Drivebase
+     */
    void configureDrivebase() {
         #ifdef HARDWARE_ENABLED
-        std::vector<std::reference_wrapper<SparkMax>> motors = {
-            std::ref(m_left_front), std::ref(m_left_rear),
-            std::ref(m_right_front), std::ref(m_right_rear)
-        };
         
+        std::reference_wrapper<SparkMax> motors[] = 
+        {
+            std::ref(m_left_front), 
+            std::ref(m_left_rear),
+            std::ref(m_right_front), 
+            std::ref(m_right_rear)
+        };
+       
         for (SparkMax& motor : motors) {
             motor.SetIdleMode(IdleMode::kCoast);
             motor.SetMotorType(MotorType::kBrushless);
+            motor.SetDutyCycle(0.0);
             motor.SetVoltage(0.0);
             motor.BurnFlash();
         }
-        //verify this in JAVA FRC code
+        //verify this in our JAVA FRC code. Should be correct, but just in case
         m_right_front.SetInverted(true);
         m_right_rear.SetInverted(true);
+        RCLCPP_INFO(get_logger(),"ALL SPARKMAXES/NEO MOTORS CONFIGURED! HARDWARE IS ENABLED!")
         #endif
     }
 
-    /**
-     * @brief interprets XBOX commands for drivebase & robot subsystems like : Mining/Digging & Dumping(conveyor belt & latch)
-     * @note I tried to call wrap these function calls within this function to prevent having to interpret JoyMSG commands in every single subsystem file
-     */
-    void handleJoystickInput(const JoyMsg msg) {
-        if (!isRobotOperational()) {
-            RCLCPP_ERROR(get_logger(),"ERROR! Robot is NOT operational!");
-        }
-        RCLCPP_INFO(get_logger(),"ROBOT IS OPERATING SUCCESSFULLY!PARSING CONTROLLER INPUT NOW");
-        parseControllerInput(msg);
-        drivebase_PubTwistFromJoy();  
-        publishSubsystemCommands();
-    }
+ 
 
     bool isRobotOperational() {
         return !robot_state.robot_disabled && robot_state.manual_enabled && robot_state.XBOX;
@@ -183,7 +188,6 @@ private:
  * @details Every button is correctly defined. I tested by running joy_node + ros2 topic echo
  */
     void parseControllerInput(const JoyMsg msg) {
-        
         xbox_input.joystick_turn_input = msg->axes[0];          // Left Stick X (Horizontal) - Turn input
         xbox_input.joystick_forward_input = msg->axes[1];       // Left Stick Y (Vertical) - Forward input
         xbox_input.throttle_backwards = msg->axes[2];           // Left Trigger - Throttle backwards (Negative)
@@ -197,8 +201,22 @@ private:
         xbox_input.b_button = msg->buttons[1];                  // B Button
         xbox_input.x_button = msg->buttons[2];                  // X Button
         xbox_input.y_button = msg->buttons[3];                  // Y Button
-
     }
+
+    /**
+     * @brief interprets XBOX commands for drivebase & robot subsystems like : Mining/Digging & Dumping(conveyor belt & latch)
+     * @note I tried to call wrap these function calls within this function to prevent having to interpret JoyMSG commands in every single subsystem file
+     */
+    void handleJoystickInput(const JoyMsg msg) {
+        if (!isRobotOperational()) {
+            RCLCPP_ERROR(get_logger(),"ERROR! Robot is NOT operational!");
+        }
+        RCLCPP_INFO(get_logger(),"ROBOT IS OPERATING SUCCESSFULLY!PARSING CONTROLLER INPUT NOW...");
+        parseControllerInput(msg);
+        drivebase_PubTwistFromJoy();  
+        publishSubsystemCommands();
+    }
+
     /**
      * @todo Examine this function. I don't think it works correctly
      * @todo Remove speed dampening & examine every single button mapping in the joy pipeline.  
@@ -231,6 +249,7 @@ private:
     }
 
     /**
+     * @brief Wrapper that publishes data that other subsystem can subscribe to that actuates the robot based on xbox input
      * @todo Understand how the system is engineered & the way subsystems will actually run code.
      */
     void publishSubsystemCommands() {
