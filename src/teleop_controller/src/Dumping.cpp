@@ -11,6 +11,8 @@ Dumping::Dumping()
     : Node("dumping_conveyor_belt")
     , m_dumping_left("can0", DUMPING_LEFT_CAN_ID)
     , m_dumping_right("can0", DUMPING_RIGHT_CAN_ID)
+    , m_linear_left("can0",LINEAR_LEFT_CAN_ID)
+    , m_linear_right("can0",LINEAR_RIGHT_CAN_ID)
 { 
     /**
      * @brief sub to published topic from Drivebase Control
@@ -20,6 +22,9 @@ Dumping::Dumping()
 }
 
 private:
+    /**
+     * @todo Linear actuators needed for dumping & digging. Trying to decide where to put them
+     */
     std::reference_wrapper<SparkMax> Motors_Dumping[2] = 
     {
         std::ref(m_dumping_left), 

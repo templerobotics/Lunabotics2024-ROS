@@ -34,9 +34,11 @@ DiggingBelt::DiggingBelt()
     RCLCPP_INFO(this->get_logger(), "Digging Belt initialized");
 }
 
-
 private:
-
+    /**
+     * @details Linear actuators needed for digging/dumping. I added the motors to dumping.cpp
+     * @todo Determining how I want to structure it. Not a big decision
+     */
     std::reference_wrapper<SparkMax> Motors_DiggingBelt[4] = 
     {
         std::ref(m_belt1), 
