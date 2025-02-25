@@ -16,6 +16,9 @@ DiggingBelt::DiggingBelt()
     : Node("digging_belt")
     , m_belt1("can0", BELT_1_CAN_ID)
     , m_belt2("can0", BELT_2_CAN_ID)
+    , m_linear_left("can0",LINEAR_LEFT_CAN_ID)
+    , m_linear_right("can0",LINEAR_RIGHT_CAN_ID)
+
 {
     velocity_pub = this->create_publisher<Float64>("belt/velocity", 10);
     temperature_pub = this->create_publisher<Float64>("belt/temperature", 10);
@@ -30,6 +33,17 @@ DiggingBelt::DiggingBelt()
     
     RCLCPP_INFO(this->get_logger(), "Digging Belt initialized");
 }
+
+
+private:
+
+    std::reference_wrapper<SparkMax> Motors_DiggingBelt[4] = 
+    {
+        std::ref(m_belt1), 
+        std::ref(m_belt2),
+        std::ref(m_linear_left),
+        std::ref(m_linear_right)
+    };
 
 void DiggingBelt::configureBelts() {
     // Config follower

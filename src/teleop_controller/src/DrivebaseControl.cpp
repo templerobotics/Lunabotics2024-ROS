@@ -21,6 +21,8 @@
  * 
  * @todo DEFINE THE ARRAY OF SPARKMAX MOTORS AS A GLOBAL VARIABLE FOR EACH CLASS. 
  * @details ConfigureDrivebase() and SendMotorHeartbeat() are NOT referencing the same motors. Just use a global and it fixes this 
+ * 
+ * @todo Currently 10 Sparkmax in my files. Check to see if I said we needed 10 or 12. I think we need 12 not 10
  */
 
 #include "core.hpp"
@@ -55,23 +57,29 @@ public:
     }
 
 private:
-    //drivebase core
     SparkMax m_left_front;
     SparkMax m_left_rear;
     SparkMax m_right_front;
     SparkMax m_right_rear;
     MotorControllerGroup left_motors, right_motors;
     
+    std::reference_wrapper<SparkMax> Motors_Drivebase[4] = 
+    {
+        std::ref(m_left_front), 
+        std::ref(m_left_rear),
+        std::ref(m_right_front), 
+        std::ref(m_right_rear)
+    };
 
     //communication interfaces
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr ready_client;
     SetParameterClientSharedPtr param_client;
     
-    // Publishers for subsystem commands
     VelocityPublisher drivebase_cmd_vel_pub;
     Float64Publisher mining_belt_pub;
     Float64Publisher mining_leadscrew_pub;
-    //limit switch?
+    
+    //limit switch? Consult JAVA FRC Code
     Float64Publisher dump_conveyor_pub;
     Float64Publisher dump_latch_pub;
 
@@ -86,6 +94,7 @@ private:
     ROBOTSTATE_t robot_state;
     ROBOT_LIMITS_t robot_dimensions;
     
+    // Periodic status monitoring
     rclcpp::TimerBase::SharedPtr timer_heartbeat;
     rclcpp::TimerBase::SharedPtr timer_temp_monitor;
     rclcpp::TimerBase::SharedPtr timer_motor_integrity;
@@ -154,7 +163,6 @@ private:
      */
    void configureDrivebase() {
         #ifdef HARDWARE_ENABLED
-        
         std::reference_wrapper<SparkMax> motors[] = 
         {
             std::ref(m_left_front), 
@@ -186,6 +194,7 @@ private:
 /**
  * @brief JoyMSG 
  * @details Every button is correctly defined. I tested by running joy_node + ros2 topic echo
+ * @todo Give names to all button inputs. Add 2 for Linear actuators
  */
     void parseControllerInput(const JoyMsg msg) {
         xbox_input.joystick_turn_input = msg->axes[0];          // Left Stick X (Horizontal) - Turn input

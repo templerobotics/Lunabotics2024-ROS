@@ -19,21 +19,32 @@ Dumping::Dumping()
     RCLCPP_INFO(this->get_logger(), "Dumping belt initialized!\n");
 }
 
-void Dumping::handleConveyorBeltSpeed(const Float64Shared msg) {
-    setConveyorBeltSpeed(msg->data);
-}
+private:
+    std::reference_wrapper<SparkMax> Motors_Dumping[2] = 
+    {
+        std::ref(m_dumping_left), 
+        std::ref(m_dumping_right)
+    };
 
-/**
- * @brief setting speed of conveyor belt
- */
-void Dumping::setConveyorBeltSpeed(double speed) {
-    
-    #ifdef HARDWARE_ENABLED
-    m_dumping_left.SetDutyCycle(speed);
-    m_dumping_right.SetDutyCycle(speed);
-    #endif
+public:
+    void Dumping::handleConveyorBeltSpeed(const Float64Shared msg) {
+        setConveyorBeltSpeed(msg->data);
+    }
 
-}
+    /**
+     * @brief setting speed of conveyor belt
+     */
+    void Dumping::setConveyorBeltSpeed(double speed) {
+        
+        #ifdef HARDWARE_ENABLED
+        m_dumping_left.SetDutyCycle(speed);
+        m_dumping_right.SetDutyCycle(speed);
+        #endif
+
+    }
+
+
+
 
 int main(int argc, char* argv[]) {
     rclcpp::init(argc, argv);

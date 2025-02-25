@@ -126,7 +126,7 @@ typedef struct{
 const uint8_t MAX_VOLTAGE = 12;
 
 /**
- * @todo Change CAN IDs to reflect their ACTUAL values based on the robot final model
+ * @todo Change CAN IDs to reflect their ACTUAL values based on the robot final configuration
  */
 const uint8_t LEADSCREW_1_CAN_ID = 7;
 const uint8_t LEADSCREW_2_CAN_ID = 8;
@@ -136,6 +136,9 @@ const double LEADSCREW_MAX_ERROR = 0.1;
 const double LEADSCREW_MAX_TRAVEL = 10.0;
 const uint8_t DUMPING_LEFT_CAN_ID = 13;
 const uint8_t DUMPING_RIGHT_CAN_ID = 14;
+const uint8_t LINEAR_LEFT_CAN_ID = 15;
+const uint8_t LINEAR_RIGHT_CAN_ID = 16;
+
 /**
  * @todo Get the ACTUAL PID constants or if they exist in some version of the FRC JAVA code, use those constants.
 */
