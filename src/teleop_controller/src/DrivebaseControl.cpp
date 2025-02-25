@@ -88,7 +88,7 @@ private:
     JoySubscription joy_sub;
     std::vector<BoolSubscriber> state_subscribers;
     
-    // Internal state tracking
+    // Internal state tracking. Internal meaning ONLY this node, not other nodes like DiggingBelt or Camera
     ROBOT_ACTUATION_t robot_actuation;
     XBOX_JOYSTICK_INPUT_t xbox_input;
     ROBOTSTATE_t robot_state;
@@ -160,18 +160,11 @@ private:
 
     /**
      * @brief initializes all 4 SparkMax & 4 NEO needed for Drivebase
+     * @todo Add a version of this function for EVERY teleop file. 
      */
    void configureDrivebase() {
         #ifdef HARDWARE_ENABLED
-        std::reference_wrapper<SparkMax> motors[] = 
-        {
-            std::ref(m_left_front), 
-            std::ref(m_left_rear),
-            std::ref(m_right_front), 
-            std::ref(m_right_rear)
-        };
-       
-        for (SparkMax& motor : motors) {
+        for (SparkMax& motor : Motors_Drivebase) {
             motor.SetIdleMode(IdleMode::kCoast);
             motor.SetMotorType(MotorType::kBrushless);
             motor.SetDutyCycle(0.0);
@@ -181,12 +174,13 @@ private:
         //verify this in our JAVA FRC code. Should be correct, but just in case
         m_right_front.SetInverted(true);
         m_right_rear.SetInverted(true);
-        RCLCPP_INFO(get_logger(),"ALL SPARKMAXES/NEO MOTORS CONFIGURED! HARDWARE IS ENABLED!")
+        RCLCPP_INFO(get_logger(),"ALL SPARKMAXES/NEO MOTORS CONFIGURED!")
         #endif
     }
 
- 
-
+    /**
+     * @brief Robot should not function if not operational
+     */
     bool isRobotOperational() {
         return !robot_state.robot_disabled && robot_state.manual_enabled && robot_state.XBOX;
     }
@@ -220,7 +214,7 @@ private:
         if (!isRobotOperational()) {
             RCLCPP_ERROR(get_logger(),"ERROR! Robot is NOT operational!");
         }
-        RCLCPP_INFO(get_logger(),"ROBOT IS OPERATING SUCCESSFULLY!PARSING CONTROLLER INPUT NOW...");
+        RCLCPP_INFO(get_logger(),"ROBOT IS OPERATING SUCCESSFULLY! PARSING CONTROLLER INPUT...");
         parseControllerInput(msg);
         drivebase_PubTwistFromJoy();  
         publishSubsystemCommands();
@@ -307,19 +301,13 @@ private:
     void sendMotorHeartbeat() {
         #ifdef HARDWARE_ENABLED
         try {
-            std::vector<std::reference_wrapper<SparkMax>> motors = {
-                std::ref(m_left_front), std::ref(m_left_rear),
-                std::ref(m_right_front), std::ref(m_right_rear)
-            };
-            
-            for (SparkMax& motor : motors) {
+            for (SparkMax& motor : Motors_Drivebase) {
                 motor.Heartbeat();
             }
         } catch (const std::exception& e) {
             RCLCPP_ERROR(get_logger(), "Motor heartbeat error: %s", e.what());
         }
         #endif
-        
         RCLCPP_DEBUG(get_logger(), "Current robot state - Manual: %s, Enabled: %s",robot_state.manual_enabled ? "true" : "false",!robot_state.robot_disabled ? "true" : "false");
     }
 
@@ -348,12 +336,10 @@ private:
      */
     void stopAllMotors() {
         #ifdef HARDWARE_ENABLED
-        left_motors.setSpeed(0.0);
-        right_motors.setSpeed(0.0);
-        m_left_front.SetVoltage(0.0);
-        m_left_rear.SetVoltage(0.0);
-        m_right_front.SetVoltage(0.0);
-        m_right_rear.SetVoltage(0.0);
+        for(SparkMax& motor : Motors_Drivebase){
+            motor.SetDutyCycle(0.0);
+            motor.SetVoltage(0.0);
+        }
         #endif
     }
 
@@ -382,12 +368,7 @@ private:
  */
     bool checkMotorFaults() {
         #ifdef HARDWARE_ENABLED
-        std::vector<std::reference_wrapper<SparkMax>> motors = {
-            std::ref(m_left_front), std::ref(m_left_rear),
-            std::ref(m_right_front), std::ref(m_right_rear)
-        };
-        
-        for (SparkMax& motor : motors) {
+        for (SparkMax& motor : Motors_Drivebase) {
             if (motor.GetFaults() != 0) {
                 RCLCPP_ERROR(get_logger(), "Motor fault detected!");
                 return false;
@@ -404,12 +385,7 @@ private:
     void monitorTemperatures() {
         #ifdef HARDWARE_ENABLED
         const float TEMP_THRESHOLD = 70.0;  // Celsius
-        std::vector<std::reference_wrapper<SparkMax>> motors = {
-            std::ref(m_left_front), std::ref(m_left_rear),
-            std::ref(m_right_front), std::ref(m_right_rear)
-        };
-        
-        for (SparkMax& motor : motors) {
+        for (SparkMax& motor : Motors_Drivebase) {
             float temp = motor.GetTemperature();
             if (temp > TEMP_THRESHOLD) {
                 RCLCPP_WARN(get_logger(), "Motor temperature high: %f C", temp);
