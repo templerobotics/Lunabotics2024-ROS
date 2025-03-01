@@ -77,45 +77,6 @@ using SetParameterClientSharedPtr = std::shared_ptr<SetParameterClient>;
 using CameraImageSub = rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr;
 using CameraImagePub = rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr;
 
-
-typedef struct{
-    bool emergency_stop_button;
-    bool manual_mode_button;
-    bool autonomous_mode_button;
-    bool a_button;
-    bool b_button;
-    bool x_button;
-    bool y_button;
-    double joystick_turn_input;
-    double joystick_forward_input;
-    double left_bumper, right_bumper,throttle_backwards, throttle_forward;
-    double dpad_horizontal, dpad_vertical;
-}XBOX_JOYSTICK_INPUT_t;
-
-
-/**
- * @note Drivebase Scaling Factor: Precise driving via trigger can be hard. Driver can use x/y along with trigger to drive at certain speeds 
- */
-typedef struct{
-    double speed_lift_actuator;
-    double speed_tilt_actuator;
-    double speed_scaling_factor_drivebase; 
-    double speed_multiplier_mining; 
-    double speed_multiplier_dumping;
-    double velocity_scaling = 1.0;//Was 0.75, might revert back to 0.75 later
-    double wheel_speed_left, wheel_speed_right;
-}ROBOT_ACTUATION_t;
-
-
-typedef struct{
-    bool manual_enabled;
-    bool robot_disabled; 
-    bool outdoor_mode;
-    bool XBOX;
-}ROBOTSTATE_t;
-
-
-
 const uint8_t MAX_VOLTAGE = 12;
 
 /**
@@ -142,6 +103,42 @@ const double BELT_kD = 0.0;
 const double BELT_kIZ = 0.0;
 const double BELT_kFF = 0.0;
 
+typedef struct{
+    bool a_button;
+    bool b_button;
+    bool x_button;
+    bool y_button;
+    double speed_multiplier = 0.6;
+
+    //Disregard this as of now. Will use when refactoring code to be more readable
+    bool manual_enabled;
+    bool robot_disabled;
+    bool autonomous_mode_button; // Consult MUX to determine if this is proper entry point to activate autonomy.
+    bool emergency_stop_button;
+    bool manual_mode_button;
+    double wheel_speed_left, wheel_speed_right;
+    double joystick_turn_input;
+    double joystick_forward_input;
+    double left_bumper, right_bumper,throttle_backwards, throttle_forward;
+    double dpad_horizontal, dpad_vertical;
+}XBOX_JOYSTICK_INPUT_t;
+
+
+/**
+ * @note Drivebase Scaling Factor: Precise driving via trigger can be hard. Driver can use x/y along with trigger to drive at certain speeds 
+ */
+typedef struct{
+    double speed_lift_actuator;
+    double speed_tilt_actuator;
+    double speed_scaling_factor_drivebase; 
+    double speed_multiplier_mining; 
+    double speed_multiplier_dumping;
+    double wheel_speed_left, wheel_speed_right;
+    bool manual_enabled;
+    bool robot_disabled; 
+    bool outdoor_mode;
+    bool XBOX;
+}ROBOT_ACTUATION_t;
 
 
 enum class LinearActuatorState {

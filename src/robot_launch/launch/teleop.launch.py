@@ -11,19 +11,6 @@ def generate_launch_description():
         description='Enable hardware interfaces'
     )
 
-    teleop_state_manager = Node(
-        package='teleop_controller',
-        executable='teleop_state_manager',
-        name='teleop_state_manager',
-        parameters=[{
-            'XBOX': True,
-            'manual_enabled': True,
-            'outdoor_mode': False,
-            'robot_disabled': True
-        }],
-        output='screen'
-    )
-
     joy_node_jaden = Node(
             package='joy',
             executable='joy_node',
@@ -43,7 +30,6 @@ def generate_launch_description():
 
     return LaunchDescription([
         hardware_enabled,
-        teleop_state_manager,
         drivebase_control,
         joy_node_jaden
     ])

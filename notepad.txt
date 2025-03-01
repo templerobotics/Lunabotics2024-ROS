@@ -11,3 +11,9 @@ I have sparkmax 2 & 3
 
 FIXES - Takeaways
 - Implement ALL Teleop Control inside of 1 Singular function that accepts Joy_msg
+
+
+Keep in Mind
+- If I don't put ALL teleop code in 1 file, then for Digging & Dumping, I need to redefine state variables & other stuff
+- Do I use a joy callback function in those other files as well?
+

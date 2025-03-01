@@ -19,22 +19,9 @@ Dumping::Dumping()
     RCLCPP_INFO(this->get_logger(), "Dumping belt initialized!\n");
 }
 
-
-  
-    void Dumping::handleConveyorBeltSpeed(const Float64Shared msg) {
-        setConveyorBeltSpeed(msg->data);
-    }
-
-    /**
-     * @brief setting speed of conveyor belt
-     */
-    void Dumping::setConveyorBeltSpeed(double speed) {        
-        #ifdef HARDWARE_ENABLED
-        m_dumping_left.SetDutyCycle(speed);
-        m_dumping_right.SetDutyCycle(speed);
-        #endif
-    }
-
+void Dumping::handleConveyorBeltSpeed(const Float64Shared msg){
+    RCLCPP_INFO(get_logger(),"DATA=%lf",msg->data);
+}
 
 int main(int argc, char* argv[]) {
     rclcpp::init(argc, argv);
