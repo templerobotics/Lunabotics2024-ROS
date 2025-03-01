@@ -51,6 +51,7 @@ public:
 
         #ifdef HARDWARE_ENABLED
         configureDrivebase();
+        RCLCPP_INFO(get_logger(),"DRIVEBASE SUCCESSFULLY CONFIGURED FOR HARDWARE");
         #endif
 
         RCLCPP_INFO(get_logger(), "Drivebase Control initialized and ready");
@@ -174,8 +175,9 @@ private:
         //verify this in our JAVA FRC code. Should be correct, but just in case
         m_right_front.SetInverted(true);
         m_right_rear.SetInverted(true);
-        RCLCPP_INFO(get_logger(),"ALL SPARKMAXES/NEO MOTORS CONFIGURED!")
         #endif
+        RCLCPP_INFO(get_logger(),"ALL SPARKMAXES/NEO MOTORS CONFIGURED!");
+        
     }
 
     /**
@@ -204,6 +206,9 @@ private:
         xbox_input.b_button = msg->buttons[1];                  // B Button
         xbox_input.x_button = msg->buttons[2];                  // X Button
         xbox_input.y_button = msg->buttons[3];                  // Y Button
+        
+        //if(xbox_input.throttle_forward){RCLCPP_INFO(get_logger(),"FORWARD THROTTLE BUTTON PRESSED = [%lf]\n",xbox_input.throttle_forward);}
+        
     }
 
     /**
@@ -212,7 +217,7 @@ private:
      */
     void handleJoystickInput(const JoyMsg msg) {
         if (!isRobotOperational()) {
-            RCLCPP_ERROR(get_logger(),"ERROR! Robot is NOT operational!");
+            //RCLCPP_ERROR(get_logger(),"ERROR! Robot is NOT operational!");
         }
         RCLCPP_INFO(get_logger(),"ROBOT IS OPERATING SUCCESSFULLY! PARSING CONTROLLER INPUT...");
         parseControllerInput(msg);
@@ -222,23 +227,33 @@ private:
 
     /**
      * @todo Examine this function. I don't think it works correctly
-     * @todo Remove speed dampening & examine every single button mapping in the joy pipeline.  
-     */
-    void drivebase_PubTwistFromJoy(){
+     *      
+    */
+    void drivebase_PubTwistFromJoy() {
         auto twist_msg = geometry_msgs::msg::Twist();
         robot_actuation.speed_scaling_factor_drivebase = (xbox_input.x_button && xbox_input.y_button) ? 0.3 : (xbox_input.x_button ? 0.1 : 0.6);
         double linear_x = 0.0;
-
-        if (xbox_input.throttle_forward != 0.0) {
-            linear_x = xbox_input.throttle_forward;
-        } else if (xbox_input.throttle_backwards != 0.0) {
-            linear_x = -xbox_input.throttle_backwards;
+        
+        // Transform trigger values from 1.0 to -1.0 range to 0.0 to 1.0 range
+        double transformed_forward = (1.0 - xbox_input.throttle_forward) / 2.0;
+        double transformed_backward = (1.0 - xbox_input.throttle_backwards) / 2.0;
+    
+        // Now check if triggers are pressed (values will be > 0.0 when pressed)
+        if (transformed_forward > 0.05) { //small deadzone
+            linear_x = transformed_forward;
+            RCLCPP_INFO(get_logger(), "Forward throttle pressed: %f", transformed_forward);
+        } else if (transformed_backward > 0.05) { //small deadzone
+            linear_x = -transformed_backward;
+            RCLCPP_INFO(get_logger(), "Backward throttle pressed: %f", transformed_backward);
         }
-
-        twist_msg.linear.x = linear_x * robot_actuation.speed_scaling_factor_drivebase ;
+    
+        twist_msg.linear.x = linear_x * robot_actuation.speed_scaling_factor_drivebase;
         twist_msg.angular.z = -xbox_input.joystick_turn_input * robot_actuation.speed_scaling_factor_drivebase;
+        RCLCPP_INFO(get_logger(), "Publishing Twist - linear: %f, angular: %f", twist_msg.linear.x, twist_msg.angular.z);
+
         drivebase_cmd_vel_pub->publish(twist_msg);
     }
+
 
     void drivebase_HandleVelocityCommand(const geometry_msgs::msg::Twist::SharedPtr velocity_msg) {
         double linear_velocity = velocity_msg->linear.x;
@@ -268,12 +283,12 @@ private:
     void publishMiningCommands() {
         auto belt_speed = std_msgs::msg::Float64();
         belt_speed.data = (xbox_input.x_button) ? 0.3 : (xbox_input.a_button) ? -0.3 : 0.0;
-        RCLCPP_INFO(get_logger(),"Sending mining belt float command");
+        //RCLCPP_INFO(get_logger(),"Sending mining belt float command");
         mining_belt_pub->publish(belt_speed);
 
         auto leadscrew_speed = std_msgs::msg::Float64();
         leadscrew_speed.data = (xbox_input.dpad_vertical > 0) ? 0.3 :(xbox_input.dpad_vertical < 0) ? -0.3 : 0.0;
-        RCLCPP_INFO(get_logger(),"Sending mining leadscrew command");
+        //RCLCPP_INFO(get_logger(),"Sending mining leadscrew command");
         mining_leadscrew_pub->publish(leadscrew_speed);
     }
 
@@ -284,12 +299,12 @@ private:
     void publishDumpingCommands() {
         auto dump_cmd_conveyor = std_msgs::msg::Float64();
         dump_cmd_conveyor.data = xbox_input.a_button ? 0.3 : 0.0;
-        RCLCPP_INFO(get_logger(),"Sending dumping conveyor float command");  
+        //RCLCPP_INFO(get_logger(),"Sending dumping conveyor float command");  
         dump_conveyor_pub->publish(dump_cmd_conveyor);
 
         auto dump_cmd_dump_latch = std_msgs::msg::Float64();
         dump_cmd_dump_latch.data = xbox_input.b_button ? 0.3 : 0.0;
-        RCLCPP_INFO(get_logger(),"Sending dumping latch float command");
+        //RCLCPP_INFO(get_logger(),"Sending dumping latch float command");
         dump_latch_pub->publish(dump_cmd_dump_latch);
         
     }

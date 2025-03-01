@@ -36,12 +36,7 @@ DiggingLeadscrew::DiggingLeadscrew()
     
     RCLCPP_INFO(get_logger(), "Digging Leadscrew initialized");
 }
-private:
-    std::reference_wrapper<SparkMax> Motors_Digging_Leadscrews[2] = 
-    {
-        std::ref(m_leadscrew1), 
-        std::ref(m_leadscrew2)
-    };
+
     
     void DiggingLeadscrew::handleMiningLeadscrewSpeed(const Float64Shared msg){
         auto temp = msg->data;

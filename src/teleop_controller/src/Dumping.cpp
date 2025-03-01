@@ -11,8 +11,6 @@ Dumping::Dumping()
     : Node("dumping_conveyor_belt")
     , m_dumping_left("can0", DUMPING_LEFT_CAN_ID)
     , m_dumping_right("can0", DUMPING_RIGHT_CAN_ID)
-    , m_linear_left("can0",LINEAR_LEFT_CAN_ID)
-    , m_linear_right("can0",LINEAR_RIGHT_CAN_ID)
 { 
     /**
      * @brief sub to published topic from Drivebase Control
@@ -21,17 +19,8 @@ Dumping::Dumping()
     RCLCPP_INFO(this->get_logger(), "Dumping belt initialized!\n");
 }
 
-private:
-    /**
-     * @todo Linear actuators needed for dumping & digging. Trying to decide where to put them
-     */
-    std::reference_wrapper<SparkMax> Motors_Dumping[2] = 
-    {
-        std::ref(m_dumping_left), 
-        std::ref(m_dumping_right)
-    };
 
-public:
+  
     void Dumping::handleConveyorBeltSpeed(const Float64Shared msg) {
         setConveyorBeltSpeed(msg->data);
     }
@@ -39,16 +28,12 @@ public:
     /**
      * @brief setting speed of conveyor belt
      */
-    void Dumping::setConveyorBeltSpeed(double speed) {
-        
+    void Dumping::setConveyorBeltSpeed(double speed) {        
         #ifdef HARDWARE_ENABLED
         m_dumping_left.SetDutyCycle(speed);
         m_dumping_right.SetDutyCycle(speed);
         #endif
-
     }
-
-
 
 
 int main(int argc, char* argv[]) {

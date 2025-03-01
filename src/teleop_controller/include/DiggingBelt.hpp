@@ -11,12 +11,7 @@ public:
     bool isRunning() const { return belt_running; }
 
 private:
-    /**
-     * @brief required hardware
-     */
-    SparkMax m_belt1;
-    SparkMax m_belt2;
-    std::unique_ptr<PIDController> p_belt;
+    //std::unique_ptr<PIDController> p_belt;
     
     /**
      * @brief state variables
@@ -37,6 +32,21 @@ private:
     void periodic();
 
 protected:
+    /**
+     * @brief required hardware
+     */
+    SparkMax m_belt1;
+    SparkMax m_belt2;
+    SparkMax m_linear_left;
+    SparkMax m_linear_right;
+    std::reference_wrapper<SparkMax> Motors_Digging_Belt[4] = 
+    {
+        std::ref(m_belt1), 
+        std::ref(m_belt2),
+        std::ref(m_linear_left),
+        std::ref(m_linear_right)
+    };
+    
     Float64Publisher velocity_pub;
     Float64Publisher temperature_pub;
     Float64Subscriber mining_belt_speed_sub;

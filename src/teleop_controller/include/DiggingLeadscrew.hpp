@@ -51,15 +51,8 @@ public:
     bool isBottomLimitPressed();
     void setLeadscrewSpeed(double speed);
     LeadscrewState getState() const;
-
-private:
-    SparkMax m_leadscrew1;
-    SparkMax m_leadscrew2;
-    
     LeadscrewState leadscrew_state = LeadscrewState::Traveling;
     bool leadscrew_initialized{false};
-    
-
     void configureLimitSwitches();
     bool checkFault(uint16_t faults, FaultBits bit);
     void periodic();
@@ -69,6 +62,13 @@ private:
     std::string stateToString(LeadscrewState state);
 
 protected:
+    SparkMax m_leadscrew1;
+    SparkMax m_leadscrew2;
+    std::reference_wrapper<SparkMax> Motors_Digging_Leadscrews[2] = 
+    {
+        std::ref(m_leadscrew1), 
+        std::ref(m_leadscrew2)
+    };
     
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub;
     rclcpp::TimerBase::SharedPtr timer_diagnostics;

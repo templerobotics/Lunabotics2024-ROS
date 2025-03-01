@@ -1,0 +1,9 @@
+Issue has to be left motors & right motors not utilizing the actual SparkMax motors & or SparkMax not being initialized 
+
+I only used motor controller groups since our JAVA FRC code had it, but graysons teleop does NOT utilize them. I probably should follow suit and call for each involved sparkmax dutycycle() and voltage() since his code works.
+
+
+if I print in the parse controller function it always prints that I've pressed a button & the value in the terminal starts at -1 and when I press it it goes to 1.0
+However, when I ACTUALLY press the button : linear speed is set to 0.6 and it says the value goes from 0 to 1 --> This is correct behavior
+
+
