@@ -7,3 +7,7 @@ if I print in the parse controller function it always prints that I've pressed a
 However, when I ACTUALLY press the button : linear speed is set to 0.6 and it says the value goes from 0 to 1 --> This is correct behavior
 
 
+I have sparkmax 2 & 3
+
+FIXES - Takeaways
+- Implement ALL Teleop Control inside of 1 Singular function that accepts Joy_msg

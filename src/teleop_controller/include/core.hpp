@@ -106,6 +106,7 @@ typedef struct{
     double wheel_speed_left, wheel_speed_right;
 }ROBOT_ACTUATION_t;
 
+
 typedef struct{
     bool manual_enabled;
     bool robot_disabled; 
@@ -113,15 +114,7 @@ typedef struct{
     bool XBOX;
 }ROBOTSTATE_t;
 
-/**
- * @note wheel distance value is arbitrary as of Jan 10, 2025. Wait for final robot design to determine this value
- * @note wheel_radius might be a constant, but check FRC JAVA code & grayson's teleop usage to determine.
- */
-typedef struct{
-    double wheel_radius;
-    const double wheel_distance = 16; 
-    double voltage_limit;
-}ROBOT_LIMITS_t;
+
 
 const uint8_t MAX_VOLTAGE = 12;
 
@@ -148,7 +141,6 @@ const double BELT_kI = 0.0;
 const double BELT_kD = 0.0;
 const double BELT_kIZ = 0.0;
 const double BELT_kFF = 0.0;
-
 
 
 

@@ -20,13 +20,12 @@ find_package(rosidl_default_generators REQUIRED)
 
 # MACRO for hardware enabled. Precursor to implementing Gazebo simulation for our teleop robot. 
 # If hardware was OFF, then sim would be used to control virtual robot. NEED to add simulation specific code for that to work properly as of Jan 22 2025
-
 option(HARDWARE_ENABLED "Enable hardware support" ON)
 if(HARDWARE_ENABLED)
     add_definitions(-DHARDWARE_ENABLED)
 endif()
 
-# Include headers
+
 include_directories(include)
 
 # Generate interfaces first
@@ -34,7 +33,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/SetParameter.srv"
 )
 
-# Create nodes
 add_executable(digging_belt src/DiggingBelt.cpp)
 add_executable(digging_leadscrew src/DiggingLeadscrew.cpp)
 add_executable(teleop_state_manager src/teleop_state_manager.cpp)
@@ -99,7 +97,7 @@ target_link_libraries(drivebase_control "${cpp_typesupport_target}")
 target_link_libraries(dumping "${cpp_typesupport_target}")
 
 
-# install nodes
+# install nodes & header files
 install(TARGETS
   digging_belt
   digging_leadscrew
@@ -109,7 +107,6 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# Install header files
 install(DIRECTORY include/
   DESTINATION include/${PROJECT_NAME}
   FILES_MATCHING PATTERN "*.hpp"
