@@ -81,6 +81,7 @@ private:
  
     /**
      * @brief Teleoperate the robot via XBOX Controller
+     * @details left/right speed = Wheel Speed for DIFF Drive mobile robot kinematics
     */
     void joy_callback(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
         if (robot_disabled) {
