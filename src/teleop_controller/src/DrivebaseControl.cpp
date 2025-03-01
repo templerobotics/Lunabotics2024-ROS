@@ -2,6 +2,9 @@
  * @file drivebase_control.cpp
  * @author Jaden Howard (jaseanhow@gmail.com or tun85812@temple.edu)
  * @brief ROS2 node for managing the robot's drivebase and coordinating subsystem commands
+ * @todo Simplify Info print commands to only say Forward/Backwards/Turning
+ * @todo For drivebase, don't even need bool x/y buttons. Can use them for another Subsystem. Something to consider
+ * @todo Put in some work to get SparkMax temps in celsius to print/other profiling data. SparkMax has method/built-in temp sensor
  * @version 0.3
  * @date 2025-03-01
  */
@@ -20,7 +23,6 @@
          robot_disabled(false)
      {
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
-        
         try {
             RCLCPP_INFO(get_logger(), "Configuring Drivebase Motors");
             left_front.SetIdleMode(IdleMode::kCoast);
@@ -58,6 +60,8 @@ private:
     SparkMax left_rear;
     SparkMax right_front;
     SparkMax right_rear;
+
+    
     
     bool manual_enabled;
     bool robot_disabled;
@@ -68,12 +72,15 @@ private:
     double left_joystick_x = 0.0;
     double right_trigger = 0.0;
     double left_trigger = 0.0;
+    
     bool x_button = false;
     bool y_button = false;
     
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub;
+    
+ 
     /**
-     * @brief Teleoperate the robot by manipulating Joy_Msgs
+     * @brief Teleoperate the robot via XBOX Controller
     */
     void joy_callback(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
         if (robot_disabled) {
@@ -98,17 +105,17 @@ private:
         if (right_trigger > 0.05) {  // Forward
             left_speed = right_trigger - left_joystick_x;
             right_speed = right_trigger + left_joystick_x;
-            RCLCPP_INFO(get_logger(), "Forward: RT=%f, LX=%f -> L=%f, R=%f", right_trigger, left_joystick_x, left_speed, right_speed);
+            //RCLCPP_INFO(get_logger(), "Forward: RT=%f, LX=%f -> L=%f, R=%f", right_trigger, left_joystick_x, left_speed, right_speed);
         
         } else if (left_trigger > 0.05) {  // Backward
             left_speed = -(left_trigger - left_joystick_x);
             right_speed = -(left_trigger + left_joystick_x);
-            RCLCPP_INFO(get_logger(), "Backward: LT=%f, LX=%f -> L=%f, R=%f", left_trigger, left_joystick_x, left_speed, right_speed);
+            //RCLCPP_INFO(get_logger(), "Backward: LT=%f, LX=%f -> L=%f, R=%f", left_trigger, left_joystick_x, left_speed, right_speed);
         
         } else if (std::abs(left_joystick_x) > 0.05) {  // Turn in place
             left_speed = -left_joystick_x;
             right_speed = left_joystick_x;
-            RCLCPP_INFO(get_logger(), "Turn: LX=%f -> L=%f, R=%f", left_joystick_x, left_speed, right_speed);
+            //RCLCPP_INFO(get_logger(), "Turn: LX=%f -> L=%f, R=%f", left_joystick_x, left_speed, right_speed);
         } else {
             left_speed = 0.0;
             right_speed = 0.0;
