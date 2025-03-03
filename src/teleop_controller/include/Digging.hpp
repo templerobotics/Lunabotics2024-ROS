@@ -32,7 +32,7 @@ protected:
      * @brief Limit Switch / Leadscrew
     */
     void configure_limit_switches();// in leadscrew.cpp
-    boolean leadscrewGetRawLimitSwitch(RobotSide side, MechanismPosition pos)
+    bool leadscrewGetRawLimitSwitch(RobotSide side, MechanismPosition pos)
     bool isTopLimitPressed();
     bool isBottomLimitPressed();
     void setLeadscrewSpeed(double speed);
@@ -52,8 +52,6 @@ protected:
     */
 
     //TODO : FIGURE THESE OUT
-   
-    
     double current_speed{0.0};
     double belt_speed{0.5};
     const double SPEED_INCREMENT{0.1};
