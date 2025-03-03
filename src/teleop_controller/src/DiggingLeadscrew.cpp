@@ -37,7 +37,6 @@ DiggingLeadscrew::DiggingLeadscrew()
     RCLCPP_INFO(get_logger(), "Digging Leadscrew initialized");
 }
 
-    
     void DiggingLeadscrew::handleMiningLeadscrewSpeed(const Float64Shared msg){
         auto temp = msg->data;
         printf("LEADSCREW SPEED = [%f]/n",temp);

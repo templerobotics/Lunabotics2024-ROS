@@ -82,6 +82,12 @@ const uint8_t MAX_VOLTAGE = 12;
 /**
  * @todo Change CAN IDs to reflect their ACTUAL values based on the robot final configuration
  */
+
+const uint8_t motor_front_left_CAN_ID = 1;
+const uint8_t motor_rear_left_CAN_ID = 2;
+const uint8_t motor_front_right_CAN_ID = 3;
+const uint8_t motor_rear_right_CAN_ID = 4;
+
 const uint8_t LEADSCREW_1_CAN_ID = 7;
 const uint8_t LEADSCREW_2_CAN_ID = 8;
 const uint8_t BELT_1_CAN_ID = 5;
@@ -92,6 +98,51 @@ const uint8_t DUMPING_LEFT_CAN_ID = 13;
 const uint8_t DUMPING_RIGHT_CAN_ID = 14;
 const uint8_t LINEAR_LEFT_CAN_ID = 15;
 const uint8_t LINEAR_RIGHT_CAN_ID = 16;
+
+enum class LinearActuatorState {
+    Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded
+};
+
+enum class RobotSide{
+LEFT,
+RIGHT,
+};
+
+enum class MechanismPosition{
+TOP,
+BOTTOM
+};
+
+
+/**
+ * @brief Fault IDs based on REV documentation. Use GetFaults() method from Sparkcan
+*/
+enum class FaultBits : uint16_t {
+    kHardLimitFwd = 0,    // Forward limit switch
+    kHardLimitRev = 1,    // Reverse limit switch
+    kSoftLimitFwd = 2,    // Forward soft limit
+    kSoftLimitRev = 3,    // Reverse soft limit
+    kMotorFault = 4,      // Motor fault
+    kSensorFault = 5,     // Sensor fault
+    kStall = 6,           // Stall detected
+    kEEPROMCRC = 7,       // EEPROM CRC error
+    kCANTX = 8,           // CAN transmit error
+    kCANRX = 9,           // CAN receive error
+    kHasReset = 10,       // Has reset
+    kDRVFault = 11,       // DRV fault
+    kOtherFault = 12,     // Other fault
+    kSoftLimitClamp = 13, // Soft limit clamp
+    kBrownout = 14        // Brownout
+};
+
+enum class LeadscrewState {
+    Extended,
+    Retracted,
+    Traveling,
+    FullExtended,
+    GivenCommand
+};
+
 
 /**
  * @todo Get the ACTUAL PID constants or if they exist in some version of the FRC JAVA code, use those constants.
@@ -124,9 +175,6 @@ typedef struct{
 }XBOX_JOYSTICK_INPUT_t;
 
 
-/**
- * @note Drivebase Scaling Factor: Precise driving via trigger can be hard. Driver can use x/y along with trigger to drive at certain speeds 
- */
 typedef struct{
     double speed_lift_actuator;
     double speed_tilt_actuator;
@@ -141,23 +189,7 @@ typedef struct{
 }ROBOT_ACTUATION_t;
 
 
-enum class LinearActuatorState {
-		Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded
-};
 
-/**
- * @note Used to set LeadScrew Speed 
- * @todo add Leadscrew function set raw speed based on DiggingLeadscew.java in FRC JAVA code
- */
-enum class RobotSide{
-    LEFT,
-    RIGHT,
-};
-
-enum class MechanismPosition{
-    TOP,
-    BOTTOM
-};
 
 
 typedef struct{

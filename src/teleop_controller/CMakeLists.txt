@@ -26,20 +26,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/SetParameter.srv"
 )
 
-add_executable(digging_belt src/DiggingBelt.cpp)
 add_executable(digging_leadscrew src/DiggingLeadscrew.cpp)
 add_executable(drivebase_control src/DrivebaseControl.cpp)
 add_executable(dumping src/Dumping.cpp)
 
 
-ament_target_dependencies(digging_belt
-  rclcpp
-  sensor_msgs
-  geometry_msgs
-  sparkcan
-  std_msgs
-  std_srvs
-)
 
 ament_target_dependencies(digging_leadscrew
   rclcpp
@@ -72,7 +63,6 @@ ament_target_dependencies(dumping
 rosidl_get_typesupport_target(cpp_typesupport_target 
   ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
-target_link_libraries(digging_belt "${cpp_typesupport_target}")
 target_link_libraries(digging_leadscrew "${cpp_typesupport_target}")
 target_link_libraries(drivebase_control "${cpp_typesupport_target}")
 target_link_libraries(dumping "${cpp_typesupport_target}")
@@ -80,7 +70,6 @@ target_link_libraries(dumping "${cpp_typesupport_target}")
 
 # install nodes & header files
 install(TARGETS
-  digging_belt
   digging_leadscrew
   drivebase_control
   dumping
