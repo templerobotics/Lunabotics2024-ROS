@@ -70,11 +70,13 @@ private:
     double left_speed = 0.0;
     double right_speed = 0.0;
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub;
-    
+    VelocityPublisher velocity_pub;
+    VelocitySubscriber velocity_sub;
+
     /**
      * @brief Teleoperate the robot via XBOX Controller
      * @details Left stick Y-axis (forward/backward) &  Right stick X-axis (turning)
-     * @todo joy--> twist msg publish --> subscribe to twist msg ---> diff drive kinematics
+     * @todo look jared repo : joy--> twist msg publish --> subscribe to twist msg ---> diff drive kinematics
     
 
     */
@@ -84,14 +86,10 @@ private:
         return;
     }
     SparkMax::Heartbeat();
-    printf("SPARKMAX LEFT FRONT RPM = [%lf] | TEMP = [%lf] | ANALOG RPM = [%lf]\n",
-    left_front.GetVelocity(), 
-    left_front.GetTemperature(),
-    left_front.GetAnalogVelocity());
-
 
     double forward = joy_msg->axes[1];  
     double turn = joy_msg->axes[2];     
+    
     
     const double deadband = 0.05;
     if (std::abs(forward) < deadband) forward = 0.0;
@@ -105,7 +103,6 @@ private:
         left_speed /= maxMagnitude;
         right_speed /= maxMagnitude;
     }
-    
     left_speed = std::clamp(left_speed * speed_multiplier, -1.0, 1.0);
     right_speed = std::clamp(right_speed * speed_multiplier, -1.0, 1.0);
     
@@ -114,19 +111,12 @@ private:
         left_rear.SetDutyCycle(left_speed);
         right_front.SetDutyCycle(right_speed);
         right_rear.SetDutyCycle(right_speed);
-        
-        double left_voltage = left_speed * MAX_VOLTAGE;
-        double right_voltage = right_speed * MAX_VOLTAGE;
-
-        left_front.SetVoltage(left_voltage);
-        left_rear.SetVoltage(left_voltage);
-        right_front.SetVoltage(right_voltage);
-        right_rear.SetVoltage(right_voltage);
-        
-        RCLCPP_DEBUG(get_logger(), "Drivebase Motor Voltages Set: [L=%f V], [R=%f V]", left_voltage, right_voltage);
     } catch (const std::exception& e) {
         RCLCPP_ERROR(get_logger(), "Failed to set Drivebase Motor speeds: %s", e.what());
     }
+    
+
+
 }
 
     
