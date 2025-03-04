@@ -11,15 +11,12 @@ Digging::Digging()
     , m_leadscrew_right("can0", LEADSCREW_2_CAN_ID)
 {
    
-    joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DiggingBelt::joy_callback_digging, this, std::placeholders::_1));
+    joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&Digging::joy_callback_digging, this, std::placeholders::_1));
     init_motors();
 
 
     RCLCPP_INFO(this->get_logger(), "Digging Subsystem Successfully Initialized!");
 }
-
-
-private:
    
     void Digging::init_motors() {
         try {
@@ -68,11 +65,9 @@ private:
      * @remark Axes[1] & Axes[2] Used for Drivebase
      */
     void Digging::joy_callback_digging(const sensor_msgs::msg::Joy::SharedPtr joy_msg){
-        assert(joy_msg->data != NULL);
-        SparkMax::Heartbeat();
-
-
-        
+        //assert(joy_msg->buttons[0] != NULL);
+        //SparkMax::Heartbeat();        
+        printf("FILLER TO COMPILE CODE = %d",joy_msg->buttons[0]);
     }
 
 

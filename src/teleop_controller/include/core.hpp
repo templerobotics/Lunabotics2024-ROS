@@ -77,16 +77,21 @@ using SetParameterClientSharedPtr = std::shared_ptr<SetParameterClient>;
 using CameraImageSub = rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr;
 using CameraImagePub = rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr;
 
+
+const uint8_t WHEEL_BASE = 30;                  //inches
+const uint8_t MIN_THROTTLE_DEADZONE = 0.05;
+const uint16_t SPARKMAX_RPM = 292;               //change to reflect actual value. Use GetVelocity()
 const uint8_t MAX_VOLTAGE = 12;
 
 /**
  * @todo Change CAN IDs to reflect their ACTUAL values based on the robot final configuration
  */
 
-const uint8_t motor_front_left_CAN_ID = 1;
-const uint8_t motor_rear_left_CAN_ID = 2;
-const uint8_t motor_front_right_CAN_ID = 3;
-const uint8_t motor_rear_right_CAN_ID = 4;
+const uint8_t MOTOR_FRONT_LEFT_CAN_ID = 1;
+const uint8_t MOTOR_REAR_LEFT_CAN_ID = 2;
+const uint8_t MOTOR_FRONT_RIGHT_CAN_ID = 3;
+const uint8_t MOTOR_REAR_RIGHT_CAN_ID = 4;
+
 
 const uint8_t LEADSCREW_1_CAN_ID = 7;
 const uint8_t LEADSCREW_2_CAN_ID = 8;
@@ -98,69 +103,60 @@ const uint8_t LINEAR_LEFT_CAN_ID = 15;
 const uint8_t LINEAR_RIGHT_CAN_ID = 16;
 
 
-enum class LinearActuatorState {
-    Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded
-};
-
-static bool LEADSCREW_INVERT = true;
-static double LEADSCREW_MAX_ACCEL = 11000 * 0.5; // RPM/s
-static double LEADSCREW_MAX_VEL = 11000 * 0.5; // RPM
-static double LEADSCREW_MIN_VEL = 10; // RPM
-static double LEADSCREW_MAX_ERROR = 1; // Rotations
-static double LEADSCREW_MAX_TRAVEL = 13000; // Native Units
-static double LEADSCREW_MAX_SPEED = 1; // For leadscrews without PIDs
-static double LEADSCREW_EXTENDED_POS = 13000; //TODO: Put a real value here
-static double LEADSCREW_kP = 0.0000000015;
-static double LEADSCREW_kI = 0.000002;
-static double LEADSCREW_kD = 0.000005;
-static double LEADSCREW_kIZ = 20;
-static double LEADSCREW_kFF = 0.000080;
-static double LEADSCREW_MAX_OUTPUT = .9;
-static double LEADSCREW_MIN_OUTPUT = -.9;
-static int LEADSCREW_CURRENT_LIMIT_STALL = 20;
-static int LEADSCREW_CURRENT_LIMIT_FREE = 10;
-static int LEADSCREW_SECNDARY_CURRENT_LIMIT = 22;
-static IdleMode LEADSCREW_IDLE_MODE = IdleMode.kBrake;
-
-// Belt
-static int BELT_1_CAN_ID = 10;
-static int BELT_1_PDP_ID = 0;
-static int BELT_2_CAN_ID = 11;
-static int BELT_2_PDP_ID = 0;
+bool LEADSCREW_INVERT = true;
+double LEADSCREW_MAX_ACCEL = 11000 * 0.5; // RPM/s
+double LEADSCREW_MAX_VEL = 11000 * 0.5; // RPM
+double LEADSCREW_MIN_VEL = 10; // RPM
+double LEADSCREW_MAX_ERROR = 1; // Rotations
+double LEADSCREW_MAX_TRAVEL = 13000; // Native Units
+double LEADSCREW_MAX_SPEED = 1; // For leadscrews without PIDs
+double LEADSCREW_EXTENDED_POS = 13000; //TODO: Put a real value here
+double LEADSCREW_kP = 0.0000000015;
+double LEADSCREW_kI = 0.000002;
+double LEADSCREW_kD = 0.000005;
+double LEADSCREW_kIZ = 20;
+double LEADSCREW_kFF = 0.000080;
+double LEADSCREW_MAX_OUTPUT = .9;
+double LEADSCREW_MIN_OUTPUT = -.9;
+int LEADSCREW_CURRENT_LIMIT_STALL = 20;
+int LEADSCREW_CURRENT_LIMIT_FREE = 10;
+int LEADSCREW_SECNDARY_CURRENT_LIMIT = 22;
+//IdleMode LEADSCREW_IDLE_MODE = IdleMode.kBrake;
 
 
-static bool BELT_INVERT = true;
-static double BELT_MAX_ACCEL = 5760; // RPM/s
-static double BELT_MAX_VEL = 11000; // RPM
-static double BELT_MIN_VEL = 10; // RPM
-static double BELT_MAX_ERROR = 50; // Rotations
-static double BELT_VELOCITY_SCALAR = 1; // 6.65e-5
-static double BELT_kP = 0.000026;
-static double BELT_kI = 0.000001;
-static double BELT_kD = 0.0001;
-static double BELT_kIZ = 20;
-static double BELT_kFF = 0.000085;
-static double BELT_MAX_OUTPUT = 0.9;
-static double BELT_MIN_OUTPUT = -0.9;
-static int BELT_CURRENT_LIMIT_STALL = 20;
-static int BELT_CURRENT_LIMIT_FREE = 10;
-static int BELT_SECNDARY_CURRENT_LIMIT = 22;
+bool BELT_INVERT = true;
+double BELT_MAX_ACCEL = 5760; // RPM/s
+double BELT_MAX_VEL = 11000; // RPM
+double BELT_MIN_VEL = 10; // RPM
+double BELT_MAX_ERROR = 50; // Rotations
+double BELT_VELOCITY_SCALAR = 1; // 6.65e-5
+double BELT_kP = 0.000026;
+double BELT_kI = 0.000001;
+double BELT_kD = 0.0001;
+double BELT_kIZ = 20;
+double BELT_kFF = 0.000085;
+double BELT_MAX_OUTPUT = 0.9;
+double BELT_MIN_OUTPUT = -0.9;
+int BELT_CURRENT_LIMIT_STALL = 20;
+int BELT_CURRENT_LIMIT_FREE = 10;
+int BELT_SECNDARY_CURRENT_LIMIT = 22;
 
 
 // Linear Actuator
-static int LINEAR_2_CAN_ID = 4;
-static int LINEAR_3_CAN_ID = 12;
-static bool LINEAR_INVERT = true;
-static double LINEAR_DEADBAND = .01;
-static double LINEAR_MIN_TRAVEL = 0; //1.438; // 0.2876; // 1.438
-static double LINEAR_MAX_TRAVEL = 0.5; //1;//3.3; //3.3; //0.55
-static double LINEAR_2_ADJUSTMENT = -0.02;
-static double DIGGING_LINEAR_kP = 0.0;//0.1;
-static double DIGGING_LINEAR_kI = 0.0;//0.000002;
-static double DIGGING_LINEAR_kD = 0.0;//0.000005;
-static double DIGGING_LINEAR_kIZ = 20;
-static double DIGGING_LINEAR_kFF = 0.000080;
+bool LINEAR_INVERT = true;
+double LINEAR_DEADBAND = .01;
+double LINEAR_MIN_TRAVEL = 0; //1.438; // 0.2876; // 1.438
+double LINEAR_MAX_TRAVEL = 0.5; //1;//3.3; //3.3; //0.55
+double LINEAR_2_ADJUSTMENT = -0.02;
+double DIGGING_LINEAR_kP = 0.0;//0.1;
+double DIGGING_LINEAR_kI = 0.0;//0.000002;
+double DIGGING_LINEAR_kD = 0.0;//0.000005;
+double DIGGING_LINEAR_kIZ = 20;
+double DIGGING_LINEAR_kFF = 0.000080;
 
+enum class LinearActuatorState {
+    Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded
+};
 
 enum class RobotSide{
 LEFT,
@@ -203,16 +199,6 @@ enum class LeadscrewState {
 };
 
 
-/**
- * @todo Get the ACTUAL PID constants or if they exist in some version of the FRC JAVA code, use those constants.
-*/
-const double BELT_VELOCITY_SCALAR = 1.0;
-const double BELT_kP = 0.0; 
-const double BELT_kI = 0.0;
-const double BELT_kD = 0.0;
-const double BELT_kIZ = 0.0;
-const double BELT_kFF = 0.0;
-
 typedef struct{
     bool a_button;
     bool b_button;
@@ -246,8 +232,6 @@ typedef struct{
     bool outdoor_mode;
     bool XBOX;
 }ROBOT_ACTUATION_t;
-
-
 
 
 

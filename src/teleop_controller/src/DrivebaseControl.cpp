@@ -74,9 +74,8 @@ private:
     /**
      * @brief Teleoperate the robot via XBOX Controller
      * @details Left stick Y-axis (forward/backward) &  Right stick X-axis (turning)
-     * @var deadband --> Prevents small joystick movements from causing unwanted motor activation
-     * @var left/right speed = Calculate left and right side power using arcade drive formula
-     * @var maxMagnitude Normalize values to keep them between -1.0 and 1.0
+     * @todo joy--> twist msg publish --> subscribe to twist msg ---> diff drive kinematics
+    
 
     */
    void joy_callback(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
@@ -85,7 +84,12 @@ private:
         return;
     }
     SparkMax::Heartbeat();
-    
+    printf("SPARKMAX LEFT FRONT RPM = [%lf] | TEMP = [%lf] | ANALOG RPM = [%lf]\n",
+    left_front.GetVelocity(), 
+    left_front.GetTemperature(),
+    left_front.GetAnalogVelocity());
+
+
     double forward = joy_msg->axes[1];  
     double turn = joy_msg->axes[2];     
     
