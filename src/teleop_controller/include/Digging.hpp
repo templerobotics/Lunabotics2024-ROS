@@ -22,22 +22,23 @@ protected:
      * @brief Digging Belt
      * @todo PID Implementation
      */
-    void configure_belts();//initialization
-    void setBeltSpeed(double speed); //USE SetDutyCycle() --> set(double speed) is [-1,1]
-    void stopMotors(); // set DutyCycle() and voltage for both belt Sparkmaxes to 0.0
-    bool belt_running{false};  // Keep only one declaration
+    void configure_belts();                         // initialization
+    void setBeltSpeedForward(double speed);         // USE SetDutyCycle() --> set(double speed) is [-1,1]
+    void setBeltSpeedReverse(double speed);
+    void stopMotors();                              // set DutyCycle() and voltage for both belt Sparkmaxes to 0.0
+    bool belt_running{false};                       // Keep only one declaration
     bool isRunning() const { return belt_running; }
 
     /**
      * @brief Limit Switch / Leadscrew
     */
-    void configureLimitSwitches();// in leadscrew.cpp
+    void configureLimitSwitches();                  // in leadscrew.cpp
     bool leadscrewGetRawLimitSwitch(RobotSide side, MechanismPosition pos);
     bool isTopLimitPressed();
     bool isBottomLimitPressed();
     void setLeadscrewSpeed(double speed);
     LeadscrewState leadscrew_state = LeadscrewState::Traveling;
-    LeadscrewState getState() const;//return leadscrew_state
+    LeadscrewState getState() const;                // return leadscrew_state
 
     bool leadscrew_initialized{false};
     bool checkFault(uint16_t faults, FaultBits bit);

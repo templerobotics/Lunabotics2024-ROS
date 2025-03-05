@@ -25,8 +25,8 @@ Digging::Digging()
     /**
      * @brief Digging Subsystem Implementation
      * @details Robot is enabled in DrivebaseControl.cpp, so skip the check. Could make it a global variable. If I do, TEST IT
-     * @details Probably also dont NEED to call SparkMax Heartbeat(), since it's called in drivebase control, but redundancy is probably for the best
-     * @remark Could use OOP by implementing a Robot Base class, but who cares
+     * @details Redundant software call to SparkmMax::Heartbeat() because redundancy is good
+     * @remark Could use OOP by implementing a Robot Base class, but bigger fish to fry
      * @remark Axes[1] & Axes[2] Used for Drivebase
      */
     void Digging::joy_callback_digging(const sensor_msgs::msg::Joy::SharedPtr joy_msg){   
@@ -41,19 +41,25 @@ Digging::Digging()
         double extend_leadscrew = joy_msg->buttons[9];
         double retract_leadscrew = joy_msg->buttons[10];
 
-        if(dig_forward){setBeltSpeed(dig_forward);}
-        if(dig_reverse){setBeltSpeed(dig_reverse);}
-
-
+        if(dig_forward){setBeltSpeedForward(dig_forward);}
+        if(dig_reverse){setBeltSpeedReverse(dig_reverse);}
 
     }
     
-    void Digging::setBeltSpeed(double speed){
+    //===========================
+    // Digging Belt Functions
+    //===========================
+
+
+    void Digging::setBeltSpeedForward(double speed){
         m_belt_left.SetDutyCycle(speed);
+        belt_running = true;
+    }
+    
+    void Digging::setBeltSpeedReverse(double speed){
         m_belt_right.SetDutyCycle(-1*speed);
         belt_running = true;
     }
- 
 
     void Digging::stopMotors(){
         RCLCPP_INFO(get_logger(),"STOPPING DIGGING BELT MOTORS!");
@@ -62,6 +68,10 @@ Digging::Digging()
         belt_running = false;
     }
     
+    //===========================
+    // Leadscrew & Limit Switch Functions
+    //===========================
+
 
 
     void Digging::initMotors() {
