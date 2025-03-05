@@ -48,6 +48,7 @@
 #include "teleop_controller/srv/set_parameter.hpp"  // generated from .srv file
 #include "sensor_msgs/msg/camera_info.hpp"
 #include "sensor_msgs/msg/image.hpp"
+#include <cmath>
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -58,6 +59,8 @@ using JoyShared = sensor_msgs::msg::Joy::SharedPtr;
 using JoySubscription = rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr;
 using Twist = geometry_msgs::msg::Twist;
 using TwistSubscription = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr;
+using TwistPublisher = rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr;
+
 using VelocityPublisher = rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr;
 using VelocitySubscriber = rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr;
 using Float64Publisher = rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr;
@@ -79,9 +82,12 @@ using CameraImagePub = rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr;
 
 
 const uint8_t WHEEL_BASE = 30;                  //inches
+const uint8_t WHEEL_RADIUS = 8;
 const uint8_t MIN_THROTTLE_DEADZONE = 0.05;
 const uint16_t SPARKMAX_RPM = 292;               //change to reflect actual value. Use GetVelocity()
 const uint8_t MAX_VOLTAGE = 12;
+const uint8_t SPARKMAX_RPM_AVERAGE = 63;
+const uint8_t SPARKMAX_MAX_DUTY_CYCLE = 1;
 
 /**
  * @todo Change CAN IDs to reflect their ACTUAL values based on the robot final configuration
