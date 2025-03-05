@@ -67,8 +67,9 @@ private:
     TwistSubscription cmd_vel_sub;
 
     bool controller_teleop_enabled;
-    bool robot_disabled;
     bool autonomy_enabled;
+    bool robot_disabled;
+    
 
     /**
      * @brief Interprets XBOX joystick Joy msgs
@@ -79,7 +80,7 @@ private:
         auto twist_msg = geometry_msgs::msg::Twist();
         twist_msg.linear.x = joy_msg->axes[1];  
         twist_msg.angular.z  = joy_msg->axes[2];
-        cmd_vel_pub.publish(twist_msg);
+        cmd_vel_pub->publish(twist_msg);
     }
     /**
      * @brief Calculates hardware motor speeds based on Twist msg
@@ -99,8 +100,8 @@ private:
         
         double motor_cmd_left = rpm_left * ( SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE);
         double motor_cmd_right = rpm_right * ( SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE);
-        motor_cmd_left = std::clamp(motor_cmd_left, -1,1);
-        motor_cmd_right = std::clamp(motor_cmd_right, -1,1);
+        motor_cmd_left = std::clamp(motor_cmd_left, -1.0,1.0);
+        motor_cmd_right = std::clamp(motor_cmd_right, -1.0,1.0);
 
         left_front.SetDutyCycle(motor_cmd_left);
         left_rear.SetDutyCycle(motor_cmd_left);

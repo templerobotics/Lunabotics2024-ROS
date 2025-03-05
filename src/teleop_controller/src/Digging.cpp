@@ -1,3 +1,7 @@
+/**
+ * @brief Temple Lunabotics Digging Subsystem
+ * @todo Digging Belt - PID & Sensor Diagnostics via Timer
+ */
 #include "core.hpp"
 #include "Digging.hpp"
 
@@ -10,15 +14,57 @@ Digging::Digging()
     , m_leadscrew_left("can0", LEADSCREW_1_CAN_ID)
     , m_leadscrew_right("can0", LEADSCREW_2_CAN_ID)
 {
-   
     joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&Digging::joy_callback_digging, this, std::placeholders::_1));
-    init_motors();
-
+    initMotors();
 
     RCLCPP_INFO(this->get_logger(), "Digging Subsystem Successfully Initialized!");
 }
-   
-    void Digging::init_motors() {
+
+
+
+    /**
+     * @brief Digging Subsystem Implementation
+     * @details Robot is enabled in DrivebaseControl.cpp, so skip the check. Could make it a global variable. If I do, TEST IT
+     * @details Probably also dont NEED to call SparkMax Heartbeat(), since it's called in drivebase control, but redundancy is probably for the best
+     * @remark Could use OOP by implementing a Robot Base class, but who cares
+     * @remark Axes[1] & Axes[2] Used for Drivebase
+     */
+    void Digging::joy_callback_digging(const sensor_msgs::msg::Joy::SharedPtr joy_msg){   
+
+        SparkMax::Heartbeat();
+        double dig_forward = joy_msg->buttons[3];
+        double dig_reverse = joy_msg->buttons[0];
+
+        double raise_linear_actuators = joy_msg->buttons[2];
+        double lower_linear_actuators = joy_msg->buttons[1];
+
+        double extend_leadscrew = joy_msg->buttons[9];
+        double retract_leadscrew = joy_msg->buttons[10];
+
+        if(dig_forward){setBeltSpeed(dig_forward);}
+        if(dig_reverse){setBeltSpeed(dig_reverse);}
+
+
+
+    }
+    
+    void Digging::setBeltSpeed(double speed){
+        m_belt_left.SetDutyCycle(speed);
+        m_belt_right.SetDutyCycle(-1*speed);
+        belt_running = true;
+    }
+ 
+
+    void Digging::stopMotors(){
+        RCLCPP_INFO(get_logger(),"STOPPING DIGGING BELT MOTORS!");
+        m_belt_left.SetDutyCycle(0.0);
+        m_belt_right.SetDutyCycle(0.0);
+        belt_running = false;
+    }
+    
+
+
+    void Digging::initMotors() {
         try {
             RCLCPP_INFO(get_logger(), "Configuring Digging Subsystem Motors");
             
@@ -57,38 +103,6 @@ Digging::Digging()
             RCLCPP_ERROR(get_logger(), "Failed to configure Digging Subsystem motors: %s", e.what());
         }
     }
-
-    /**
-     * @brief Digging Subsystem Implementation
-     * @details Robot is enabled in DrivebaseControl.cpp, so skipp the check
-     * @remark Could use OOP by implementing a Robot Base class, but who cares
-     * @remark Axes[1] & Axes[2] Used for Drivebase
-     */
-    void Digging::joy_callback_digging(const sensor_msgs::msg::Joy::SharedPtr joy_msg){
-        //assert(joy_msg->buttons[0] != NULL);
-        //SparkMax::Heartbeat();        
-        printf("FILLER TO COMPILE CODE = %d",joy_msg->buttons[0]);
-    }
-
-
-
-    /*
-        Left Trigger : joy_msg->axes[4] 
-        Right Trigger : joy_msg->axes[5] 
-        msg->buttons[5];    Right Bumper 
-        msg->buttons[4];    Left Bumper 
-        msg->buttons[1];    B Button
-        msg->buttons[2];    X Button  
-            
-    */
-    bool x_button = false;          //raise linear actuator
-    bool b_button = false;          // lower linear actuator
-    bool left_bumper = false;       // Extend Leadscrew
-    bool right_bumper = false;      //Retract Leadscrew
-    bool left_trigger = false;      // Increase Speed of Leadscrew extension
-    bool right_trigger = false;     // Increase Speed of Leadscrew retraction
-
-
 
 
 int main(int argc, char* argv[]) {

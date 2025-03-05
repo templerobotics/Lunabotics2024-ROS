@@ -12,16 +12,27 @@ Dumping::Dumping()
     , m_dumping_left("can0", DUMPING_LEFT_CAN_ID)
     , m_dumping_right("can0", DUMPING_RIGHT_CAN_ID)
 { 
-    /**
-     * @brief sub to published topic from Drivebase Control
-     */
-    sub_dumping_conveyor_speed = this->create_subscription<Float64>("dumping/conveyor_speed", 10,std::bind(&Dumping::handleConveyorBeltSpeed, this, std::placeholders::_1));
-    RCLCPP_INFO(this->get_logger(), "Dumping belt initialized!\n");
+    initMotors();
+    RCLCPP_INFO(this->get_logger(), "Dumping Subsystem ready to go!\n");
 }
+    void Dumping::joy_callback_dumping(const sensor_msgs::msg::Joy::SharedPtr joy_msg){
+        double activate_conveyor_belt = 
+        double activate_dump_latch = 
+    }
 
-void Dumping::handleConveyorBeltSpeed(const Float64Shared msg){
-    RCLCPP_INFO(get_logger(),"DATA=%lf",msg->data);
-}
+    void Dumping::initMotors(){
+        m_dumping_left.SetIdleMode(IdleMode::kCoast);
+        m_dumping_left.SetMotorType(MotorType::kBrushless);
+        m_dumping_left.SetDutyCycle(0.0);
+        m_dumping_left.BurnFlash();
+        
+        m_dumping_right.SetIdleMode(IdleMode::kCoast);
+        m_dumping_right.SetMotorType(MotorType::kBrushless);
+        m_dumping_right.SetDutyCycle(0.0);
+        m_dumping_right.BurnFlash();
+        
+        RCLCPP_INFO(get_logger(), "Dumping Subsystem Motors configured successfully");
+    }
 
 int main(int argc, char* argv[]) {
     rclcpp::init(argc, argv);
