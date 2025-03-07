@@ -164,6 +164,16 @@ enum class LinearActuatorState {
     Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded
 };
 
+
+enum class LeadscrewState {
+    Extended,
+    Retracted,
+    Traveling,
+    FullExtended,
+    GivenCommand
+};
+
+
 enum class RobotSide{
 LEFT,
 RIGHT,
@@ -196,13 +206,6 @@ enum class FaultBits : uint16_t {
     kBrownout = 14        // Brownout
 };
 
-enum class LeadscrewState {
-    Extended,
-    Retracted,
-    Traveling,
-    FullExtended,
-    GivenCommand
-};
 
 
 typedef struct{

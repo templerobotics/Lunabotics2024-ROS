@@ -22,51 +22,51 @@ protected:
      * @brief Digging Belt
      * @todo PID Implementation
      */
-    void configure_belts();                         // initialization
-    void setBeltSpeedForward(double speed);         // USE SetDutyCycle() --> set(double speed) is [-1,1]
+    void setBeltSpeedForward(double speed);         
     void setBeltSpeedReverse(double speed);
-    void stopMotors();                              // set DutyCycle() and voltage for both belt Sparkmaxes to 0.0
-    bool belt_running{false};                       // Keep only one declaration
+    void stopDiggingBeltMotors();                              
+    bool belt_running{false};                      
     bool isRunning() const { return belt_running; }
 
     /**
      * @brief Limit Switch / Leadscrew
     */
-    void configureLimitSwitches();                  // in leadscrew.cpp
-    bool leadscrewGetRawLimitSwitch(RobotSide side, MechanismPosition pos);
+    void configureLimitSwitches();                  
     bool isTopLimitPressed();
     bool isBottomLimitPressed();
     void setLeadscrewSpeed(double speed);
     LeadscrewState leadscrew_state = LeadscrewState::Traveling;
-    LeadscrewState getState() const;                // return leadscrew_state
+    LeadscrewState getLeadscrewState();               
 
     bool leadscrew_initialized{false};
     bool checkFault(uint16_t faults, FaultBits bit);
     void periodic();
-    void checkLimits();
+    void checkLeadscrewLimits();
     void publishState();
     std::string stateToString(LeadscrewState state);
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub;
-       
-    /*
-    Left Trigger : joy_msg->axes[4] 
-    Right Trigger : joy_msg->axes[5] 
-    msg->buttons[5];    Right Bumper 
-    msg->buttons[4];    Left Bumper 
-    msg->buttons[1];    B Button
-    msg->buttons[2];    X Button        
-    */
+    rclcpp::TimerBase::SharedPtr timer_diagnostics;
+    rclcpp::TimerBase::SharedPtr timer_linear_actuators;
+
+    // LINEAR ACTUATOR
+    LinearActuatorState linear_actuator_state = LinearActuatorState::Unknown;
+    void checkLinearActuatorLimits();
+    void commandUp();
+    void commandDown();
+    void commandStop();
+    void linearUp();
+    void linearDown();
+    LinearActuatorState getLinearActuatorState();
+    double getLinearActuatorLeftPosition();
+    double getLinearActuatorRightPosition();
+    void stopLinearActuatorMotors();                              
+    void periodicLinearActuatorCheck();
+
    bool x_button = false;          //raise linear actuator
    bool b_button = false;          // lower linear actuator
    bool left_bumper = false;       // Extend Leadscrew
    bool right_bumper = false;      //Retract Leadscrew
    bool left_trigger = false;      // Increase Speed of Leadscrew extension
    bool right_trigger = false;     // Increase Speed of Leadscrew retraction
-    
-   
-   /**
-    * @brief Linear Actuator
-    */
-
 
 };
