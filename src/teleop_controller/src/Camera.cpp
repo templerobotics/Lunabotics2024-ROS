@@ -16,6 +16,7 @@ public:
     }
 
 private:
+
     void config_cameras(){
         this->declare_parameter("camera_digging",           "/dev/video0");
         this->declare_parameter("camera_dumping",           "/dev/video1");

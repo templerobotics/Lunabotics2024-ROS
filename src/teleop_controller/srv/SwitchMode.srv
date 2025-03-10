@@ -1,0 +1,5 @@
+string mode_name  # "teleop" or "autonomy"
+bool activate
+---
+bool success
+string message

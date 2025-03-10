@@ -24,6 +24,7 @@ include_directories(include)
 # Generate interfaces first
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/SetParameter.srv"
+  "srv/SwitchMode.srv"
 )
 
 add_executable(drivebase_control src/DrivebaseControl.cpp)

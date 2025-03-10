@@ -2,6 +2,7 @@
  * @file drivebase_control.cpp
  * @author Jaden Howard (jaseanhow@gmail.com or tun85812@temple.edu)
  * @brief ROS2 node for managing the robot's drivebase and coordinating subsystem commands
+ * @todo UTILIZE CALC MOTOR SPEEDS! I recently deleted cmd_vel sub due to implementing Twist MUX
  * @todo Put in some work to get SparkMax temps in celsius to print/other profiling data. SparkMax has method/built-in temp sensor
  * @version 0.3
  * @date 2025-03-01
@@ -22,8 +23,13 @@
          robot_disabled(false)
      {
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
-        cmd_vel_pub = create_publisher<Twist>("cmd_vel", 10);
-        cmd_vel_sub = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&DrivebaseControl::cmd_vel_callback, this, std::placeholders::_1));
+        cmd_vel_pub = create_publisher<Twist>("cmd_vel/teleop", 10);    
+        cmd_vel_sub = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, [this](const geometry_msgs::msg::Twist::SharedPtr msg) {
+                this->calculate_motor_speeds(msg->linear.x, msg->angular.z);
+            });
+
+        mode_client = create_client<teleop_controller::srv::SwitchMode>("activate_mode");
+        
         try {
             RCLCPP_INFO(get_logger(), "Configuring Drivebase Motors");
             left_front.SetIdleMode(IdleMode::kCoast);
@@ -69,7 +75,28 @@ private:
     bool controller_teleop_enabled;
     bool autonomy_enabled;
     bool robot_disabled;
-    
+
+    rclcpp::Client<teleop_controller::srv::SwitchMode>::SharedPtr mode_client;
+
+    void request_mode_change(const std::string& mode, bool activate) {
+        while (!mode_client->wait_for_service(1s)) {
+            if (!rclcpp::ok()) {
+                RCLCPP_ERROR(get_logger(), "Interrupted while waiting for mode service");
+                return;
+            }
+            RCLCPP_INFO(get_logger(), "Waiting for activate_mode service...");
+        }
+        
+        auto request = std::make_shared<teleop_controller::srv::SwitchMode::Request>();
+        request->mode_name = mode;
+        request->activate = activate;
+        auto future = mode_client->async_send_request(request);
+        if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) == rclcpp::FutureReturnCode::SUCCESS) {
+            auto response = future.get();
+            RCLCPP_INFO(get_logger(), "Mode change result: %s", response->message.c_str());
+        }
+
+    }
 
     /**
      * @brief Interprets XBOX joystick Joy msgs
@@ -77,10 +104,18 @@ private:
    void joy_callback(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
         if (robot_disabled) {RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 1000, "Robot is disabled!");return;}
         SparkMax::Heartbeat();
+        
+        if (joy_msg->buttons[5]) { // Guide button for teleop
+            request_mode_change("teleop", true);
+        } else if (joy_msg->buttons[6]) { // Start button for autonomy
+            request_mode_change("autonomy", true);
+        }
+
         auto twist_msg = geometry_msgs::msg::Twist();
         twist_msg.linear.x = joy_msg->axes[1];  
         twist_msg.angular.z  = joy_msg->axes[2];
         cmd_vel_pub->publish(twist_msg);
+    
     }
     /**
      * @brief Calculates hardware motor speeds based on Twist msg
@@ -110,20 +145,11 @@ private:
 
     }
 
-    /**
-     * @brief Interprets publishes Twist msg to actuate the Robot's Motors via XBOX Controller Teleop
-     */
-    void cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr twist_msg){
-        double linear_x_velocity = twist_msg->linear.x;
-        double angular_z_velocity = twist_msg->angular.z;
-        calculate_motor_speeds(linear_x_velocity, angular_z_velocity);
-    }
 
-   
-
-    
 };
  
+
+
  int main(int argc, char* argv[]) {
      rclcpp::init(argc, argv);
      auto node = std::make_shared<DrivebaseControl>();
