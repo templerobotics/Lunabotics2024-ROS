@@ -247,17 +247,25 @@ private:
         // Use INFO level during troubleshooting so we can see these messages
         //RCLCPP_INFO(get_logger(), "Motor commands: left=%.2f, right=%.2f from input: linear=%.2f, angular=%.2f", motor_cmd_left, motor_cmd_right, linear_x_velocity, angular_z_velocity);
 
+       // ADDITIONAL SCALING FACTOR
+        // This multiplier increases the final output to compensate for any scaling issues
+        const double POWER_BOOST = 10.0;  // Using your 100x multiplier
+        motor_cmd_left *= POWER_BOOST;
+        motor_cmd_right *= POWER_BOOST;
+        
+        // CRITICAL: Clamp duty cycle to valid range (-1.0 to 1.0)
+        motor_cmd_left = std::clamp(motor_cmd_left, -1.0, 1.0);
+        motor_cmd_right = std::clamp(motor_cmd_right, -1.0, 1.0);
+
+        RCLCPP_INFO(get_logger(), "FINAL MOTOR DUTY: left=%.2f, right=%.2f", 
+                  motor_cmd_left, motor_cmd_right);
+
         // Apply to motors
-        printf("MOTOR CMD LEFT = [%lf]\n",motor_cmd_left);
-        printf("MOTOR CMD RIGHT = [%lf]\n",motor_cmd_right);
-        //NOTE: TEMPORARY SOLUTION is x100 so the motors actually spin
-        //NOTE: RUNS ON STARTUP??? SHOULD NOT HAPPEN. ALSO CLAMP DUTY CYCLE AND THE CODE IS GOOD TO GO!
-        left_front.SetDutyCycle(motor_cmd_left*100);
-        left_rear.SetDutyCycle(motor_cmd_left*100);
-        right_front.SetDutyCycle(motor_cmd_right*100);
-        right_rear.SetDutyCycle(motor_cmd_right*100);
-        printf("AFTERMOTOR CMD LEFT = [%lf]\n",motor_cmd_left);
-        printf("AFTER MOTOR CMD RIGHT = [%lf]\n",motor_cmd_right);
+        left_front.SetDutyCycle(motor_cmd_left);
+        left_rear.SetDutyCycle(motor_cmd_left);
+        right_front.SetDutyCycle(motor_cmd_right);
+        right_rear.SetDutyCycle(motor_cmd_right);
+
     }
 };
 
