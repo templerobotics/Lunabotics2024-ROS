@@ -6,35 +6,31 @@
  * @date 2025-03-10
  */
 
+
+/*
+
+FIXING
+    - Only When Joystick input is given should the motors actuate via calculate motor speeds
+    - Trying to call function only when those buttons used
+
+*/
 #include "core.hpp"
 
 
  class DrivebaseControl : public rclcpp::Node {
  public:
-     DrivebaseControl() 
-         : Node("drivebase_control"), 
-         left_front("can0", 1),
-         left_rear("can0", 2),
-         right_front("can0", 3),
-         right_rear("can0", 4),
-         controller_teleop_enabled(true),
-         autonomy_enabled(false), 
-         robot_disabled(false),
-         last_heartbeat_time(this->now())
+     DrivebaseControl() : Node("drivebase_control"), left_front("can0", 1),left_rear("can0", 2),right_front("can0", 3),right_rear("can0", 4),controller_teleop_enabled(true),autonomy_enabled(false), robot_disabled(false)
      {
-        // Subscribe to joystick for direct control
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
-        
-        // Publish teleop commands for the multiplexer
         cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("cmd_vel/teleop", 10);
         
-        // Subscribe to final multiplexed commands (for autonomy mode)
+        // Sub to final multiplexed commands
         cmd_vel_sub = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&DrivebaseControl::cmd_vel_callback, this, std::placeholders::_1));
 
         // Client for changing control modes
         mode_client = create_client<teleop_controller::srv::SwitchMode>("activate_mode");
         
-        // Subscribe to the current mode topic to stay in sync with the multiplexer
+        // Sub to the current mode topic to stay in sync with the multiplexer
         mode_sub = create_subscription<std_msgs::msg::String>(
             "current_mode", 10, 
             [this](const std_msgs::msg::String::SharedPtr msg) {
@@ -47,10 +43,7 @@
                 }
             });
             
-        // Create a timer for regular heartbeats and diagnostics
-        heartbeat_timer = create_wall_timer(
-            std::chrono::milliseconds(100),
-            std::bind(&DrivebaseControl::heartbeat_callback, this));
+     
         
         try {
             RCLCPP_INFO(get_logger(), "Configuring Drivebase Motors");
@@ -97,28 +90,11 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr mode_sub;
     rclcpp::Client<teleop_controller::srv::SwitchMode>::SharedPtr mode_client;
-    rclcpp::TimerBase::SharedPtr heartbeat_timer;
 
     bool controller_teleop_enabled;
     bool autonomy_enabled;
     bool robot_disabled;
-    
-    rclcpp::Time last_heartbeat_time;
-    
-    /**
-     * @brief Timer callback for regular heartbeat and diagnostics
-     */
-    void heartbeat_callback() {
-        SparkMax::Heartbeat();
-        auto now = this->now();
-        auto elapsed = now - last_heartbeat_time;
         
-        if (elapsed.seconds() > 5.0) {
-            RCLCPP_DEBUG(get_logger(), "Drivebase heartbeat - Motors running");
-            RCLCPP_INFO(get_logger(), "Motor temps: LF: %.1f°C, LR: %.1f°C, RF: %.1f°C, RR: %.1f°C", left_front.GetTemperature(), left_rear.GetTemperature(),right_front.GetTemperature(), right_rear.GetTemperature());
-        }
-    }
-
     void request_mode_change(const std::string& mode, bool activate) {
         while (!mode_client->wait_for_service(std::chrono::seconds(1))) {
             if (!rclcpp::ok()) {
@@ -185,9 +161,14 @@ private:
             twist_msg.angular.z = angular_z;
             cmd_vel_pub->publish(twist_msg);
             
-            calculate_motor_speeds(linear_x, angular_z);
+            /**
+             * @brief TEST THIS OUT ON ACTUAL HARDWARE!!!
+             */
+            if(linear_x && angular_z)
+                calculate_motor_speeds(linear_x, angular_z);
+            }
+
         }
-    }
 
     /**
      * @brief Calculates hardware motor speeds based on Twist msg
@@ -202,32 +183,8 @@ private:
      * @var rpm_left/right = m/s to RPM
      */
     void calculate_motor_speeds(double linear_x_velocity, double angular_z_velocity) {
-        // Add constants if they're not defined in core.hpp
-        const double MIN_THROTTLE_DEADZONE = 0.05;  // Adjust as needed
-        const double WHEEL_BASE = 0.5;  // Distance between wheels in meters
-        const double WHEEL_RADIUS = 0.1;  // Wheel radius in meters
-        const double SPARKMAX_MAX_DUTY_CYCLE = 1.0;
-        const double SPARKMAX_RPM_AVERAGE = 5676.0;  // Max RPM of your motors
-        
-        // Update last heartbeat time when receiving commands
-        last_heartbeat_time = this->now();
-        
-        // Apply deadzone
-        if (std::abs(linear_x_velocity) < MIN_THROTTLE_DEADZONE) { 
-            linear_x_velocity = 0.0; 
-        }
-        if (std::abs(angular_z_velocity) < MIN_THROTTLE_DEADZONE) { 
-            angular_z_velocity = 0.0; 
-        }
-        
-        // If both inputs are zero after deadzone, just stop the motors directly
-        if (linear_x_velocity == 0.0 && angular_z_velocity == 0.0) {
-            left_front.SetDutyCycle(0.0);
-            left_rear.SetDutyCycle(0.0);
-            right_front.SetDutyCycle(0.0);
-            right_rear.SetDutyCycle(0.0);
-            return;
-        }
+        if (std::abs(linear_x_velocity) < MIN_THROTTLE_DEADZONE) { linear_x_velocity = 0.0; }
+        if (std::abs(angular_z_velocity) < MIN_THROTTLE_DEADZONE) { angular_z_velocity = 0.0; }
         
         // Calculate wheel speeds based on differential drive kinematics
         double wheel_speed_left = linear_x_velocity - (angular_z_velocity * WHEEL_BASE/2);
@@ -241,32 +198,18 @@ private:
         double motor_cmd_left = rpm_left * (SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE);
         double motor_cmd_right = rpm_right * (SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE);
         
-        //motor_cmd_left = (motor_cmd_left, -1.0, 1.0);
-        //motor_cmd_right = (motor_cmd_right, -1.0, 1.0);
-
-        // Use INFO level during troubleshooting so we can see these messages
-        //RCLCPP_INFO(get_logger(), "Motor commands: left=%.2f, right=%.2f from input: linear=%.2f, angular=%.2f", motor_cmd_left, motor_cmd_right, linear_x_velocity, angular_z_velocity);
-
-       // ADDITIONAL SCALING FACTOR
-        // This multiplier increases the final output to compensate for any scaling issues
-        const double POWER_BOOST = 10.0;  // Using your 100x multiplier
-        motor_cmd_left *= POWER_BOOST;
-        motor_cmd_right *= POWER_BOOST;
-        
-        // CRITICAL: Clamp duty cycle to valid range (-1.0 to 1.0)
+        // Multiplier strategy does NOT work. Allows motors to spin w/ out user joystick input
         motor_cmd_left = std::clamp(motor_cmd_left, -1.0, 1.0);
         motor_cmd_right = std::clamp(motor_cmd_right, -1.0, 1.0);
 
-        RCLCPP_INFO(get_logger(), "FINAL MOTOR DUTY: left=%.2f, right=%.2f", 
-                  motor_cmd_left, motor_cmd_right);
-
-        // Apply to motors
+        //Duty Cycle values were around 0.007 & 0.004, which are way to slow for a fully built motor equipped w/ a shaft
         left_front.SetDutyCycle(motor_cmd_left);
         left_rear.SetDutyCycle(motor_cmd_left);
         right_front.SetDutyCycle(motor_cmd_right);
         right_rear.SetDutyCycle(motor_cmd_right);
 
     }
+
 };
 
 int main(int argc, char* argv[]) {
