@@ -6,31 +6,34 @@
  * @date 2025-03-10
  */
 
-
-/*
-
-FIXING
-    - Only When Joystick input is given should the motors actuate via calculate motor speeds
-    - Trying to call function only when those buttons used
-
-*/
-#include "core.hpp"
+ #include "core.hpp"
 
 
  class DrivebaseControl : public rclcpp::Node {
  public:
-     DrivebaseControl() : Node("drivebase_control"), left_front("can0", 1),left_rear("can0", 2),right_front("can0", 3),right_rear("can0", 4),controller_teleop_enabled(true),autonomy_enabled(false), robot_disabled(false)
+     DrivebaseControl() 
+         : Node("drivebase_control"), 
+         left_front("can0", 1),
+         left_rear("can0", 2),
+         right_front("can0", 3),
+         right_rear("can0", 4),
+         controller_teleop_enabled(true),
+         autonomy_enabled(false), 
+         robot_disabled(false)
      {
+        // Subscribe to joystick for direct control
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
+        
+        // Publish teleop commands for the multiplexer
         cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("cmd_vel/teleop", 10);
         
-        // Sub to final multiplexed commands
+        // Subscribe to final multiplexed commands (for autonomy mode)
         cmd_vel_sub = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&DrivebaseControl::cmd_vel_callback, this, std::placeholders::_1));
 
         // Client for changing control modes
         mode_client = create_client<teleop_controller::srv::SwitchMode>("activate_mode");
         
-        // Sub to the current mode topic to stay in sync with the multiplexer
+        // Subscribe to the current mode topic to stay in sync with the multiplexer
         mode_sub = create_subscription<std_msgs::msg::String>(
             "current_mode", 10, 
             [this](const std_msgs::msg::String::SharedPtr msg) {
@@ -43,7 +46,7 @@ FIXING
                 }
             });
             
-     
+        
         
         try {
             RCLCPP_INFO(get_logger(), "Configuring Drivebase Motors");
@@ -90,11 +93,14 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr mode_sub;
     rclcpp::Client<teleop_controller::srv::SwitchMode>::SharedPtr mode_client;
+    rclcpp::TimerBase::SharedPtr heartbeat_timer;
 
     bool controller_teleop_enabled;
     bool autonomy_enabled;
     bool robot_disabled;
-        
+
+    double linear_x, angular_z;
+
     void request_mode_change(const std::string& mode, bool activate) {
         while (!mode_client->wait_for_service(std::chrono::seconds(1))) {
             if (!rclcpp::ok()) {
@@ -129,6 +135,8 @@ private:
 
     /**
      * @brief Interprets XBOX joystick Joy msgs
+     * @details Crucial Part = Deadzone check. Makes sure that joy ONLY publishes velocities when the joysticks are moved.
+     *         
     */
     void joy_callback(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
         if (robot_disabled) {
@@ -151,8 +159,16 @@ private:
         }
 
         if (controller_teleop_enabled) {
-            double linear_x = joy_msg->axes[1];  
-            double angular_z = joy_msg->axes[2];
+            linear_x = joy_msg->axes[1];  
+            angular_z = joy_msg->axes[3];
+            
+            if (std::abs(linear_x) < MIN_THROTTLE_DEADZONE && std::abs(angular_z) < MIN_THROTTLE_DEADZONE) {
+                left_front.SetDutyCycle(0.0);
+                left_rear.SetDutyCycle(0.0);
+                right_front.SetDutyCycle(0.0);
+                right_rear.SetDutyCycle(0.0);
+                return;  
+            }
 
             RCLCPP_INFO(get_logger(), "Joy input: linear_x=%.2f, angular_z=%.2f", linear_x, angular_z);
             
@@ -160,15 +176,13 @@ private:
             twist_msg.linear.x = linear_x;
             twist_msg.angular.z = angular_z;
             cmd_vel_pub->publish(twist_msg);
+            calculate_motor_speeds(linear_x, angular_z);
             
-            /**
-             * @brief TEST THIS OUT ON ACTUAL HARDWARE!!!
-             */
-            if(linear_x && angular_z)
-                calculate_motor_speeds(linear_x, angular_z);
-            }
 
         }
+    }
+
+
 
     /**
      * @brief Calculates hardware motor speeds based on Twist msg
@@ -183,9 +197,13 @@ private:
      * @var rpm_left/right = m/s to RPM
      */
     void calculate_motor_speeds(double linear_x_velocity, double angular_z_velocity) {
-        if (std::abs(linear_x_velocity) < MIN_THROTTLE_DEADZONE) { linear_x_velocity = 0.0; }
-        if (std::abs(angular_z_velocity) < MIN_THROTTLE_DEADZONE) { angular_z_velocity = 0.0; }
-        
+        if (std::abs(linear_x_velocity) < MIN_THROTTLE_DEADZONE) { 
+            linear_x_velocity = 0.0; 
+        }
+        if (std::abs(angular_z_velocity) < MIN_THROTTLE_DEADZONE) { 
+            angular_z_velocity = 0.0; 
+        }
+  
         // Calculate wheel speeds based on differential drive kinematics
         double wheel_speed_left = linear_x_velocity - (angular_z_velocity * WHEEL_BASE/2);
         double wheel_speed_right = linear_x_velocity + (angular_z_velocity * WHEEL_BASE/2);
@@ -198,18 +216,17 @@ private:
         double motor_cmd_left = rpm_left * (SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE);
         double motor_cmd_right = rpm_right * (SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE);
         
-        // Multiplier strategy does NOT work. Allows motors to spin w/ out user joystick input
+        RCLCPP_INFO(get_logger(), "PRE CLAMP MOTOR DUTY: left=%.2f, right=%.2f", motor_cmd_left, motor_cmd_right);
+
         motor_cmd_left = std::clamp(motor_cmd_left, -1.0, 1.0);
         motor_cmd_right = std::clamp(motor_cmd_right, -1.0, 1.0);
 
-        //Duty Cycle values were around 0.007 & 0.004, which are way to slow for a fully built motor equipped w/ a shaft
         left_front.SetDutyCycle(motor_cmd_left);
         left_rear.SetDutyCycle(motor_cmd_left);
         right_front.SetDutyCycle(motor_cmd_right);
         right_rear.SetDutyCycle(motor_cmd_right);
 
     }
-
 };
 
 int main(int argc, char* argv[]) {
