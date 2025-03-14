@@ -2,6 +2,7 @@
  * @file drivebase_control.cpp
  * @author Jaden Howard (jaseanhow@gmail.com or tun85812@temple.edu)
  * @brief ROS2 node for managing the robot's drivebase and coordinating subsystem commands
+ * @todo 2 Options for MUX : Global Bool states vs Wrapping service call w/ ros2 params. Try both
  * @version 0.4
  * @date 2025-03-10
  */
@@ -21,15 +22,17 @@
          autonomy_enabled(false), 
          robot_disabled(false)
      {
-        // Subscribe to joystick for direct control
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
         
-        // Publish teleop commands for the multiplexer
         cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("cmd_vel/teleop", 10);
         
-        // Subscribe to final multiplexed commands (for autonomy mode)
         cmd_vel_sub = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&DrivebaseControl::cmd_vel_callback, this, std::placeholders::_1));
 
+        metrics_timer = create_wall_timer(
+            std::chrono::milliseconds(500),
+            std::bind(&DrivebaseControl::publish_motor_metrics, this)
+        );
+        
         // Client for changing control modes
         mode_client = create_client<teleop_controller::srv::SwitchMode>("activate_mode");
         
@@ -93,13 +96,38 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr mode_sub;
     rclcpp::Client<teleop_controller::srv::SwitchMode>::SharedPtr mode_client;
-    rclcpp::TimerBase::SharedPtr heartbeat_timer;
+    rclcpp::TimerBase::SharedPtr metrics_timer;
 
     bool controller_teleop_enabled;
     bool autonomy_enabled;
     bool robot_disabled;
 
     double linear_x, angular_z;
+
+    /**
+     * @brief Periodically logs motor metrics
+     * @details Downgrade all Sparkmaxes to Firmware Version 24 
+     * I updated CAN ID 1 Sparkmax already
+     */
+    void publish_motor_metrics()
+    {
+        try {
+            float temperature = left_front.GetTemperature();
+            float voltage = left_front.GetVoltage();
+            float current = left_front.GetCurrent();
+            float velocity = left_front.GetVelocity();
+            float duty_cycle = left_front.GetDutyCycle();
+            float pos = left_front.GetPosition();
+
+            RCLCPP_INFO(get_logger(), "Motor Metrics [Left Front] - Temp: %.6f C, Voltage: %.6f C ",temperature, voltage);
+            RCLCPP_INFO(get_logger(), "Motor Metrics [Left Front] - Duty Cycle: %.6f C, Velocity: %.6f C | Position =%.6f ", duty_cycle , velocity , pos);
+
+            if (temperature > 40.0) {RCLCPP_WARN(get_logger(), "Motor temperature high: %.1f°C", temperature);}
+
+        } catch (const std::exception& e) {
+            RCLCPP_ERROR(get_logger(), "Failed to read motor metrics: %s", e.what());
+        }
+    }
 
     void request_mode_change(const std::string& mode, bool activate) {
         while (!mode_client->wait_for_service(std::chrono::seconds(1))) {
@@ -146,7 +174,7 @@ private:
         
         SparkMax::Heartbeat();
         
-        if (joy_msg->buttons[5]) { // Guide button for teleop
+        if (joy_msg->buttons[7]) { // 3 horizontal bars button
             request_mode_change("teleop", true);
             controller_teleop_enabled = true;
             autonomy_enabled = false;
@@ -155,7 +183,7 @@ private:
             request_mode_change("autonomy", true);
             controller_teleop_enabled = false;
             autonomy_enabled = true;
-            RCLCPP_INFO(get_logger(), "Autonomy mode activated");
+            RCLCPP_INFO(get_logger(), "FROM DRIVEBASE JOY CALLBACK--->Autonomy mode activated");
         }
 
         if (controller_teleop_enabled) {
@@ -170,7 +198,7 @@ private:
                 return;  
             }
 
-            RCLCPP_INFO(get_logger(), "Joy input: linear_x=%.2f, angular_z=%.2f", linear_x, angular_z);
+            //RCLCPP_INFO(get_logger(), "Joy input: linear_x=%.2f, angular_z=%.2f", linear_x, angular_z);
             
             auto twist_msg = geometry_msgs::msg::Twist();
             twist_msg.linear.x = linear_x;
@@ -216,7 +244,7 @@ private:
         double motor_cmd_left = rpm_left * (SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE);
         double motor_cmd_right = rpm_right * (SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE);
         
-        RCLCPP_INFO(get_logger(), "PRE CLAMP MOTOR DUTY: left=%.2f, right=%.2f", motor_cmd_left, motor_cmd_right);
+        //RCLCPP_INFO(get_logger(), "PRE CLAMP MOTOR DUTY: left=%.2f, right=%.2f", motor_cmd_left, motor_cmd_right);
 
         motor_cmd_left = std::clamp(motor_cmd_left, -1.0, 1.0);
         motor_cmd_right = std::clamp(motor_cmd_right, -1.0, 1.0);

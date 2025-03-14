@@ -28,8 +28,21 @@ def generate_launch_description():
         output='screen'
     )
 
+    mode_control = Node(
+        package='teleop_controller',
+        executable='robot_mode',
+        name='activate_mode',
+        parameters=[{
+            'hardware_enabled': LaunchConfiguration('hardware_enabled')
+        }],
+        output='screen'
+    )
+
+
+
     return LaunchDescription([
         hardware_enabled,
         drivebase_control,
+        mode_control,
         joy_node_jaden
     ])
