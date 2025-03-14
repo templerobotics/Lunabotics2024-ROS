@@ -13,7 +13,6 @@ public:
         cmd_vel_sub_teleop = create_subscription<geometry_msgs::msg::Twist>("cmd_vel/teleop", 10, std::bind(&ActivateMode::callback_teleop_cmdvel, this, std::placeholders::_1));
         cmd_vel_sub_autonomy = create_subscription<geometry_msgs::msg::Twist>( "cmd_vel/autonomy", 10, std::bind(&ActivateMode::callback_autonomy_cmdvel, this, std::placeholders::_1));
         cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
-        
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&ActivateMode::joy_callback, this, std::placeholders::_1));
         
         mode_service = create_service<teleop_controller::srv::SwitchMode>("activate_mode", std::bind(&ActivateMode::handle_mode_change, this, std::placeholders::_1, std::placeholders::_2));                     
@@ -26,11 +25,13 @@ private:
     rclcpp::Service<teleop_controller::srv::SwitchMode>::SharedPtr mode_service;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr mode_publisher;
     rclcpp::TimerBase::SharedPtr current_mode_pub;
+    
+
+    //Need these 110%
     TwistPublisher cmd_vel_pub;
     TwistSubscription cmd_vel_sub_teleop;
     TwistSubscription cmd_vel_sub_autonomy;
-
-    rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub;
+    rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub; 
 
     bool controller_teleop_enabled, autonomy_enabled;
     
@@ -42,6 +43,7 @@ private:
             autonomy_enabled = !request->activate;
             response->success = true;
             response->message = "FROM HANDLE MODE CHANGE Teleop mode " + std::string(request->activate ? "activated" : "deactivated");
+
         } 
         else if (request->mode_name == "autonomy") {
             autonomy_enabled = request->activate;
@@ -74,11 +76,7 @@ private:
     }
 
     /**
-     * @brief 
-     * @var joy_msg->buttons[5]
-     * XBOX Guide Button
-     * @var joy_msg->buttons[6]
-     * XBOX Start Button
+     * @brief Switch back and forth between teleop and autonomy
      */
     void joy_callback(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
         if (joy_msg->buttons[7]) { 
@@ -89,10 +87,12 @@ private:
             controller_teleop_enabled = false;
             autonomy_enabled = true;
             RCLCPP_INFO(get_logger(), "FROM ACTIVATE MODE JOY_MSG ---> Autonomy mode activated");
+            
         }
 
-    }
 
+    }
+    
 
 };
 

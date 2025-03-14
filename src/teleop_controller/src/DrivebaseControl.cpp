@@ -103,6 +103,8 @@ private:
     bool robot_disabled;
 
     double linear_x, angular_z;
+    const sensor_msgs::msg::Joy::SharedPtr last_joy_msg;
+
 
     /**
      * @brief Periodically logs motor metrics
@@ -114,7 +116,6 @@ private:
         try {
             float temperature = left_front.GetTemperature();
             float voltage = left_front.GetVoltage();
-            float current = left_front.GetCurrent();
             float velocity = left_front.GetVelocity();
             float duty_cycle = left_front.GetDutyCycle();
             float pos = left_front.GetPosition();
@@ -179,6 +180,7 @@ private:
             controller_teleop_enabled = true;
             autonomy_enabled = false;
             RCLCPP_INFO(get_logger(), "Teleop mode activated");
+
         } else if (joy_msg->buttons[6]) { // Start button for autonomy
             request_mode_change("autonomy", true);
             controller_teleop_enabled = false;
@@ -190,6 +192,11 @@ private:
             linear_x = joy_msg->axes[1];  
             angular_z = joy_msg->axes[3];
             
+            if(controller_teleop_enabled && last_joy_msg){
+                linear_x = last_joy_msg->axes[1];
+                angular_z = last_joy_msg->axes[3];
+            }
+
             if (std::abs(linear_x) < MIN_THROTTLE_DEADZONE && std::abs(angular_z) < MIN_THROTTLE_DEADZONE) {
                 left_front.SetDutyCycle(0.0);
                 left_rear.SetDutyCycle(0.0);
