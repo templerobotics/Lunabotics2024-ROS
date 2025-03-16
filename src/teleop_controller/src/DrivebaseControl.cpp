@@ -18,39 +18,17 @@
          left_rear("can0", 2),
          right_front("can0", 3),
          right_rear("can0", 4),
-         controller_teleop_enabled(true),
-         autonomy_enabled(false), 
-         robot_disabled(false)
+         controller_teleop_enabled(true)
      {
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
-        
-        cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("cmd_vel/teleop", 10);
-        
-        cmd_vel_sub = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&DrivebaseControl::cmd_vel_callback, this, std::placeholders::_1));
-
-        metrics_timer = create_wall_timer(
-            std::chrono::milliseconds(500),
-            std::bind(&DrivebaseControl::publish_motor_metrics, this)
-        );
-        
-        // Client for changing control modes
-        mode_client = create_client<teleop_controller::srv::SwitchMode>("activate_mode");
-        
-        // Subscribe to the current mode topic to stay in sync with the multiplexer
-        mode_sub = create_subscription<std_msgs::msg::String>(
-            "current_mode", 10, 
+        cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("teleop/cmd_vel", 10);
+        metrics_timer = create_wall_timer(std::chrono::milliseconds(500),std::bind(&DrivebaseControl::publish_motor_metrics, this));          
+        mode_sub = create_subscription<std_msgs::msg::String>("current_mode", 10, 
             [this](const std_msgs::msg::String::SharedPtr msg) {
-                if (msg->data == "teleop") {
-                    controller_teleop_enabled = true;
-                    autonomy_enabled = false;
-                } else if (msg->data == "autonomy") {
-                    controller_teleop_enabled = false;
-                    autonomy_enabled = true;
-                }
+                controller_teleop_enabled = (msg->data == "teleop"); // Update global
+                RCLCPP_INFO(get_logger(), "Mode updated: %s", msg->data.c_str());
             });
             
-        
-        
         try {
             RCLCPP_INFO(get_logger(), "Configuring Drivebase Motors");
             left_front.SetIdleMode(IdleMode::kCoast);
@@ -71,7 +49,7 @@
             
             right_rear.SetIdleMode(IdleMode::kCoast);
             right_rear.SetMotorType(MotorType::kBrushless);
-            right_rear.SetInverted(true);  // Invert right motors
+            right_rear.SetInverted(true);  
             right_rear.SetDutyCycle(0.0);
             right_rear.BurnFlash();
 
@@ -93,23 +71,15 @@ private:
 
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub;
-    rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub;
-    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr mode_sub;
-    rclcpp::Client<teleop_controller::srv::SwitchMode>::SharedPtr mode_client;
     rclcpp::TimerBase::SharedPtr metrics_timer;
-
-    bool controller_teleop_enabled;
-    bool autonomy_enabled;
-    bool robot_disabled;
-
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr mode_sub; 
     double linear_x, angular_z;
-    const sensor_msgs::msg::Joy::SharedPtr last_joy_msg;
-
+    bool controller_teleop_enabled;
 
     /**
      * @brief Periodically logs motor metrics
      * @details Downgrade all Sparkmaxes to Firmware Version 24 
-     * I updated CAN ID 1 Sparkmax already
+     * @details CAN ID 1 Sparkmax downgraded to version 24 already & worked perfectly
      */
     void publish_motor_metrics()
     {
@@ -130,73 +100,22 @@ private:
         }
     }
 
-    void request_mode_change(const std::string& mode, bool activate) {
-        while (!mode_client->wait_for_service(std::chrono::seconds(1))) {
-            if (!rclcpp::ok()) {
-                RCLCPP_ERROR(get_logger(), "Interrupted while waiting for mode service");
-                return;
-            }
-            RCLCPP_INFO(get_logger(), "Waiting for activate_mode service...");
-        }
-        
-        auto request = std::make_shared<teleop_controller::srv::SwitchMode::Request>();
-        request->mode_name = mode;
-        request->activate = activate;
-        auto future = mode_client->async_send_request(request);
-        if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) == rclcpp::FutureReturnCode::SUCCESS) {
-            auto response = future.get();
-            RCLCPP_INFO(get_logger(), "Mode change result: %s", response->message.c_str());
-        }
-    }
-
-    /**
-     * @brief Handles multiplexed cmd_vel messages 
-     * @details This callback handles commands from the multiplexer, which will be either from autonomy or from teleop (via the other node)
-     * @note Only use these commands in autonomy mode or if they're coming back from the mux. This avoids double-processing our own teleop commands
-     */
-    void cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg) {
-       
-        if (autonomy_enabled || !controller_teleop_enabled) {
-            RCLCPP_DEBUG(get_logger(), "Cmd_vel input: linear_x=%.2f, angular_z=%.2f", msg->linear.x, msg->angular.z);
-            calculate_motor_speeds(msg->linear.x, msg->angular.z);
-        }
-    }
-
     /**
      * @brief Interprets XBOX joystick Joy msgs
      * @details Crucial Part = Deadzone check. Makes sure that joy ONLY publishes velocities when the joysticks are moved.
      *         
     */
     void joy_callback(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
-        if (robot_disabled) {
-            RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 1000, "Robot is disabled!");
-            return;
-        }
-        
-        SparkMax::Heartbeat();
-        
-        if (joy_msg->buttons[7]) { // 3 horizontal bars button
-            request_mode_change("teleop", true);
-            controller_teleop_enabled = true;
-            autonomy_enabled = false;
-            RCLCPP_INFO(get_logger(), "Teleop mode activated");
+        //add system check? 
+        left_front.Heartbeat();
+        left_rear.Heartbeat();
+        right_front.Heartbeat();
+        right_rear.Heartbeat();
 
-        } else if (joy_msg->buttons[6]) { // Start button for autonomy
-            request_mode_change("autonomy", true);
-            controller_teleop_enabled = false;
-            autonomy_enabled = true;
-            RCLCPP_INFO(get_logger(), "FROM DRIVEBASE JOY CALLBACK--->Autonomy mode activated");
-        }
-
-        if (controller_teleop_enabled) {
+        if(controller_teleop_enabled){
             linear_x = joy_msg->axes[1];  
             angular_z = joy_msg->axes[3];
             
-            if(controller_teleop_enabled && last_joy_msg){
-                linear_x = last_joy_msg->axes[1];
-                angular_z = last_joy_msg->axes[3];
-            }
-
             if (std::abs(linear_x) < MIN_THROTTLE_DEADZONE && std::abs(angular_z) < MIN_THROTTLE_DEADZONE) {
                 left_front.SetDutyCycle(0.0);
                 left_rear.SetDutyCycle(0.0);
@@ -205,26 +124,16 @@ private:
                 return;  
             }
 
-            //RCLCPP_INFO(get_logger(), "Joy input: linear_x=%.2f, angular_z=%.2f", linear_x, angular_z);
+            RCLCPP_INFO(get_logger(), "Joy input: linear_x=%.2f, angular_z=%.2f", linear_x, angular_z);
             
             auto twist_msg = geometry_msgs::msg::Twist();
             twist_msg.linear.x = linear_x;
             twist_msg.angular.z = angular_z;
             cmd_vel_pub->publish(twist_msg);
             calculate_motor_speeds(linear_x, angular_z);
-            
-
         }
     }
 
-
-
-    /**
-     * @brief Calculates hardware motor speeds based on Twist msg
-     * @details Applies Forward Kinematics
-     * @var wheel_speed_left/right --> in m/s
-     * @var rpm_left/right = m/s to RPM
-     */
     /**
      * @brief Calculates hardware motor speeds based on Twist msg
      * @details Applies Forward Kinematics
@@ -260,8 +169,9 @@ private:
         left_rear.SetDutyCycle(motor_cmd_left);
         right_front.SetDutyCycle(motor_cmd_right);
         right_rear.SetDutyCycle(motor_cmd_right);
-
     }
+
+
 };
 
 int main(int argc, char* argv[]) {

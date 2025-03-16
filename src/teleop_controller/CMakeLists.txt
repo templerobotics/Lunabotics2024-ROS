@@ -29,7 +29,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 add_executable(drivebase_control src/DrivebaseControl.cpp)
 add_executable(robot_mode src/ActivateMode.cpp)
-
 add_executable(digging src/Digging.cpp)
 
 

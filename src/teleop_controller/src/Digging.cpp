@@ -37,7 +37,13 @@ Digging::Digging()
      * @todo Implement more logic for this function
      */
     void Digging::joy_callback_digging(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {   
-        SparkMax::Heartbeat();
+        m_belt_left.Heartbeat();
+        m_belt_right.Heartbeat();
+        m_linear_left.Heartbeat();
+        m_linear_right.Heartbeat();
+        m_leadscrew_left.Heartbeat();
+        m_leadscrew_right.Heartbeat();
+
         double dig_forward = joy_msg->buttons[3];
         double dig_reverse = joy_msg->buttons[0];
         
