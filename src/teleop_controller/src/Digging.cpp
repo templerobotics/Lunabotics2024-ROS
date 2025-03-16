@@ -64,7 +64,7 @@ Digging::Digging()
     }
 
     /**
-     * @brief Our Digging Belt spins like a smily face 
+     * @brief The Digging Belt spins like a smily face 
      */
     void Digging::setBeltSpeedForward(double speed) {
         m_belt_left.SetDutyCycle(speed);
