@@ -11,6 +11,7 @@ find_package(rclpy REQUIRED)
 
 install(DIRECTORY 
   launch
+  scripts
   DESTINATION share/${PROJECT_NAME}
 )
 
