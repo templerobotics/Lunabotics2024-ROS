@@ -18,15 +18,17 @@
          left_rear("can0", 2),
          right_front("can0", 3),
          right_rear("can0", 4),
-         controller_teleop_enabled(true)
+         controller_teleop_enabled(true),
+         autonomy_enabled(false)
      {
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
         cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("teleop/cmd_vel", 10);
-        metrics_timer = create_wall_timer(std::chrono::milliseconds(500),std::bind(&DrivebaseControl::publish_motor_metrics, this));          
+        //metrics_timer = create_wall_timer(std::chrono::milliseconds(500),std::bind(&DrivebaseControl::publish_motor_metrics, this));          
         mode_sub = create_subscription<std_msgs::msg::String>("current_mode", 10, 
             [this](const std_msgs::msg::String::SharedPtr msg) {
                 controller_teleop_enabled = (msg->data == "teleop"); // Update global
-                RCLCPP_INFO(get_logger(), "Mode updated: %s", msg->data.c_str());
+                autonomy_enabled = (msg->data == "autonomy"); // Update global
+                RCLCPP_INFO(get_logger(), "Mode enabled = %s", msg->data.c_str());
             });
             
         try {
@@ -74,7 +76,7 @@ private:
     rclcpp::TimerBase::SharedPtr metrics_timer;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr mode_sub; 
     double linear_x, angular_z;
-    bool controller_teleop_enabled;
+    bool controller_teleop_enabled, autonomy_enabled;
 
     /**
      * @brief Periodically logs motor metrics
@@ -106,7 +108,6 @@ private:
      *         
     */
     void joy_callback(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
-        //add system check? 
         left_front.Heartbeat();
         left_rear.Heartbeat();
         right_front.Heartbeat();
@@ -124,7 +125,7 @@ private:
                 return;  
             }
 
-            RCLCPP_INFO(get_logger(), "Joy input: linear_x=%.2f, angular_z=%.2f", linear_x, angular_z);
+            //RCLCPP_INFO(get_logger(), "Joy input: linear_x=%.2f, angular_z=%.2f", linear_x, angular_z);
             
             auto twist_msg = geometry_msgs::msg::Twist();
             twist_msg.linear.x = linear_x;
