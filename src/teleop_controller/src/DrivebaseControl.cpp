@@ -23,7 +23,7 @@
      {
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
         cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("teleop/cmd_vel", 10);
-        //metrics_timer = create_wall_timer(std::chrono::milliseconds(500),std::bind(&DrivebaseControl::publish_motor_metrics, this));          
+        metrics_timer = create_wall_timer(std::chrono::milliseconds(500),std::bind(&DrivebaseControl::publish_motor_metrics, this));          
         mode_sub = create_subscription<std_msgs::msg::String>("current_mode", 10, 
             [this](const std_msgs::msg::String::SharedPtr msg) {
                 controller_teleop_enabled = (msg->data == "teleop"); // Update global

@@ -1,0 +1,23 @@
+// ImGUI & ImPlot dependencies
+sudo apt-get install -y build-essential cmake libglfw3-dev libgl1-mesa-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+
+// Arduino Nano dependencies for Dumping System
+
+sudo apt-get update
+sudo apt-get install -y arduino arduino-core
+
+# For USB access permissions
+sudo usermod -a -G dialout $USER
+
+
+# Explaining usermod command in Linux
+https://www.geeksforgeeks.org/usermod-command-in-linux-with-examples/
+
+To add a user to a new group while preserving their existing group memberships, use the -a (append) and -G options followed by the group name. For example:
+
+sudo usermod -aG groupname username
+
+This command adds the user username to the group groupname without affecting their membership in other groups. If you omit -a, the user will be removed from all groups except the ones specified after -G.
+
+
+In Linux, the "dialout" group grants users access to serial ports, historically used for dial-up modems, and now used for other serial devices like Arduino boards

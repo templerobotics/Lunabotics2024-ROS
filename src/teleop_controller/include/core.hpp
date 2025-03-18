@@ -49,6 +49,10 @@
 #include "sensor_msgs/msg/camera_info.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include <cmath>
+#include <fcntl.h>
+#include <termios.h>
+#include <unistd.h>
+
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;

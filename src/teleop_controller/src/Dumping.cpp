@@ -6,11 +6,11 @@
  * @note getPosition() interval of [0,1]
  * @note setSpeed() interval of [-1,1]
  * @note Dumping Servos connected to roboRIO last year ---> Use Raspberry PIS
- * @note Visualization Notes --> In Obsidian Notes
- * @todo ARDUINO INTEGRATION - 16 March 2025
+ * @todo ARDUINO INTEGRATION - 18 March 2025
  */
 #include "core.hpp"
 #include "Dumping.hpp"
+#include <fcntl.h>
 
 Dumping::Dumping()
     : Node("dumping_conveyor_belt")
@@ -20,19 +20,44 @@ Dumping::Dumping()
     initMotors();
     RCLCPP_INFO(this->get_logger(), "Dumping Subsystem ready to go!\n");
 }
+
+
+    void Dumping::cmd_open_dumplatch(double cmd_open_dumplatch){
+        int arduino_fd = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
+        if (arduino_fd < 0) {
+            fprintf(stderr,"Arduino FD cant be negative! Value is [%d]",arduino_fd);
+        }
+        if(cmd_open_dumplatch) {write(arduino_fd,"o",1);}
+    }      
+    
+    void Dumping::cmd_close_dumplatch(double cmd_close_dumplatch){
+        int arduino_fd = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
+        if (arduino_fd < 0) {
+            fprintf(stderr,"Arduino FD cant be negative! Value is [%d]",arduino_fd);
+        }
+        if(cmd_close_dumplatch) {write(arduino_fd,"c",1);}
+    }      
+    
     /**
      * @brief
      * @var conveyor_belt_forward
-     *  XBOX DPAD-UP
+     *  XBOX DPAD-RIGHT
      * @var conveyor_belt_backwards
-     *  XBOX DPAD-DOWN
-     * @var activate_dump_latch
-     *  XBOX DPAD_RIGHT
+     *  XBOX DPAD-LEFT
+     * @var open_dump_latch
+     *  XBOX DPAD_UP
+     * @var close_dump_latch 
+     * XBOX DPAD-DOWN
      */
     void Dumping::joy_callback_dumping(const sensor_msgs::msg::Joy::SharedPtr joy_msg){
-        double conveyor_belt_forward = joy_msg->buttons[11];
-        double conveyor_belt_reverse = joy_msg->buttons[12];
-        double activate_dump_latch = joy_msg->buttons[14];
+        double conveyor_belt_forward = joy_msg->buttons[14]; //dpad right
+        double conveyor_belt_reverse = joy_msg->buttons[13]; //dpad left
+        double open_dump_latch = joy_msg->buttons[11]; // d-pad up
+        double close_dump_latch = joy_msg->buttons[12]; // d-pad down
+
+        if(open_dump_latch){ cmd_open_dumplatch(open_dump_latch); } 
+        if(close_dump_latch){ cmd_close_dumplatch(close_dump_latch); }
+        
     }
 
     void move_belt_forward(){
@@ -43,13 +68,6 @@ Dumping::Dumping()
 
     }
 
-    /**
-     * @brief Opens dumping latch at the back of the robot dumping conveyor belt
-     * @details 2 dumping servos 
-     */
-    void open_dumping_latch(){
-
-    }
     
     void getPostiion(){
 
@@ -58,7 +76,6 @@ Dumping::Dumping()
     void setSpeed(){
 
     }
-
 
     void Dumping::initMotors(){
         m_dumping_left.SetIdleMode(IdleMode::kCoast);
@@ -70,7 +87,7 @@ Dumping::Dumping()
         m_dumping_right.SetMotorType(MotorType::kBrushless);
         m_dumping_right.SetDutyCycle(0.0);
         m_dumping_right.BurnFlash();
-        
+
         RCLCPP_INFO(get_logger(), "Dumping Subsystem Motors configured successfully");
     }
 

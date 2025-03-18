@@ -1,6 +1,7 @@
 /**
  * @brief Temple Lunabotics Digging Subsystem
  * @todo Digging Belt - PID & Sensor Diagnostics via Timer
+ * @todo Leadscrews start at 0 , Actuators are down. Initializatin was leadscrews down for 2 seconds then came up till hit top limit switch even if at 0
  */
 #include "core.hpp"
 #include "Digging.hpp"
