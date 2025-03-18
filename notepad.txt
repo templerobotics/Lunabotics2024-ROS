@@ -1,19 +1,29 @@
-Issue has to be left motors & right motors not utilizing the actual SparkMax motors & or SparkMax not being initialized 
+#!/bin/bash
 
-I only used motor controller groups since our JAVA FRC code had it, but graysons teleop does NOT utilize them. I probably should follow suit and call for each involved sparkmax dutycycle() and voltage() since his code works.
+set -xe
+
+echo "STARTING ROBOT TELEOPERATION CONTROL!"
+
+ros2 launch robot_launch teleop.launch.py &
+
+echo "STARTING ROBOT CAMERA LIVESTREAM FOOTAGE!"
+
+# 1080p Clear Video w/ slight noticeable delay
+ffmpeg -f v4l2 -framerate 30 -video_size 1920x1080 -i /dev/video0 \
+  -c:v libx264 -preset ultrafast -tune zerolatency \
+  -f matroska pipe:1 | \
+ffplay -fflags nobuffer -framedrop -i - &
 
 
-if I print in the parse controller function it always prints that I've pressed a button & the value in the terminal starts at -1 and when I press it it goes to 1.0
-However, when I ACTUALLY press the button : linear speed is set to 0.6 and it says the value goes from 0 to 1 --> This is correct behavior
+# Extreme low-latency settings - 720P
+ffmpeg -f v4l2 -framerate 30 -video_size 1280x720 -i /dev/video0 \
+  -c:v libx264 -preset ultrafast -tune zerolatency \
+  -x264-params "nal-hrd=cbr:force-cfr=1" \
+  -b:v 750k -minrate 750k -maxrate 750k -bufsize 150k \
+  -an -sn -f mpegts pipe:1 | \
+ffplay -fflags nobuffer -framedrop -flags low_delay \
+  -probesize 32 -analyzeduration 0 -sync ext \
+  -i - &
 
 
-I have sparkmax 2 & 3
-
-FIXES - Takeaways
-- Implement ALL Teleop Control inside of 1 Singular function that accepts Joy_msg
-
-
-Keep in Mind
-- If I don't put ALL teleop code in 1 file, then for Digging & Dumping, I need to redefine state variables & other stuff
-- Do I use a joy callback function in those other files as well?
-
+wait
