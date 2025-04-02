@@ -43,6 +43,7 @@ private:
             RCLCPP_INFO(get_logger(), "Toggling Control Mode!");
             
             // Toggle modes 
+            
             controller_teleop_enabled = !controller_teleop_enabled;
             autonomy_enabled = !autonomy_enabled;
             
@@ -55,7 +56,7 @@ private:
             publish_current_mode(); 
             last_switch = now;
         }
-        if(joy_msg->buttons[7] && joy_msg->buttons[8]){
+        if(joy_msg->buttons[7] && joy_msg->buttons[5]){
             controller_teleop_enabled = false;
             autonomy_enabled = false;
         }
@@ -63,11 +64,12 @@ private:
 
     void publish_current_mode() {
         auto msg = std_msgs::msg::String();
-        if (controller_teleop_enabled != false || autonomy_enabled != false){
-            msg.data = controller_teleop_enabled ? "teleop" : "autonomy";
-        } else {
+        if(controller_teleop_enabled == false && autonomy_enabled == false){
             msg.data = "Communications Killed";
+        } else{
+            msg.data = controller_teleop_enabled ? "teleop" : "autonomy";
         }
+       
          
         mode_publisher->publish(msg);
         RCLCPP_INFO(get_logger(), "Mode enabled = %s", msg.data.c_str());

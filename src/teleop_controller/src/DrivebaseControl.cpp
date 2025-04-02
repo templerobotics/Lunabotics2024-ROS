@@ -20,7 +20,6 @@
          right_rear("can0", 4),
          controller_teleop_enabled(true),
          autonomy_enabled(false)
-         kill_comms_enabled(false)
      {
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
         cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("teleop/cmd_vel", 10);
@@ -77,7 +76,7 @@ private:
     rclcpp::TimerBase::SharedPtr metrics_timer;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr mode_sub; 
     double linear_x, angular_z;
-    bool controller_teleop_enabled, autonomy_enabled, kill_comms_enabled;
+    bool controller_teleop_enabled, autonomy_enabled;
 
     /**
      * @brief Periodically logs motor metrics
@@ -87,16 +86,16 @@ private:
     void publish_motor_metrics()
     {
         try {
-            float temperature = left_front.GetTemperature();
-            float voltage = left_front.GetVoltage();
-            float velocity = left_front.GetVelocity();
-            float duty_cycle = left_front.GetDutyCycle();
-            float pos = left_front.GetPosition();
+           // float temperature = left_front.GetTemperature();
+            //float voltage = left_front.GetVoltage();
+            //float velocity = left_front.GetVelocity();
+            //float duty_cycle = left_front.GetDutyCycle();
+           // float pos = left_front.GetPosition();
 
-            RCLCPP_INFO(get_logger(), "Motor Metrics [Left Front] - Temp: %.6f C, Voltage: %.6f C ",temperature, voltage);
-            RCLCPP_INFO(get_logger(), "Motor Metrics [Left Front] - Duty Cycle: %.6f C, Velocity: %.6f C | Position =%.6f ", duty_cycle , velocity , pos);
+            //RCLCPP_INFO(get_logger(), "Motor Metrics [Left Front] - Temp: %.6f C, Voltage: %.6f C ",temperature, voltage);
+            //RCLCPP_INFO(get_logger(), "Motor Metrics [Left Front] - Duty Cycle: %.6f C, Velocity: %.6f C | Position =%.6f ", duty_cycle , velocity , pos);
 
-            if (temperature > 40.0) {RCLCPP_WARN(get_logger(), "Motor temperature high: %.1f°C", temperature);}
+            //if (temperature > 40.0) {RCLCPP_WARN(get_logger(), "Motor temperature high: %.1f°C", temperature);}
 
         } catch (const std::exception& e) {
             RCLCPP_ERROR(get_logger(), "Failed to read motor metrics: %s", e.what());
