@@ -3,14 +3,14 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include <imgui.h>         // ImGui header
-#include <implot.h>        // ImPlot header
-#include "GLFW/glfw3.h"    // GLFW header
+#include <imgui.h>         
+#include <implot.h>        
+#include "GLFW/glfw3.h"    
 #include "sensor_msgs/msg/joy.hpp"
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 
-// Structure to hold motor metrics data
+
 struct MotorMetrics {
     std::vector<float> temperature;
     std::vector<float> voltage;
@@ -19,11 +19,11 @@ struct MotorMetrics {
     std::vector<float> position;
 };
 
-// ROS2 Node for Visualization
+
 class DashboardViz : public rclcpp::Node {
 public:
     DashboardViz() : Node("dashboard_viz"), metrics({}) {
-        // Subscribe to the DrivebaseControl motor metrics topic
+        
         subscription_ = this->create_subscription<std_msgs::msg::String>(
             "motor_metrics", 10, std::bind(&DashboardViz::metrics_callback, this, std::placeholders::_1)
         );

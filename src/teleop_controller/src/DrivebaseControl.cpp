@@ -20,6 +20,7 @@
          right_rear("can0", 4),
          controller_teleop_enabled(true),
          autonomy_enabled(false)
+         kill_comms_enabled(false)
      {
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
         cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("teleop/cmd_vel", 10);
@@ -76,7 +77,7 @@ private:
     rclcpp::TimerBase::SharedPtr metrics_timer;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr mode_sub; 
     double linear_x, angular_z;
-    bool controller_teleop_enabled, autonomy_enabled;
+    bool controller_teleop_enabled, autonomy_enabled, kill_comms_enabled;
 
     /**
      * @brief Periodically logs motor metrics

@@ -10,6 +10,7 @@ public:
                      autonomy_enabled(false) {
         cmd_vel_sub_teleop = create_subscription<geometry_msgs::msg::Twist>("teleop/cmd_vel", 10, std::bind(&ActivateMode::callback_teleop_cmdvel, this, std::placeholders::_1));
         cmd_vel_sub_autonomy = create_subscription<geometry_msgs::msg::Twist>("autonomy/cmd_vel", 10, std::bind(&ActivateMode::callback_autonomy_cmdvel, this, std::placeholders::_1));
+
         cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&ActivateMode::joy_callback, this, std::placeholders::_1));
         
@@ -54,11 +55,20 @@ private:
             publish_current_mode(); 
             last_switch = now;
         }
+        if(joy_msg->buttons[7] && joy_msg->buttons[8]){
+            controller_teleop_enabled = false;
+            autonomy_enabled = false;
+        }
     }
 
     void publish_current_mode() {
         auto msg = std_msgs::msg::String();
-        msg.data = controller_teleop_enabled ? "teleop" : "autonomy";
+        if (controller_teleop_enabled != false || autonomy_enabled != false){
+            msg.data = controller_teleop_enabled ? "teleop" : "autonomy";
+        } else {
+            msg.data = "Communications Killed";
+        }
+         
         mode_publisher->publish(msg);
         RCLCPP_INFO(get_logger(), "Mode enabled = %s", msg.data.c_str());
     }
