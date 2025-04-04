@@ -43,14 +43,22 @@ private:
             RCLCPP_INFO(get_logger(), "Toggling Control Mode!");
             
             // Toggle modes 
-            
-            controller_teleop_enabled = !controller_teleop_enabled;
-            autonomy_enabled = !autonomy_enabled;
+
+            if(!controller_teleop_enabled && !autonomy_enabled){
+                controller_teleop_enabled = true;
+            }else{
+                controller_teleop_enabled = !controller_teleop_enabled;
+                autonomy_enabled = !autonomy_enabled;
+            }
+         
             
             if (controller_teleop_enabled) {
                 RCLCPP_INFO(get_logger(), "Teleoperation Mode Activated!");
-            } else {
+            } else if (autonomy_enabled){
                 RCLCPP_INFO(get_logger(), "Autonomous Mode Activated!");
+            }
+            else{
+                RCLCPP_INFO(get_logger(), "Communications Killed!");
             }
             
             publish_current_mode(); 
@@ -64,7 +72,7 @@ private:
 
     void publish_current_mode() {
         auto msg = std_msgs::msg::String();
-        if(controller_teleop_enabled == false && autonomy_enabled == false){
+        if(!controller_teleop_enabled  && !autonomy_enabled ){
             msg.data = "Communications Killed";
         } else{
             msg.data = controller_teleop_enabled ? "teleop" : "autonomy";
