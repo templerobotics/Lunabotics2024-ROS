@@ -8,6 +8,7 @@ public:
           right_front("can0", MOTOR_FRONT_RIGHT_CAN_ID), right_rear("can0", MOTOR_REAR_RIGHT_CAN_ID),
           controller_teleop_enabled(true), autonomy_enabled(false) {
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
+        //ALL defined for Foxglove to visualize them in real-time. 
         cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("teleop/cmd_vel", 10);
         temp_pub = create_publisher<std_msgs::msg::Float64>("/sparkmax/temperature", 10);
         voltage_pub = create_publisher<std_msgs::msg::Float64>("/sparkmax/voltage", 10);
@@ -82,7 +83,7 @@ private:
                 calculate_motor_speeds(linear_x, angular_z);
             }
 
-            // Publish metrics here for true real-time reflection
+            // Foxglove does not publish exactly real-time, so im messing w/ "optimal" spot in code that allows metrics to be published w/ 0 delay
             try {
                 auto msg = std_msgs::msg::Float64();
                 msg.data = left_front.GetTemperature();
