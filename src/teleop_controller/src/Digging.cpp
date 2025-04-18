@@ -48,8 +48,8 @@ Digging::Digging()
         double dig_forward = joy_msg->buttons[3];
         double dig_reverse = joy_msg->buttons[0];
         
-        double extend_leadscrew = joy_msg->buttons[9];
-        double retract_leadscrew = joy_msg->buttons[10];
+        double extend_leadscrew = joy_msg->axes[6];
+        double retract_leadscrew = joy_msg->axes[2];
         
         if(dig_forward) { setBeltSpeedForward(dig_forward); }
         if(dig_reverse) { setBeltSpeedReverse(dig_reverse); }

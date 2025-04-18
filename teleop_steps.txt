@@ -1,0 +1,31 @@
+Prerequisites:
+	- Power via PDH
+	- Can-able plugged in
+	- All sparkmaxes configured in REV Hardware Client to the latest Firmware Version 24.x
+	- Correct sparkmax configurations for: (1) Drivebase (2) Digging (3) Dumping
+	- If camera(s) plugged in refer to "/home/ubuntu/robotics/Lunabotics2024-ROS/src/robot_launch/scripts/start_teleop.sh".Important part is "/dev/video0"
+
+1. 
+
+Run "./canable_start.sh" in robotics/Lunabotics2024-ROS/ directory
+	- interface = "can0" 
+	- password = "robotics"
+
+	
+2. 
+
+in robotics/Lunabotics2024-ROS/ directory, run "colcon build" 
+
+
+
+3. 
+
+in "robotics/Lunabotics2024-ROS/src" run "ros2 launch robot_launch teleop.launch.py" in 1 terminal for teleop control
+
+in a different terminal for Foxglove real-time dashboard, run :
+
+"ros2 run rosbridge_server rosbridge_websocket", for Foxglove real-time dashboard
+
+
+Sidenote:
+	- Alter arduino/camera ports if testing Thursday April 17 to test them

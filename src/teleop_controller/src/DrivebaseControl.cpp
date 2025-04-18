@@ -4,7 +4,8 @@ class DrivebaseControl : public rclcpp::Node {
 public:
     DrivebaseControl() 
         : Node("drivebase_control"), 
-          left_front("can0", 7), left_rear("can0", 2), right_front("can0", 3), right_rear("can0", 4),
+          left_front("can0", MOTOR_FRONT_LEFT_CAN_ID), left_rear("can0", MOTOR_REAR_LEFT_CAN_ID), 
+          right_front("can0", MOTOR_FRONT_RIGHT_CAN_ID), right_rear("can0", MOTOR_REAR_RIGHT_CAN_ID),
           controller_teleop_enabled(true), autonomy_enabled(false) {
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
         cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("teleop/cmd_vel", 10);
@@ -20,7 +21,7 @@ public:
                 autonomy_enabled = (msg->data == "autonomy");
                 RCLCPP_INFO(get_logger(), "Mode enabled = %s", msg->data.c_str());
             });
-            
+            //Todo : Put inside a function called initMotors()
         try {
             RCLCPP_INFO(get_logger(), "Configuring Drivebase Motors");
             left_front.SetIdleMode(IdleMode::kCoast);

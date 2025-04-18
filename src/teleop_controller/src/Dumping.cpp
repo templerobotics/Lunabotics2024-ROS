@@ -21,7 +21,7 @@ Dumping::Dumping()
     RCLCPP_INFO(this->get_logger(), "Dumping Subsystem ready to go!\n");
 }
 
-
+    /*Change port to correct arduino port. Also, I have no idea if this code works or not*/
     void Dumping::cmd_open_dumplatch(double cmd_open_dumplatch){
         int arduino_fd = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
         if (arduino_fd < 0) {
@@ -38,44 +38,32 @@ Dumping::Dumping()
         if(cmd_close_dumplatch) {write(arduino_fd,"c",1);}
     }      
     
-    /**
-     * @brief
-     * @var conveyor_belt_forward
-     *  XBOX DPAD-RIGHT
-     * @var conveyor_belt_backwards
-     *  XBOX DPAD-LEFT
-     * @var open_dump_latch
-     *  XBOX DPAD_UP
-     * @var close_dump_latch 
-     * XBOX DPAD-DOWN
-     */
+  
     void Dumping::joy_callback_dumping(const sensor_msgs::msg::Joy::SharedPtr joy_msg){
-        double conveyor_belt_forward = joy_msg->buttons[14]; //dpad right
-        double conveyor_belt_reverse = joy_msg->buttons[13]; //dpad left
-        double open_dump_latch = joy_msg->buttons[11]; // d-pad up
-        double close_dump_latch = joy_msg->buttons[12]; // d-pad down
-
-        if(open_dump_latch){ cmd_open_dumplatch(open_dump_latch); } 
-        if(close_dump_latch){ cmd_close_dumplatch(close_dump_latch); }
+        double conveyor_belt_control = joy_msg->axes[6]; 
+        double dump_latch_control = joy_msg->axes[7]
+        if(conveyor_belt_control < 0){ move_belt_forward();}                    // belt "forward"
+        if(conveyor_belt_control > 0){ move_belt_reverse();  }                  // belt "backward/reverse"
+        if(dump_latch_control < 0){ cmd_close_dumplatch(dump_latch_control); }  // close dump latch
+        if(dump_latch_control > 0){ cmd_open_dumplatch(dump_latch_control); }   // open dump latch
         
     }
-
+    // Conveyor Belt is actuated by both sparkmaxes regardless of forward or backwards. 
+    // Duty cycle being (+) or (-) is irrelevant I think. Need real-life testing and observation
     void move_belt_forward(){
-
+        m_dumping_left.SetDutyCycle(1.0);
+        m_dumping_right.SetDutyCycle(1.0);
     }
 
     void move_belt_reverse(){
-
+        m_dumping_left.SetDutyCycle(-1.0);
+        m_dumping_right.SetDutyCycle(-1.0);
     }
 
-    
-    void getPostiion(){
-
-    }
-
-    void setSpeed(){
-
-    }
+    /*
+    void getPostiion(){}
+    void setSpeed(){}
+    */
 
     void Dumping::initMotors(){
         m_dumping_left.SetIdleMode(IdleMode::kCoast);
