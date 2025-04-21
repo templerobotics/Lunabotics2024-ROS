@@ -101,23 +101,23 @@ const double SPARKMAX_RPM = 292;
 const double MAX_VOLTAGE = 12;
 const double SPARKMAX_RPM_AVERAGE = 63;
 const double SPARKMAX_MAX_DUTY_CYCLE = 1;
+const double GEAR_RATIO = 100.0;                            // 100 to 1 gear ratio is used0
 
 
+const int MOTOR_FRONT_LEFT_CAN_ID = 5;
+const int MOTOR_REAR_LEFT_CAN_ID = 3;
+const int MOTOR_FRONT_RIGHT_CAN_ID = 4;
+const int MOTOR_REAR_RIGHT_CAN_ID = 2;
 
-const double MOTOR_FRONT_LEFT_CAN_ID = 1;
-const double MOTOR_REAR_LEFT_CAN_ID = 2;
-const double MOTOR_FRONT_RIGHT_CAN_ID = 3;
-const double MOTOR_REAR_RIGHT_CAN_ID = 4;
 
-
-const double LEADSCREW_1_CAN_ID = 7;
-const double LEADSCREW_2_CAN_ID = 8;
-const double BELT_1_CAN_ID = 5;
-const double BELT_2_CAN_ID = 6;
-const double DUMPING_LEFT_CAN_ID = 13;
-const double DUMPING_RIGHT_CAN_ID = 14;
-const double LINEAR_LEFT_CAN_ID = 15;
-const double LINEAR_RIGHT_CAN_ID = 16;
+const int LEADSCREW_left_CAN_ID = 9;
+const int LEADSCREW_right_CAN_ID = 8;
+const int BELT_left_CAN_ID = 11;
+const int BELT_right_CAN_ID = 10;
+const int DUMPING_LEFT_CAN_ID = 13;
+const int DUMPING_RIGHT_CAN_ID = 12;
+const int LINEAR_LEFT_CAN_ID = 7;
+const int LINEAR_RIGHT_CAN_ID = 6;
 
 
 bool LEADSCREW_INVERT = true;

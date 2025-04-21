@@ -8,29 +8,29 @@
 
 Digging::Digging()
     : Node("digging")
-    , m_belt_left("can0", BELT_1_CAN_ID)
-    , m_belt_right("can0", BELT_2_CAN_ID)
+    , m_belt_left("can0", BELT_left_CAN_ID)
+    , m_belt_right("can0", BELT_right_CAN_ID)
     , m_linear_left("can0", LINEAR_LEFT_CAN_ID)
     , m_linear_right("can0", LINEAR_RIGHT_CAN_ID)
-    , m_leadscrew_left("can0", LEADSCREW_1_CAN_ID)
-    , m_leadscrew_right("can0", LEADSCREW_2_CAN_ID)
-{
+    , m_leadscrew_left("can0", LEADSCREW_left_CAN_ID)
+    , m_leadscrew_right("can0", LEADSCREW_right_CAN_ID)
+        {
+            joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&Digging::joy_callback_digging, this, std::placeholders::_1));
+            initMotors();    
+            configureLimitSwitches();
 
-    joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&Digging::joy_callback_digging, this, std::placeholders::_1));
-    initMotors();    
-    configureLimitSwitches();
-    
-    m_leadscrew_right.SetFollowerID(LEADSCREW_1_CAN_ID);
-    m_leadscrew_right.SetFollowerConfig(1);  // follower mode
-    m_leadscrew_left.BurnFlash();
-    m_leadscrew_right.BurnFlash();
-    
-    state_pub = create_publisher<std_msgs::msg::String>("leadscrew/state", 10);
-    timer_diagnostics = create_wall_timer(std::chrono::milliseconds(500), std::bind(&Digging::periodic, this));
-    timer_linear_actuators = create_wall_timer(std::chrono::milliseconds(500), std::bind(&Digging::periodicLinearActuatorCheck, this));
+            m_leadscrew_right.SetFollowerID(LEADSCREW_left_CAN_ID);
+            m_leadscrew_right.SetFollowerConfig(1);  // follower mode
+            m_leadscrew_left.BurnFlash();
+            m_leadscrew_right.BurnFlash();
+            
+            state_pub = create_publisher<std_msgs::msg::String>("leadscrew/state", 10);
+            timer_diagnostics = create_wall_timer(std::chrono::milliseconds(500), std::bind(&Digging::periodic, this));
+            timer_linear_actuators = create_wall_timer(std::chrono::milliseconds(500), std::bind(&Digging::periodicLinearActuatorCheck, this));
 
-    RCLCPP_INFO(this->get_logger(), "Digging Subsystem Successfully Initialized!");
-}
+            RCLCPP_INFO(this->get_logger(), "Digging Subsystem Successfully Initialized!");
+            
+        }
 
 
     /**
@@ -44,21 +44,38 @@ Digging::Digging()
         m_linear_right.Heartbeat();
         m_leadscrew_left.Heartbeat();
         m_leadscrew_right.Heartbeat();
+        
+        double extend_leadscrew = joy_msg->axes[5];
+        double retract_leadscrew = joy_msg->axes[4];
+        RCLCPP_INFO(this->get_logger(), "%lf", extend_leadscrew);
+        bool current_a = joy_msg->buttons[0];
+        if (current_a && !last_a_state) {  // Button A just pressed
+            if (belt_running) {
+                stopDiggingBeltMotors();
+            } else {
+                setBeltSpeedForward(1.0);  // Or however fast you want
+            }
+        }
+        last_a_state = current_a;
 
-        double dig_forward = joy_msg->buttons[3];
-        double dig_reverse = joy_msg->buttons[0];
+        // Debounced toggle logic for Y (button 3)
+        bool current_y = joy_msg->buttons[3];
+        if (current_y && !last_y_state) {  // Button Y just pressed
+            if (belt_running) {
+                stopDiggingBeltMotors();
+            } else {
+                setBeltSpeedReverse(1.0);  // Opposite direction
+            }
+        }
+        last_y_state = current_y;
         
-        double extend_leadscrew = joy_msg->axes[6];
-        double retract_leadscrew = joy_msg->axes[2];
-        
-        if(dig_forward) { setBeltSpeedForward(dig_forward); }
-        if(dig_reverse) { setBeltSpeedReverse(dig_reverse); }
-        
-        if(extend_leadscrew) { setLeadscrewSpeed(0.5); }
-        if(retract_leadscrew) { setLeadscrewSpeed(-0.5); }
+        if(extend_leadscrew > -0.9) { setLeadscrewSpeed(extend_leadscrew);}
+            else{stopLeadScrew();}
+        if(retract_leadscrew > -0.9) { setLeadscrewSpeed(-retract_leadscrew);}
+            else{stopLeadScrew();}
 
-        double raise_linear_actuators = joy_msg->buttons[2];
-        double lower_linear_actuators = joy_msg->buttons[1];
+        double raise_linear_actuators = joy_msg->buttons[1];
+        double lower_linear_actuators = joy_msg->buttons[2];
         if(raise_linear_actuators){ commandUp(); }
         if(lower_linear_actuators){ commandDown(); }
         
@@ -84,6 +101,9 @@ Digging::Digging()
         m_belt_left.SetDutyCycle(0.0);
         m_belt_right.SetDutyCycle(0.0);
         belt_running = false;
+    }
+    void Digging::stopLeadScrew(){
+        m_leadscrew_left.SetDutyCycle(0); 
     }
 
     void Digging::configureLimitSwitches() {
@@ -169,17 +189,17 @@ Digging::Digging()
     }
 
     void Digging::setLeadscrewSpeed(double speed) {
-        auto position = m_leadscrew_left.GetPosition();
+        // auto position = m_leadscrew_left.GetPosition();
         
-        if (position <= LEADSCREW_MAX_ERROR && speed < 0) {
-            RCLCPP_WARN(get_logger(), "At bottom limit, cannot move down further");
-            return;
-        }
+        // if (position <= LEADSCREW_MAX_ERROR && speed < 0) {
+        //     // RCLCPP_WARN(get_logger(), "At bottom limit, cannot move down further");
+        //     return;
+        // }
         
-        if (position >= LEADSCREW_MAX_TRAVEL - LEADSCREW_MAX_ERROR && speed > 0) {
-            RCLCPP_WARN(get_logger(), "At top limit, cannot move up further");
-            return;
-        }
+        // if (position >= LEADSCREW_MAX_TRAVEL - LEADSCREW_MAX_ERROR && speed > 0) {
+        //     RCLCPP_WARN(get_logger(), "At top limit, cannot move up further");
+        //     return;
+        // }
 
         leadscrew_state = LeadscrewState::Traveling;
         m_leadscrew_left.SetDutyCycle(speed);  // Leadscrew2 follows automatically due to follower config
@@ -277,36 +297,41 @@ Digging::Digging()
     void Digging::initMotors() {
         try {
             RCLCPP_INFO(get_logger(), "Configuring Digging Subsystem Motors");
-            
             // Belt motors
             m_belt_left.SetIdleMode(IdleMode::kCoast);
             m_belt_left.SetMotorType(MotorType::kBrushless);
             m_belt_left.SetDutyCycle(0.0);
+            m_belt_left.ClearStickyFaults();
             m_belt_left.BurnFlash();
             
             m_belt_right.SetIdleMode(IdleMode::kCoast);
             m_belt_right.SetMotorType(MotorType::kBrushless);
             m_belt_right.SetDutyCycle(0.0);
+            m_belt_right.ClearStickyFaults();
             m_belt_right.BurnFlash();
             
             // Linear actuators
             m_linear_left.SetIdleMode(IdleMode::kCoast);
-            m_linear_left.SetMotorType(MotorType::kBrushless);
+            m_linear_left.SetMotorType(MotorType::kBrushed);
             m_linear_left.SetDutyCycle(0.0);
+            m_linear_left.ClearStickyFaults();
             m_linear_left.BurnFlash();
             
             m_linear_right.SetIdleMode(IdleMode::kCoast);
-            m_linear_right.SetMotorType(MotorType::kBrushless);
+            m_linear_right.SetMotorType(MotorType::kBrushed);
             m_linear_right.SetDutyCycle(0.0);
+            m_linear_right.ClearStickyFaults();
             m_linear_right.BurnFlash();
             
             // Leadscrews
             m_leadscrew_left.SetIdleMode(IdleMode::kCoast);
             m_leadscrew_left.SetMotorType(MotorType::kBrushless);
+            m_leadscrew_left.ClearStickyFaults();
             m_leadscrew_left.SetDutyCycle(0.0);
             
             m_leadscrew_right.SetIdleMode(IdleMode::kCoast);
             m_leadscrew_right.SetMotorType(MotorType::kBrushless);
+            m_leadscrew_right.ClearStickyFaults();
             m_leadscrew_right.SetDutyCycle(0.0);
             
             RCLCPP_INFO(get_logger(), "Digging Subsystem Motors configured successfully");

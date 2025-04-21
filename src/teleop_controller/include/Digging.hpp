@@ -43,6 +43,7 @@ protected:
     void periodic();
     void checkLeadscrewLimits();
     void publishState();
+    void stopLeadScrew();
     std::string stateToString(LeadscrewState state);
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub;
     rclcpp::TimerBase::SharedPtr timer_diagnostics;
@@ -62,11 +63,12 @@ protected:
     void stopLinearActuatorMotors();                              
     void periodicLinearActuatorCheck();
 
-   bool x_button = false;          //raise linear actuator
-   bool b_button = false;          // lower linear actuator
-   bool left_bumper = false;       // Extend Leadscrew
-   bool right_bumper = false;      //Retract Leadscrew
-   bool left_trigger = false;      // Increase Speed of Leadscrew extension
-   bool right_trigger = false;     // Increase Speed of Leadscrew retraction
-
+    bool x_button = false;          //raise linear actuator
+    bool b_button = false;          // lower linear actuator
+    bool left_bumper = false;       // Extend Leadscrew
+    bool right_bumper = false;      //Retract Leadscrew
+    bool left_trigger = false;      // Increase Speed of Leadscrew extension
+    bool right_trigger = false;     // Increase Speed of Leadscrew retraction
+    bool last_a_state = false;
+    bool last_y_state = false;
 };

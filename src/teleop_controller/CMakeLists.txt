@@ -30,6 +30,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 add_executable(drivebase_control src/DrivebaseControl.cpp)
 add_executable(robot_mode src/ActivateMode.cpp)
 add_executable(digging src/Digging.cpp)
+add_executable(dumping_conveyor_belt src/Dumping.cpp)
 
 
 ament_target_dependencies(drivebase_control 
@@ -59,6 +60,16 @@ ament_target_dependencies(digging
   std_srvs
 )
 
+ament_target_dependencies(dumping_conveyor_belt 
+  rclcpp 
+  sensor_msgs 
+  geometry_msgs 
+  sparkcan 
+  std_msgs
+  std_srvs
+)
+
+
 # Link against generated service interfaces
 rosidl_get_typesupport_target(cpp_typesupport_target 
   ${PROJECT_NAME} "rosidl_typesupport_cpp")
@@ -66,6 +77,8 @@ rosidl_get_typesupport_target(cpp_typesupport_target
 target_link_libraries(drivebase_control "${cpp_typesupport_target}")
 target_link_libraries(robot_mode "${cpp_typesupport_target}")
 target_link_libraries(digging "${cpp_typesupport_target}")
+target_link_libraries(dumping_conveyor_belt "${cpp_typesupport_target}")
+
 
 
 # install nodes & header files
@@ -73,6 +86,7 @@ install(TARGETS
   drivebase_control
   robot_mode
   digging
+  dumping_conveyor_belt
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -28,20 +28,24 @@ public:
             left_front.SetIdleMode(IdleMode::kCoast);
             left_front.SetMotorType(MotorType::kBrushless);
             left_front.SetDutyCycle(0.0);
+            left_front.ClearStickyFaults();
             left_front.BurnFlash();
             left_rear.SetIdleMode(IdleMode::kCoast);
             left_rear.SetMotorType(MotorType::kBrushless);
             left_rear.SetDutyCycle(0.0);
+            left_rear.ClearStickyFaults();
             left_rear.BurnFlash();
             right_front.SetIdleMode(IdleMode::kCoast);
             right_front.SetMotorType(MotorType::kBrushless);
-            right_front.SetInverted(true);
+            right_front.SetInverted(false);
+            right_front.ClearStickyFaults();
             right_front.SetDutyCycle(0.0);
             right_front.BurnFlash();
             right_rear.SetIdleMode(IdleMode::kCoast);
             right_rear.SetMotorType(MotorType::kBrushless);
-            right_rear.SetInverted(true);
+            right_rear.SetInverted(false);
             right_rear.SetDutyCycle(0.0);
+            right_rear.ClearStickyFaults();
             right_rear.BurnFlash();
             RCLCPP_INFO(get_logger(), "Drivebase Motors configured successfully");
         } catch (const std::exception& e) {
@@ -68,7 +72,9 @@ private:
 
         if (controller_teleop_enabled) {
             linear_x = joy_msg->axes[1];  
-            angular_z = joy_msg->axes[3];
+            angular_z = joy_msg->axes[2];
+            //linear_x *= -1;
+            //angular_z *= -1;
             
             if (std::abs(linear_x) < MIN_THROTTLE_DEADZONE && std::abs(angular_z) < MIN_THROTTLE_DEADZONE) {
                 left_front.SetDutyCycle(0.0);
@@ -107,12 +113,16 @@ private:
         if (std::abs(angular_z_velocity) < MIN_THROTTLE_DEADZONE) angular_z_velocity = 0.0;
         double wheel_speed_left = linear_x_velocity - (angular_z_velocity * WHEEL_BASE / 2);
         double wheel_speed_right = linear_x_velocity + (angular_z_velocity * WHEEL_BASE / 2);
-        double rpm_left = (wheel_speed_left / (2 * M_PI * WHEEL_RADIUS)) * 60;
-        double rpm_right = (wheel_speed_right / (2 * M_PI * WHEEL_RADIUS)) * 60;
+        //double rpm_left = (wheel_speed_left / (2 * M_PI * WHEEL_RADIUS)) * 60;
+        //double rpm_right = (wheel_speed_right / (2 * M_PI * WHEEL_RADIUS)) * 60;
+        double rpm_left = ((wheel_speed_left / (2 * M_PI * WHEEL_RADIUS)) * 60); //test to make sure shit still works fine
+        double rpm_right = ((wheel_speed_right / (2 * M_PI * WHEEL_RADIUS)) * 60);
+
         double motor_cmd_left = rpm_left * (SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE);
         double motor_cmd_right = rpm_right * (SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE);
         motor_cmd_left = std::clamp(motor_cmd_left, -1.0, 1.0);
         motor_cmd_right = std::clamp(motor_cmd_right, -1.0, 1.0);
+
         left_front.SetDutyCycle(motor_cmd_left);
         left_rear.SetDutyCycle(motor_cmd_left);
         right_front.SetDutyCycle(motor_cmd_right);

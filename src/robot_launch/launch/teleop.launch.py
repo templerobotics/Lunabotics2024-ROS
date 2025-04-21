@@ -5,12 +5,7 @@ from launch.substitutions import LaunchConfiguration
 import subprocess
 
 def generate_launch_description():
-    hardware_enabled = DeclareLaunchArgument(
-        'hardware_enabled',
-        default_value='true',
-        description='Enable hardware interfaces'
-    )
-
+   
     joy_node_jaden = Node(
             package='joy',
             executable='joy_node',
@@ -22,27 +17,42 @@ def generate_launch_description():
         package='teleop_controller',
         executable='drivebase_control',
         name='drivebase_control',
-        parameters=[{
-            'hardware_enabled': LaunchConfiguration('hardware_enabled')
-        }],
         output='screen'
     )
+
+    digging_control = Node(
+         package='teleop_controller',
+         executable='digging',
+         name='digging',
+         output='screen'
+     )
+
+    dumping_control = Node(
+         package='teleop_controller',
+         executable='dumping_conveyor_belt',
+         name='dumping_conveyor_belt',
+         output='screen'
+     )
+    
 
     mode_control = Node(
         package='teleop_controller',
         executable='robot_mode',
         name='activate_mode',
-        parameters=[{
-            'hardware_enabled': LaunchConfiguration('hardware_enabled')
-        }],
+        output='screen'
+    )
+
+    joy_udp_listener_process = ExecuteProcess(
+        cmd=['python3', '/home/ubuntu/robotics/Lunabotics2024-ROS/src/udp_joy_receiver/joy_udp_listener.py'],
         output='screen'
     )
 
 
-
     return LaunchDescription([
-        hardware_enabled,
+        joy_udp_listener_process,
         drivebase_control,
         mode_control,
-        joy_node_jaden
+        joy_node_jaden,
+        digging_control,
+        dumping_control
     ])

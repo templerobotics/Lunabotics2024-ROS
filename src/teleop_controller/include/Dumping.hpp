@@ -2,15 +2,22 @@
 #include "core.hpp"
 
 class Dumping : public rclcpp::Node {
+public:
+    Dumping();
 
 protected:
-    Dumping();
     SparkMax m_dumping_left;
     SparkMax m_dumping_right;
+    rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub;
     void joy_callback_dumping(const sensor_msgs::msg::Joy::SharedPtr joy_msg);
     void initMotors();  
     void cmd_open_dumplatch(double cmd_open_dumplatch);
     void cmd_close_dumplatch(double cmd_close_dumplatch);
-    
-    
+    void move_belt_forward();
+    void move_belt_reverse();
+    void stop_dumping_belt();
+
+    bool last_dpad_right = false;
+    bool last_dpad_left = false;
+    bool dumping_belt_running = false;    
 };
