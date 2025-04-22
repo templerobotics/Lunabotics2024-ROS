@@ -18,12 +18,8 @@ Digging::Digging()
             joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&Digging::joy_callback_digging, this, std::placeholders::_1));
             initMotors();    
             configureLimitSwitches();
-
-            m_leadscrew_right.SetFollowerID(LEADSCREW_left_CAN_ID);
-            m_leadscrew_right.SetFollowerConfig(1);  // follower mode
-            m_leadscrew_left.BurnFlash();
-            m_leadscrew_right.BurnFlash();
-            
+            linear_actuator_state_left = LinearActuatorStateLeft::Unknown;
+            linear_actuator_state_right = LinearActuatorStateRight::Unknown;
             state_pub = create_publisher<std_msgs::msg::String>("leadscrew/state", 10);
             timer_diagnostics = create_wall_timer(std::chrono::milliseconds(500), std::bind(&Digging::periodic, this));
             timer_linear_actuators = create_wall_timer(std::chrono::milliseconds(500), std::bind(&Digging::periodicLinearActuatorCheck, this));
@@ -45,9 +41,8 @@ Digging::Digging()
         m_leadscrew_left.Heartbeat();
         m_leadscrew_right.Heartbeat();
         
-        double extend_leadscrew = joy_msg->axes[5];
-        double retract_leadscrew = joy_msg->axes[4];
-        RCLCPP_INFO(this->get_logger(), "%lf", extend_leadscrew);
+        
+        // RCLCPP_INFO(this->get_logger(), "%lf", extend_leadscrew);
         bool current_a = joy_msg->buttons[0];
         if (current_a && !last_a_state) {  // Button A just pressed
             if (belt_running) {
@@ -68,17 +63,80 @@ Digging::Digging()
             }
         }
         last_y_state = current_y;
-        
-        if(extend_leadscrew > -0.9) { setLeadscrewSpeed(extend_leadscrew);}
-            else{stopLeadScrew();}
-        if(retract_leadscrew > -0.9) { setLeadscrewSpeed(-retract_leadscrew);}
-            else{stopLeadScrew();}
 
-        double raise_linear_actuators = joy_msg->buttons[1];
-        double lower_linear_actuators = joy_msg->buttons[2];
-        if(raise_linear_actuators){ commandUp(); }
-        if(lower_linear_actuators){ commandDown(); }
-        
+        double rightTrigger = joy_msg->axes[5];
+        double leftTrigger = joy_msg->axes[4];
+        double leadscrewSpeed;
+        if (leftTrigger > MIN_THROTTLE_DEADZONE && rightTrigger > MIN_THROTTLE_DEADZONE) {
+            leadscrewSpeed = 0;
+        }
+        else if (leftTrigger > MIN_THROTTLE_DEADZONE){
+			leadscrewSpeed = -1*leftTrigger;
+		}
+		else if (rightTrigger > MIN_THROTTLE_DEADZONE){
+			leadscrewSpeed = rightTrigger;
+		}
+		setLeadscrewSpeed(std::clamp(leadscrewSpeed, -1.0, 0.5));
+
+        // bool current_b = joy_msg->buttons[1];
+        // if(current_b){
+        //     commandUp();
+        // }
+        // bool current_x = joy_msg->buttons[2];
+        // if(current_x){
+        //     commandDown();
+        // }
+        // bool current_b = joy_msg->buttons[1];
+        // if (current_b && !last_b_state) {
+        //     if (actuators_running) {
+        //         commandStopLeft();
+        //         commandStopRight();
+        //     } else {
+        //         commandUp();
+        //         actuators_running = true;
+        //     }
+        // }
+        // last_b_state = current_b;
+
+        // bool current_x = joy_msg->buttons[2];
+        // if (current_x && !last_x_state) {
+        //     if (actuators_running) {
+        //         commandStopLeft();
+        //         commandStopRight();
+        //     } else {
+        //         commandDown();
+        //         actuators_running = true;
+        //     }
+        // }
+        // last_x_state = current_x;
+
+        bool current_b = joy_msg->buttons[1];  // B = up
+        if (current_b && !last_b_state) {
+            if (actuators_going_up) {
+                commandStopLeft();
+                commandStopRight();
+                actuators_going_up = false;
+            } else {
+                commandUp();
+                actuators_going_up = true;
+                actuators_going_down = false;  // Cancel down mode
+            }
+        }
+        last_b_state = current_b;
+
+        bool current_x = joy_msg->buttons[2];  // X = down
+        if (current_x && !last_x_state) {
+            if (actuators_going_down) {
+                commandStopLeft();
+                commandStopRight();
+                actuators_going_down = false;
+            } else {
+                commandDown();
+                actuators_going_down = true;
+                actuators_going_up = false;  // Cancel up mode
+            }
+        }
+        last_x_state = current_x;
     }
 
     /**
@@ -104,6 +162,7 @@ Digging::Digging()
     }
     void Digging::stopLeadScrew(){
         m_leadscrew_left.SetDutyCycle(0); 
+        m_leadscrew_right.SetDutyCycle(0);
     }
 
     void Digging::configureLimitSwitches() {
@@ -129,7 +188,7 @@ Digging::Digging()
     }
 
     void Digging::periodic() {
-        checkLeadscrewLimits();
+        // checkLeadscrewLimits();
         publishState();
     }
 
@@ -189,20 +248,24 @@ Digging::Digging()
     }
 
     void Digging::setLeadscrewSpeed(double speed) {
-        // auto position = m_leadscrew_left.GetPosition();
+        auto position = std::abs(m_leadscrew_left.GetPosition());
+        // RCLCPP_INFO(get_logger(), "Leadscrew position %lf", position);
+        // RCLCPP_INFO(get_logger(), "Leadscrew speed %lf", speed);
         
-        // if (position <= LEADSCREW_MAX_ERROR && speed < 0) {
-        //     // RCLCPP_WARN(get_logger(), "At bottom limit, cannot move down further");
-        //     return;
-        // }
+        if (position <= LEADSCREW_MAX_ERROR && speed < 0) {
+            RCLCPP_WARN(get_logger(), "At bottom limit, cannot move down further");
+            return;
+        }
         
-        // if (position >= LEADSCREW_MAX_TRAVEL - LEADSCREW_MAX_ERROR && speed > 0) {
-        //     RCLCPP_WARN(get_logger(), "At top limit, cannot move up further");
-        //     return;
-        // }
+        if (position >= LEADSCREW_MAX_TRAVEL - LEADSCREW_MAX_ERROR && speed > 0) {
+            RCLCPP_WARN(get_logger(), "At top limit, cannot move up further");
+            return;
+        }
 
         leadscrew_state = LeadscrewState::Traveling;
-        m_leadscrew_left.SetDutyCycle(speed);  // Leadscrew2 follows automatically due to follower config
+        m_leadscrew_left.SetDutyCycle(speed);
+        m_leadscrew_right.SetDutyCycle(speed);
+
     }
 
     LeadscrewState Digging::getLeadscrewState() {
@@ -218,78 +281,89 @@ Digging::Digging()
 
 
     void Digging::linearUp(){
-        if (m_linear_left.GetPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND) || linear_actuator_state == LinearActuatorState::Lowered) {
-            stopLinearActuatorMotors();
+        if (m_linear_right.GetAnalogPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND)) {
+            m_linear_right.SetDutyCycle(0);
             return;
         }
-        if (m_linear_right.GetPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND) || linear_actuator_state == LinearActuatorState::Lowered) {
-            stopLinearActuatorMotors();
+        if (m_linear_left.GetAnalogPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND)) {
+            m_linear_left.SetDutyCycle(0);
             return;
         }
 
-        linear_actuator_state = LinearActuatorState::TravelingUp;
-        m_linear_left.SetDutyCycle(-1.0);
-        m_linear_right.SetDutyCycle(-1.0);
+        linear_actuator_state_right = LinearActuatorStateRight::TravelingUp;
+        linear_actuator_state_left = LinearActuatorStateLeft::TravelingUp;
+        m_linear_left.SetDutyCycle(-1);
+        m_linear_right.SetDutyCycle(-1);
     }
 
     void Digging::linearDown(){
-        if (m_linear_left.GetPosition() <= LINEAR_MIN_TRAVEL || linear_actuator_state == LinearActuatorState::Lowered){ return; }
-        if (m_linear_right.GetPosition() <= LINEAR_MIN_TRAVEL || linear_actuator_state == LinearActuatorState::Lowered){ return; }
+        if (m_linear_left.GetAnalogPosition() <= LINEAR_MIN_TRAVEL || linear_actuator_state_left == LinearActuatorStateLeft::Lowered){ return; }
+        if (m_linear_right.GetAnalogPosition() <= LINEAR_MIN_TRAVEL || linear_actuator_state_right == LinearActuatorStateRight::Lowered){ return; }
         
-        linear_actuator_state = LinearActuatorState::TravelingDown;
+        linear_actuator_state_right = LinearActuatorStateRight::TravelingDown;
+        linear_actuator_state_left = LinearActuatorStateLeft::TravelingDown;
         m_linear_left.SetDutyCycle(1.0);
         m_linear_right.SetDutyCycle(1.0);
-    }
-
-    void Digging::stopLinearActuatorMotors(){
-        RCLCPP_INFO(get_logger(), "STOPPING LINEAR ACTUATOR SPARKMAXES!");
-        m_linear_left.SetDutyCycle(0.0);
+    }  
+    void Digging::stopLinearActuatorMotorsRight(){
+        RCLCPP_INFO(get_logger(), "STOPPING LINEAR ACTUATOR SPARKMAXES Right!");
         m_linear_right.SetDutyCycle(0.0);
-        
+    }      
+    void Digging::stopLinearActuatorMotorsLeft(){
+        RCLCPP_INFO(get_logger(), "STOPPING LINEAR ACTUATOR SPARKMAXES Left!");
+        m_linear_left.SetDutyCycle(0.0);
     }                            
 
-    double Digging::getLinearActuatorLeftPosition(){ return m_linear_left.GetPosition(); }
-    double Digging::getLinearActuatorRightPosition(){  return m_linear_right.GetPosition(); }
+    double Digging::getLinearActuatorLeftPosition(){ return m_linear_left.GetAnalogPosition(); }
+    double Digging::getLinearActuatorRightPosition(){  return m_linear_right.GetAnalogPosition(); }
 
     void Digging::commandUp(){
         linearUp();
-        linear_actuator_state = LinearActuatorState::Commanded;
+        linear_actuator_state_right = LinearActuatorStateRight::Commanded;
+        linear_actuator_state_left = LinearActuatorStateLeft::Commanded;
     }
     void Digging::commandDown(){
         linearDown();
-        linear_actuator_state = LinearActuatorState::Commanded;
+        linear_actuator_state_right = LinearActuatorStateRight::Commanded;
+        linear_actuator_state_left = LinearActuatorStateLeft::Commanded;
     }
     
-    void Digging::commandStop(){ stopLinearActuatorMotors(); }
+    void Digging::commandStopRight(){ 
+        stopLinearActuatorMotorsRight(); 
+    }
+    void Digging::commandStopLeft(){
+        stopLinearActuatorMotorsLeft();
+    }
 
-    LinearActuatorState Digging::getLinearActuatorState(){ return linear_actuator_state; }
+    LinearActuatorStateRight Digging::getLinearActuatorStateRight(){ return linear_actuator_state_right; }
+    LinearActuatorStateLeft Digging::getLinearActuatorStateLeft(){ return linear_actuator_state_left; }
 
     void Digging::checkLinearActuatorLimits(){
         RCLCPP_INFO(
         get_logger(),"CURRENT LINEAR ACTUATOR POSITONS = LEFT %lf\tRIGHT %lf\n ", 
-        m_linear_left.GetPosition(), 
-        m_linear_right.GetPosition()
+        m_linear_left.GetAnalogPosition(), 
+        m_linear_right.GetAnalogPosition()
         );
-
-        if (linear_actuator_state != LinearActuatorState::Raised && linear_actuator_state != LinearActuatorState::TravelingDown 
-                && m_linear_left.GetPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND)) {
-            linear_actuator_state = LinearActuatorState::Raised;
-            commandStop();
+        if (linear_actuator_state_right != LinearActuatorStateRight::Raised && linear_actuator_state_right != LinearActuatorStateRight::TravelingDown 
+                && m_linear_right.GetAnalogPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND)) {
+            linear_actuator_state_right = LinearActuatorStateRight::Raised;
+            commandStopRight();
         }
-        if (linear_actuator_state != LinearActuatorState::Lowered && linear_actuator_state != LinearActuatorState::TravelingUp
-                && m_linear_left.GetPosition() <= LINEAR_MIN_TRAVEL) {
-            linear_actuator_state = LinearActuatorState::Lowered;
-            commandStop();
+        if (linear_actuator_state_right != LinearActuatorStateRight::Lowered && linear_actuator_state_right != LinearActuatorStateRight::TravelingUp
+            && m_linear_right.GetAnalogPosition() <= LINEAR_MIN_TRAVEL) {
+            linear_actuator_state_right = LinearActuatorStateRight::Lowered;
+            commandStopRight();
         }
-        if (linear_actuator_state != LinearActuatorState::Raised && linear_actuator_state != LinearActuatorState::TravelingDown
-                && m_linear_right.GetPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND)) {
-            linear_actuator_state = LinearActuatorState::Raised;
-            commandStop();
+        if (linear_actuator_state_left != LinearActuatorStateLeft::Raised && linear_actuator_state_left != LinearActuatorStateLeft::TravelingDown
+                && m_linear_left.GetAnalogPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND)) {
+            linear_actuator_state_left = LinearActuatorStateLeft::Raised;
+            commandStopLeft();
         }
-        if (linear_actuator_state != LinearActuatorState::Lowered && linear_actuator_state != LinearActuatorState::TravelingUp
-                && m_linear_right.GetPosition() <= LINEAR_MIN_TRAVEL) {
-            linear_actuator_state = LinearActuatorState::Lowered;
-            commandStop();
+        
+        if (linear_actuator_state_left != LinearActuatorStateLeft::Lowered && linear_actuator_state_left != LinearActuatorStateLeft::TravelingUp
+                && m_linear_left.GetAnalogPosition() <= LINEAR_MIN_TRAVEL) {
+            linear_actuator_state_left = LinearActuatorStateLeft::Lowered;
+            commandStopLeft();
         }
     }
 
@@ -311,13 +385,13 @@ Digging::Digging()
             m_belt_right.BurnFlash();
             
             // Linear actuators
-            m_linear_left.SetIdleMode(IdleMode::kCoast);
+            // m_linear_left.SetIdleMode(IdleMode::kCoast);
             m_linear_left.SetMotorType(MotorType::kBrushed);
             m_linear_left.SetDutyCycle(0.0);
             m_linear_left.ClearStickyFaults();
             m_linear_left.BurnFlash();
             
-            m_linear_right.SetIdleMode(IdleMode::kCoast);
+            // m_linear_right.SetIdleMode(IdleMode::kCoast);
             m_linear_right.SetMotorType(MotorType::kBrushed);
             m_linear_right.SetDutyCycle(0.0);
             m_linear_right.ClearStickyFaults();
@@ -328,11 +402,13 @@ Digging::Digging()
             m_leadscrew_left.SetMotorType(MotorType::kBrushless);
             m_leadscrew_left.ClearStickyFaults();
             m_leadscrew_left.SetDutyCycle(0.0);
-            
+            m_leadscrew_left.BurnFlash();
+
             m_leadscrew_right.SetIdleMode(IdleMode::kCoast);
             m_leadscrew_right.SetMotorType(MotorType::kBrushless);
             m_leadscrew_right.ClearStickyFaults();
             m_leadscrew_right.SetDutyCycle(0.0);
+            m_leadscrew_right.BurnFlash();
             
             RCLCPP_INFO(get_logger(), "Digging Subsystem Motors configured successfully");
         } catch (const std::exception& e) {

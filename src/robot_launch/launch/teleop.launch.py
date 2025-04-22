@@ -47,6 +47,11 @@ def generate_launch_description():
         output='screen'
     )
 
+    # run_plotjuggler = ExecuteProcess(
+    #     cmd=['ros2', 'run', 'plotjuggler', 'plotjuggler'],
+    #     output='screen',
+    #     shell=True
+    # )
 
     return LaunchDescription([
         joy_udp_listener_process,
@@ -55,4 +60,5 @@ def generate_launch_description():
         joy_node_jaden,
         digging_control,
         dumping_control
+        # run_plotjuggler
     ])

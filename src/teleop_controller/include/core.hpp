@@ -101,7 +101,7 @@ const double SPARKMAX_RPM = 292;
 const double MAX_VOLTAGE = 12;
 const double SPARKMAX_RPM_AVERAGE = 63;
 const double SPARKMAX_MAX_DUTY_CYCLE = 1;
-const double GEAR_RATIO = 100.0;                            // 100 to 1 gear ratio is used0
+const double GEAR_RATIO = 100.0;                            // 100 to 1 gear ratio is used
 
 
 const int MOTOR_FRONT_LEFT_CAN_ID = 5;
@@ -171,10 +171,13 @@ double DIGGING_LINEAR_kD = 0.0;//0.000005;
 double DIGGING_LINEAR_kIZ = 20;
 double DIGGING_LINEAR_kFF = 0.000080;
 
-enum class LinearActuatorState {
+enum class LinearActuatorStateRight {
     Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded
 };
 
+enum class LinearActuatorStateLeft {
+    Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded
+};
 
 enum class LeadscrewState {
 Extended,

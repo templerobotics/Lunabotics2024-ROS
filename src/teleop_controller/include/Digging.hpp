@@ -10,7 +10,7 @@ protected:
     SparkMax m_belt_left;
     SparkMax m_belt_right;
     SparkMax m_linear_left;
-    SparkMax m_linear_right;    
+    SparkMax m_linear_right;  
     SparkMax m_leadscrew_left;
     SparkMax m_leadscrew_right;
 
@@ -50,17 +50,21 @@ protected:
     rclcpp::TimerBase::SharedPtr timer_linear_actuators;
 
     // LINEAR ACTUATOR
-    LinearActuatorState linear_actuator_state = LinearActuatorState::Unknown;
+    LinearActuatorStateRight linear_actuator_state_right = LinearActuatorStateRight::Unknown;
+    LinearActuatorStateLeft linear_actuator_state_left = LinearActuatorStateLeft::Unknown;
     void checkLinearActuatorLimits();
     void commandUp();
     void commandDown();
-    void commandStop();
+    void commandStopRight();
+    void commandStopLeft();
     void linearUp();
     void linearDown();
-    LinearActuatorState getLinearActuatorState();
+    LinearActuatorStateRight getLinearActuatorStateRight();
+    LinearActuatorStateLeft getLinearActuatorStateLeft();
     double getLinearActuatorLeftPosition();
     double getLinearActuatorRightPosition();
-    void stopLinearActuatorMotors();                              
+    void stopLinearActuatorMotorsRight();       
+    void stopLinearActuatorMotorsLeft();                       
     void periodicLinearActuatorCheck();
 
     bool x_button = false;          //raise linear actuator
@@ -71,4 +75,8 @@ protected:
     bool right_trigger = false;     // Increase Speed of Leadscrew retraction
     bool last_a_state = false;
     bool last_y_state = false;
+    bool last_b_state = false;
+    bool last_x_state = false;
+    bool actuators_going_up = false;
+    bool actuators_going_down = false;
 };

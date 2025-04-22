@@ -28,22 +28,24 @@ public:
             left_front.SetIdleMode(IdleMode::kCoast);
             left_front.SetMotorType(MotorType::kBrushless);
             left_front.SetDutyCycle(0.0);
+            left_front.SetInverted(false);
             left_front.ClearStickyFaults();
             left_front.BurnFlash();
             left_rear.SetIdleMode(IdleMode::kCoast);
             left_rear.SetMotorType(MotorType::kBrushless);
             left_rear.SetDutyCycle(0.0);
+            left_rear.SetInverted(false);
             left_rear.ClearStickyFaults();
             left_rear.BurnFlash();
             right_front.SetIdleMode(IdleMode::kCoast);
             right_front.SetMotorType(MotorType::kBrushless);
-            right_front.SetInverted(false);
+            right_front.SetInverted(true);
             right_front.ClearStickyFaults();
             right_front.SetDutyCycle(0.0);
             right_front.BurnFlash();
             right_rear.SetIdleMode(IdleMode::kCoast);
             right_rear.SetMotorType(MotorType::kBrushless);
-            right_rear.SetInverted(false);
+            right_rear.SetInverted(true);
             right_rear.SetDutyCycle(0.0);
             right_rear.ClearStickyFaults();
             right_rear.BurnFlash();
@@ -122,11 +124,11 @@ private:
         double motor_cmd_right = rpm_right * (SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE);
         motor_cmd_left = std::clamp(motor_cmd_left, -1.0, 1.0);
         motor_cmd_right = std::clamp(motor_cmd_right, -1.0, 1.0);
-
-        left_front.SetDutyCycle(motor_cmd_left);
-        left_rear.SetDutyCycle(motor_cmd_left);
-        right_front.SetDutyCycle(motor_cmd_right);
-        right_rear.SetDutyCycle(motor_cmd_right);
+        
+        left_front.SetDutyCycle(-motor_cmd_left);
+        left_rear.SetDutyCycle(-motor_cmd_left);
+        right_front.SetDutyCycle(-motor_cmd_right);
+        right_rear.SetDutyCycle(-motor_cmd_right);
     }
 };
 

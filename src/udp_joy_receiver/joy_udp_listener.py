@@ -10,9 +10,9 @@ class JoyReceiver(Node):
         super().__init__('joy_receiver')
         self.pub = self.create_publisher(Joy, 'joy', 10)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind(('0.0.0.0', 5005))  # Must match the Mac's UDP port
+        self.sock.bind(('0.0.0.0', 5006))  # Must match the Mac's UDP port
         threading.Thread(target=self.listen_udp, daemon=True).start()
-        self.get_logger().info("Listening for joystick data on UDP port 5005...")
+        self.get_logger().info("Listening for joystick data on UDP port 5006...")
 
     def listen_udp(self):
         while True:
