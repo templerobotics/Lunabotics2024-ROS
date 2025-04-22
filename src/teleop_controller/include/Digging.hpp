@@ -57,6 +57,7 @@ protected:
     void commandDown();
     void commandStopRight();
     void commandStopLeft();
+    void commandStop();
     void linearUp();
     void linearDown();
     LinearActuatorStateRight getLinearActuatorStateRight();
@@ -77,6 +78,5 @@ protected:
     bool last_y_state = false;
     bool last_b_state = false;
     bool last_x_state = false;
-    bool actuators_going_up = false;
-    bool actuators_going_down = false;
+    bool actuators_running = false;
 };

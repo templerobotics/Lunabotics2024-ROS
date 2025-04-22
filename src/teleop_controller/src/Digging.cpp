@@ -41,6 +41,14 @@ Digging::Digging()
         m_leadscrew_left.Heartbeat();
         m_leadscrew_right.Heartbeat();
         
+        // m_linear_left.SetDutyCycle(1.0);
+        // rclcpp::sleep_for(std::chrono::seconds(2));
+        // m_linear_left.SetDutyCycle(0.0);
+        // rclcpp::sleep_for(std::chrono::seconds(2));
+        // m_linear_left.SetDutyCycle(-1.0);
+        // rclcpp::sleep_for(std::chrono::seconds(2));
+        // m_linear_left.SetDutyCycle(0.0);
+
         
         // RCLCPP_INFO(this->get_logger(), "%lf", extend_leadscrew);
         bool current_a = joy_msg->buttons[0];
@@ -112,28 +120,20 @@ Digging::Digging()
 
         bool current_b = joy_msg->buttons[1];  // B = up
         if (current_b && !last_b_state) {
-            if (actuators_going_up) {
-                commandStopLeft();
-                commandStopRight();
-                actuators_going_up = false;
+            if (actuators_running) {
+                commandStop();
             } else {
                 commandUp();
-                actuators_going_up = true;
-                actuators_going_down = false;  // Cancel down mode
             }
         }
         last_b_state = current_b;
 
         bool current_x = joy_msg->buttons[2];  // X = down
         if (current_x && !last_x_state) {
-            if (actuators_going_down) {
-                commandStopLeft();
-                commandStopRight();
-                actuators_going_down = false;
+            if (actuators_running) {
+                commandStop();
             } else {
                 commandDown();
-                actuators_going_down = true;
-                actuators_going_up = false;  // Cancel up mode
             }
         }
         last_x_state = current_x;
@@ -281,27 +281,26 @@ Digging::Digging()
 
 
     void Digging::linearUp(){
-        if (m_linear_right.GetAnalogPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND)) {
-            m_linear_right.SetDutyCycle(0);
-            return;
-        }
-        if (m_linear_left.GetAnalogPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND)) {
-            m_linear_left.SetDutyCycle(0);
-            return;
-        }
-
-        linear_actuator_state_right = LinearActuatorStateRight::TravelingUp;
-        linear_actuator_state_left = LinearActuatorStateLeft::TravelingUp;
+        // if (m_linear_right.GetAnalogPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND)) {
+        //     m_linear_right.SetDutyCycle(0);
+        //     return;
+        // }
+        // if (m_linear_left.GetAnalogPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND)) {
+        //     m_linear_left.SetDutyCycle(0);
+        //     return;
+        // }
+        // linear_actuator_state_right = LinearActuatorStateRight::TravelingUp;
+        // linear_actuator_state_left = LinearActuatorStateLeft::TravelingUp;
         m_linear_left.SetDutyCycle(-1);
         m_linear_right.SetDutyCycle(-1);
     }
 
     void Digging::linearDown(){
-        if (m_linear_left.GetAnalogPosition() <= LINEAR_MIN_TRAVEL || linear_actuator_state_left == LinearActuatorStateLeft::Lowered){ return; }
-        if (m_linear_right.GetAnalogPosition() <= LINEAR_MIN_TRAVEL || linear_actuator_state_right == LinearActuatorStateRight::Lowered){ return; }
-        
-        linear_actuator_state_right = LinearActuatorStateRight::TravelingDown;
-        linear_actuator_state_left = LinearActuatorStateLeft::TravelingDown;
+        // if (m_linear_left.GetAnalogPosition() <= LINEAR_MIN_TRAVEL){ return; }
+        // if (m_linear_right.GetAnalogPosition() <= LINEAR_MIN_TRAVEL){ return; }
+        // RCLCPP_INFO(get_logger(), "Setting actuator speed to 1");
+        // linear_actuator_state_right = LinearActuatorStateRight::TravelingDown;
+        // linear_actuator_state_left = LinearActuatorStateLeft::TravelingDown;
         m_linear_left.SetDutyCycle(1.0);
         m_linear_right.SetDutyCycle(1.0);
     }  
@@ -318,16 +317,22 @@ Digging::Digging()
     double Digging::getLinearActuatorRightPosition(){  return m_linear_right.GetAnalogPosition(); }
 
     void Digging::commandUp(){
+        actuators_running = true;
         linearUp();
-        linear_actuator_state_right = LinearActuatorStateRight::Commanded;
-        linear_actuator_state_left = LinearActuatorStateLeft::Commanded;
+        // linear_actuator_state_right = LinearActuatorStateRight::Commanded;
+        // linear_actuator_state_left = LinearActuatorStateLeft::Commanded;
     }
     void Digging::commandDown(){
+        actuators_running = true;
         linearDown();
-        linear_actuator_state_right = LinearActuatorStateRight::Commanded;
-        linear_actuator_state_left = LinearActuatorStateLeft::Commanded;
+        // linear_actuator_state_right = LinearActuatorStateRight::Commanded;
+        // linear_actuator_state_left = LinearActuatorStateLeft::Commanded;
     }
-    
+    void Digging::commandStop(){
+        m_linear_left.SetDutyCycle(0);
+        m_linear_right.SetDutyCycle(0);
+        actuators_running = false;
+    }
     void Digging::commandStopRight(){ 
         stopLinearActuatorMotorsRight(); 
     }
@@ -340,31 +345,32 @@ Digging::Digging()
 
     void Digging::checkLinearActuatorLimits(){
         RCLCPP_INFO(
-        get_logger(),"CURRENT LINEAR ACTUATOR POSITONS = LEFT %lf\tRIGHT %lf\n ", 
+        get_logger(),"CURRENT LINEAR ACTUATOR POSITONS Analog = LEFT %lf\tRIGHT %lf\n ", 
         m_linear_left.GetAnalogPosition(), 
         m_linear_right.GetAnalogPosition()
         );
+
         if (linear_actuator_state_right != LinearActuatorStateRight::Raised && linear_actuator_state_right != LinearActuatorStateRight::TravelingDown 
                 && m_linear_right.GetAnalogPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND)) {
             linear_actuator_state_right = LinearActuatorStateRight::Raised;
             commandStopRight();
         }
-        if (linear_actuator_state_right != LinearActuatorStateRight::Lowered && linear_actuator_state_right != LinearActuatorStateRight::TravelingUp
-            && m_linear_right.GetAnalogPosition() <= LINEAR_MIN_TRAVEL) {
-            linear_actuator_state_right = LinearActuatorStateRight::Lowered;
-            commandStopRight();
-        }
+        // if (linear_actuator_state_right != LinearActuatorStateRight::Lowered && linear_actuator_state_right != LinearActuatorStateRight::TravelingUp
+        //     && m_linear_right.GetAnalogPosition() <= LINEAR_MIN_TRAVEL) {
+        //     linear_actuator_state_right = LinearActuatorStateRight::Lowered;
+        //     commandStopRight();
+        // }
         if (linear_actuator_state_left != LinearActuatorStateLeft::Raised && linear_actuator_state_left != LinearActuatorStateLeft::TravelingDown
                 && m_linear_left.GetAnalogPosition() >= (LINEAR_MAX_TRAVEL - LINEAR_DEADBAND)) {
             linear_actuator_state_left = LinearActuatorStateLeft::Raised;
             commandStopLeft();
         }
         
-        if (linear_actuator_state_left != LinearActuatorStateLeft::Lowered && linear_actuator_state_left != LinearActuatorStateLeft::TravelingUp
-                && m_linear_left.GetAnalogPosition() <= LINEAR_MIN_TRAVEL) {
-            linear_actuator_state_left = LinearActuatorStateLeft::Lowered;
-            commandStopLeft();
-        }
+        // if (linear_actuator_state_left != LinearActuatorStateLeft::Lowered && linear_actuator_state_left != LinearActuatorStateLeft::TravelingUp
+        //         && m_linear_left.GetAnalogPosition() <= LINEAR_MIN_TRAVEL) {
+        //     linear_actuator_state_left = LinearActuatorStateLeft::Lowered;
+        //     commandStopLeft();
+        // }
     }
 
 
@@ -387,12 +393,14 @@ Digging::Digging()
             // Linear actuators
             // m_linear_left.SetIdleMode(IdleMode::kCoast);
             m_linear_left.SetMotorType(MotorType::kBrushed);
+            m_linear_left.SetSensorType(SensorType::kEncoder);
             m_linear_left.SetDutyCycle(0.0);
             m_linear_left.ClearStickyFaults();
             m_linear_left.BurnFlash();
             
             // m_linear_right.SetIdleMode(IdleMode::kCoast);
             m_linear_right.SetMotorType(MotorType::kBrushed);
+            m_linear_right.SetSensorType(SensorType::kEncoder);
             m_linear_right.SetDutyCycle(0.0);
             m_linear_right.ClearStickyFaults();
             m_linear_right.BurnFlash();
@@ -409,7 +417,12 @@ Digging::Digging()
             m_leadscrew_right.ClearStickyFaults();
             m_leadscrew_right.SetDutyCycle(0.0);
             m_leadscrew_right.BurnFlash();
-            
+
+            // m_leadscrew_left.SetDutyCycle(-1);
+            // m_leadscrew_right.SetDutyCycle(-1);
+            // rclcpp::sleep_for(std::chrono::seconds(2));
+            // m_leadscrew_left.SetDutyCycle(1);
+            // m_leadscrew_right.SetDutyCycle(1);
             RCLCPP_INFO(get_logger(), "Digging Subsystem Motors configured successfully");
         } catch (const std::exception& e) {
             RCLCPP_ERROR(get_logger(), "Failed to configure Digging Subsystem motors: %s", e.what());
