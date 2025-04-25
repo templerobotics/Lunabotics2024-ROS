@@ -9,6 +9,8 @@ protected:
     SparkMax m_dumping_left;
     SparkMax m_dumping_right;
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub;
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr dumping_right_speed_pub, dumping_left_speed_pub, dumping_right_temp_pub, dumping_left_temp_pub;
+    rclcpp::TimerBase::SharedPtr telemetry_timer;
     void joy_callback_dumping(const sensor_msgs::msg::Joy::SharedPtr joy_msg);
     void initMotors();  
     void cmd_open_dumplatch(double cmd_open_dumplatch);

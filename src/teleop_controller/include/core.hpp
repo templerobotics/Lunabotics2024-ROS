@@ -163,7 +163,7 @@ int BELT_SECNDARY_CURRENT_LIMIT = 22;
 bool LINEAR_INVERT = true;
 double LINEAR_DEADBAND = .01;
 double LINEAR_MIN_TRAVEL = 0; //1.438; // 0.2876; // 1.438
-double LINEAR_MAX_TRAVEL = 0.5; //1;//3.3; //3.3; //0.55
+double LINEAR_MAX_TRAVEL = 1; //1;//3.3; //3.3; //0.55
 double LINEAR_2_ADJUSTMENT = -0.02;
 double DIGGING_LINEAR_kP = 0.0;//0.1;
 double DIGGING_LINEAR_kI = 0.0;//0.000002;
@@ -172,11 +172,11 @@ double DIGGING_LINEAR_kIZ = 20;
 double DIGGING_LINEAR_kFF = 0.000080;
 
 enum class LinearActuatorStateRight {
-    Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded
+    Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded, Stopped
 };
 
 enum class LinearActuatorStateLeft {
-    Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded
+    Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded, Stopped
 };
 
 enum class LeadscrewState {
@@ -229,6 +229,10 @@ typedef struct{
 
 //BMS
 
+template <typename T>
+const T& clamp(const T& v, const T& lo, const T& hi) {
+    return (v < lo) ? lo : (hi < v) ? hi : v;
+}
 
 
 

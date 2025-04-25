@@ -21,6 +21,29 @@ Dumping::Dumping()
         joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&Dumping::joy_callback_dumping, this, std::placeholders::_1));
         initMotors();
         RCLCPP_INFO(this->get_logger(), "Dumping Subsystem ready to go!\n");
+
+        dumping_right_speed_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/right/speed", 10);
+        dumping_left_speed_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/left/speed", 10);
+        dumping_right_temp_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/right/temp", 10);
+        dumping_left_temp_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/left/temp", 10);
+
+
+        telemetry_timer = this->create_wall_timer(
+            100ms, [this]() {
+        try {
+            auto msg = std_msgs::msg::Float64();
+            msg.data = m_dumping_right.GetVelocity();
+            dumping_right_speed_pub->publish(msg);
+            msg.data = m_dumping_left.GetVelocity();
+            dumping_left_speed_pub->publish(msg);
+            msg.data = m_dumping_right.GetTemperature();
+            dumping_right_temp_pub->publish(msg);
+            msg.data = m_dumping_left.GetTemperature();
+            dumping_left_temp_pub->publish(msg);
+            } catch (const std::exception& e) {
+                RCLCPP_ERROR(get_logger(), "Failed to read motor metrics: %s", e.what());
+            }
+        });
     }
 
     /*Change port to correct arduino port. Also, I have no idea if this code works or not*/
@@ -97,12 +120,18 @@ Dumping::Dumping()
         m_dumping_left.SetMotorType(MotorType::kBrushless);
         m_dumping_left.SetDutyCycle(0.0);
         m_dumping_left.ClearStickyFaults();
+        m_dumping_left.ResetFaults();
+        m_dumping_left.SetPeriodicStatus3Period(0);
+        m_dumping_left.SetPeriodicStatus4Period(0);
         m_dumping_left.BurnFlash();
         
         m_dumping_right.SetIdleMode(IdleMode::kCoast);
         m_dumping_right.SetMotorType(MotorType::kBrushless);
         m_dumping_right.SetDutyCycle(0.0);
         m_dumping_right.ClearStickyFaults();
+        m_dumping_right.ResetFaults();
+        m_dumping_right.SetPeriodicStatus3Period(0);
+        m_dumping_right.SetPeriodicStatus4Period(0);
         m_dumping_right.BurnFlash();
 
         RCLCPP_INFO(get_logger(), "Dumping Subsystem Motors configured successfully");

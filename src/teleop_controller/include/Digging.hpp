@@ -44,22 +44,30 @@ protected:
     void checkLeadscrewLimits();
     void publishState();
     void stopLeadScrew();
-    std::string stateToString(LeadscrewState state);
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr state_pub;
+    std::string stateToStringActuatorLeft(LinearActuatorStateLeft state);
+    std::string stateToStringActuatorRight(LinearActuatorStateRight state);
+    std::string stateToStringLeadScrew(LeadscrewState state);
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr actuator_right_state_pub, actuator_left_state_pub, leadscrew_right_state_pub, leadscrew_left_state_pub;
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr digging_right_speed_pub, digging_left_speed_pub, digging_right_temp_pub, digging_left_temp_pub, leadscrew_right_speed_pub, leadscrew_left_speed_pub, leadscrew_right_temp_pub, leadscrew_left_temp_pub, actuator_right_position_pub, actuator_left_position_pub;
     rclcpp::TimerBase::SharedPtr timer_diagnostics;
     rclcpp::TimerBase::SharedPtr timer_linear_actuators;
+    rclcpp::TimerBase::SharedPtr telemetry_timer;
 
     // LINEAR ACTUATOR
     LinearActuatorStateRight linear_actuator_state_right = LinearActuatorStateRight::Unknown;
     LinearActuatorStateLeft linear_actuator_state_left = LinearActuatorStateLeft::Unknown;
     void checkLinearActuatorLimits();
-    void commandUp();
-    void commandDown();
+    void commandUpRight();
+    void commandUpLeft();
+    void commandDownRight();
+    void commandDownLeft();
     void commandStopRight();
     void commandStopLeft();
     void commandStop();
-    void linearUp();
-    void linearDown();
+    void linearUpRight();
+    void linearUpLeft();
+    void linearDownRight();
+    void linearDownLeft();
     LinearActuatorStateRight getLinearActuatorStateRight();
     LinearActuatorStateLeft getLinearActuatorStateLeft();
     double getLinearActuatorLeftPosition();
@@ -78,5 +86,6 @@ protected:
     bool last_y_state = false;
     bool last_b_state = false;
     bool last_x_state = false;
-    bool actuators_running = false;
+    bool actuators_running_right = false;
+    bool actuators_running_left = false;
 };
