@@ -97,10 +97,10 @@ Dumping::Dumping()
         if(dump_latch_control > 0) { cmd_open_dumplatch(dump_latch_control); }
     }
     void Dumping::move_belt_forward(){
-        // m_dumping_left.SetDutyCycle(1.0);
-        // m_dumping_right.SetDutyCycle(-1.0);
-        m_dumping_left.SetDutyCycle(0.5);
-        m_dumping_right.SetDutyCycle(-0.5);
+        m_dumping_left.SetDutyCycle(1.0);
+        m_dumping_right.SetDutyCycle(-1.0);
+        // m_dumping_left.SetDutyCycle(0.5);
+        // m_dumping_right.SetDutyCycle(-0.5);
     }
 
     void Dumping::move_belt_reverse(){

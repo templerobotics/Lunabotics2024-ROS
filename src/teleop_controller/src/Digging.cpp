@@ -95,7 +95,7 @@ Digging::Digging()
             if (belt_running) {
                 stopDiggingBeltMotors();
             } else {
-                setBeltSpeedForward(1.0);  // Or however fast you want
+                setBeltSpeedForward(0.25);//1  // Or however fast you want
             }
         }
         last_a_state = current_a;
@@ -106,7 +106,7 @@ Digging::Digging()
             if (belt_running) {
                 stopDiggingBeltMotors();
             } else {
-                setBeltSpeedReverse(1.0);  // Opposite direction
+                setBeltSpeedReverse(0.25); //1 // Opposite direction
             }
         }
         last_y_state = current_y;

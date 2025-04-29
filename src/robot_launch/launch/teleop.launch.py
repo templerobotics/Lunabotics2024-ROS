@@ -52,28 +52,43 @@ def generate_launch_description():
         output='screen'
     )
 
-    # V4L2 Camera Node (publishes /image_raw)
-    camera_input = Node(
+    camera_input_1 = Node(
         package='v4l2_camera',
         executable='v4l2_camera_node',
-        name='usb_cam',
-        parameters=[{'image_size': [640, 480], 'time_per_frame': [1, 10]}],  # ~10 FPS
-        remappings=[
-            ('/image_raw', '/camera/image_raw')
+        name='camera_c960',
+        parameters=[
+            {'video_device': '/dev/video0'},
+            {'camera_name': 'cam_c960'},
+            {'image_size': [640, 480]},  # Smaller resolution if you want
         ],
         output='screen'
     )
 
-    # Image Republisher Node (compresses and republishes)
-    camera_compressed = Node(
+    # Second Camera
+    camera_input_2 = Node(
+        package='v4l2_camera',
+        executable='v4l2_camera_node',
+        name='camera_c961',
+        parameters=[
+            {'video_device': '/dev/cam_c961'},
+            {'camera_name': 'cam_c961'},
+            {'image_size': [640, 480]},  # Smaller resolution if you want
+        ],
+        output='screen'
+    )
+
+    camera_compressed_1 = Node(
         package='image_transport',
         executable='republish',
-        name='image_transport_republish',
-        arguments=['raw', 'compressed'],
-        remappings=[
-            ('in', '/camera/image_raw'),
-            ('out', '/camera/image_raw/compressed')
-        ],
+        name='compressor_c960',
+        arguments=['raw', 'compressed', '--ros-args', '-r', 'in:=/cam_c960/image_raw', '-r', 'out:=/cam_c960/image_raw/compressed'],
+        output='screen'
+    )
+    camera_compressed_2 = Node(
+        package='image_transport',
+        executable='republish',
+        name='compressor_c961',
+        arguments=['raw', 'compressed', '--ros-args', '-r', 'in:=/cam_c961/image_raw', '-r', 'out:=/cam_c961/image_raw/compressed'],
         output='screen'
     )
 
@@ -85,6 +100,8 @@ def generate_launch_description():
         digging_control,
         dumping_control,
         foxglove_bridge,
-        camera_input,
-        camera_compressed
+        camera_input_1,
+        camera_input_2,
+        camera_compressed_1,
+        camera_compressed_2
     ])
