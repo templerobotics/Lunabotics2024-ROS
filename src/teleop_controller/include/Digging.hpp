@@ -3,9 +3,10 @@
 #include "core.hpp"
 
 class Digging : public rclcpp::Node {
+
 public:
     Digging();
-
+    bool isRunning();
 protected:
     SparkMax m_belt_left;
     SparkMax m_belt_right;
@@ -13,6 +14,7 @@ protected:
     SparkMax m_linear_right;  
     SparkMax m_leadscrew_left;
     SparkMax m_leadscrew_right;
+    
 
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub;
     void joy_callback_digging(const sensor_msgs::msg::Joy::SharedPtr joy_msg);
@@ -25,8 +27,8 @@ protected:
     void setBeltSpeedForward(double speed);         
     void setBeltSpeedReverse(double speed);
     void stopDiggingBeltMotors();                              
-    bool belt_running{false};                      
-    bool isRunning() const { return belt_running; }
+    bool belt_running = false;                      
+    
 
     /**
      * @brief Limit Switch / Leadscrew
@@ -47,8 +49,9 @@ protected:
     std::string stateToStringActuatorLeft(LinearActuatorStateLeft state);
     std::string stateToStringActuatorRight(LinearActuatorStateRight state);
     std::string stateToStringLeadScrew(LeadscrewState state);
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr actuator_right_state_pub, actuator_left_state_pub, leadscrew_right_state_pub, leadscrew_left_state_pub;
-    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr digging_right_speed_pub, digging_left_speed_pub, digging_right_temp_pub, digging_left_temp_pub, leadscrew_right_speed_pub, leadscrew_left_speed_pub, leadscrew_right_temp_pub, leadscrew_left_temp_pub, actuator_right_position_pub, actuator_left_position_pub;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr actuator_right_state_pub, actuator_left_state_pub, mode_publisher;
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr digging_right_speed_pub, digging_left_speed_pub, digging_right_temp_pub, digging_left_temp_pub, leadscrew_right_speed_pub, leadscrew_left_speed_pub, leadscrew_right_temp_pub, leadscrew_left_temp_pub, leadscrew_right_position_pub, leadscrew_left_position_pub, actuator_right_position_pub, actuator_left_position_pub, drivetrain_right_pub, drivetrain_left_pub;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr is_digging_running_pub;
     rclcpp::TimerBase::SharedPtr timer_diagnostics;
     rclcpp::TimerBase::SharedPtr timer_linear_actuators;
     rclcpp::TimerBase::SharedPtr telemetry_timer;
@@ -88,4 +91,7 @@ protected:
     bool last_x_state = false;
     bool actuators_running_right = false;
     bool actuators_running_left = false;
+    bool auto_button = false;
+    bool auto_running = false;
+    bool last_auto_state = false;
 };

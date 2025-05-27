@@ -6,7 +6,7 @@ ros2 launch robot_launch teleop.launch.py &
 echo "STARTING ROBOT CAMERA LIVESTREAM FOOTAGE!"
 
 # 1080p with minimal latency
-ffmpeg -f v4l2 -input_format mjpeg -framerate 30 -video_size 1920x1080 -i /dev/video0 \
+ffmpeg -f v4l2 -input_format mjpeg -framerate 30 -video_size 1920x1080 -i /dev/video2 \
   -c:v rawvideo -pix_fmt yuv420p \
   -fflags nobuffer -flags low_delay \
   -f nut pipe:1 | \

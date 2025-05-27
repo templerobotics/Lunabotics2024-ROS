@@ -18,7 +18,6 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)                  
 find_package(rosidl_default_generators REQUIRED) 
 
-
 include_directories(include)
 
 # Generate interfaces first

@@ -24,8 +24,8 @@ Dumping::Dumping()
 
         dumping_right_speed_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/right/speed", 10);
         dumping_left_speed_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/left/speed", 10);
-        dumping_right_temp_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/right/temp", 10);
-        dumping_left_temp_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/left/temp", 10);
+        // dumping_right_temp_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/right/temp", 30);
+        // dumping_left_temp_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/left/temp", 30);
 
 
         telemetry_timer = this->create_wall_timer(
@@ -36,10 +36,10 @@ Dumping::Dumping()
             dumping_right_speed_pub->publish(msg);
             msg.data = m_dumping_left.GetVelocity();
             dumping_left_speed_pub->publish(msg);
-            msg.data = m_dumping_right.GetTemperature();
-            dumping_right_temp_pub->publish(msg);
-            msg.data = m_dumping_left.GetTemperature();
-            dumping_left_temp_pub->publish(msg);
+            // msg.data = m_dumping_right.GetTemperature();
+            // dumping_right_temp_pub->publish(msg);
+            // msg.data = m_dumping_left.GetTemperature();
+            // dumping_left_temp_pub->publish(msg);
             } catch (const std::exception& e) {
                 RCLCPP_ERROR(get_logger(), "Failed to read motor metrics: %s", e.what());
             }
@@ -69,7 +69,24 @@ Dumping::Dumping()
         bool dpad_horizontal_left = joy_msg->buttons[13];
         bool dpad_horizontal_right = joy_msg->buttons[14];
         double dump_latch_control = joy_msg->axes[7];
+        // int dpad_dumping = joy_msg->axes[6]; //when on the nuc
+        // if(dpad_dumping == -1){
+        //     if (dumping_belt_running) {
+        //         stop_dumping_belt();
+        //     } else {
+        //         move_belt_forward();
+        //         dumping_belt_running = true;
+        //     }
+        // }
 
+        // if(dpad_dumping == 1){
+        //     if(dumping_belt_running){
+        //         stop_dumping_belt();
+        //     } else {
+        //         move_belt_reverse();
+        //         dumping_belt_running = true;
+        //     }
+        // }
         // D-Pad Right → Forward (axes[6] == -1)
         if (dpad_horizontal_right && !last_dpad_right) {
             if (dumping_belt_running) {

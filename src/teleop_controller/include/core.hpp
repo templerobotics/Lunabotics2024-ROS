@@ -171,6 +171,35 @@ double DIGGING_LINEAR_kD = 0.0;//0.000005;
 double DIGGING_LINEAR_kIZ = 20;
 double DIGGING_LINEAR_kFF = 0.000080;
 
+template <typename T>
+const T& clamp(const T& v, const T& lo, const T& hi) {
+    return (v < lo) ? lo : (hi < v) ? hi : v;
+}
+
+inline double calculate_motor_speedsRight(double linear_x_velocity, double angular_z_velocity,
+    double &motor_cmd_right) {
+    if (std::abs(linear_x_velocity) < MIN_THROTTLE_DEADZONE) linear_x_velocity = 0.0;
+    if (std::abs(angular_z_velocity) < MIN_THROTTLE_DEADZONE) angular_z_velocity = 0.0;
+
+    double wheel_speed_right = linear_x_velocity + (angular_z_velocity * WHEEL_BASE / 2);
+
+    double rpm_right = ((wheel_speed_right / (2 * M_PI * WHEEL_RADIUS)) * 60);
+
+    motor_cmd_right = clamp(rpm_right * (SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE), -1.0, 1.0);
+    return motor_cmd_right;
+    }
+inline double calculate_motor_speedsLeft(double linear_x_velocity, double angular_z_velocity,
+    double &motor_cmd_left) {
+    if (std::abs(linear_x_velocity) < MIN_THROTTLE_DEADZONE) linear_x_velocity = 0.0;
+    if (std::abs(angular_z_velocity) < MIN_THROTTLE_DEADZONE) angular_z_velocity = 0.0;
+
+    double wheel_speed_left = linear_x_velocity - (angular_z_velocity * WHEEL_BASE / 2);
+
+    double rpm_left = ((wheel_speed_left / (2 * M_PI * WHEEL_RADIUS)) * 60);
+
+    motor_cmd_left = clamp(rpm_left * (SPARKMAX_MAX_DUTY_CYCLE / SPARKMAX_RPM_AVERAGE), -1.0, 1.0);
+    return motor_cmd_left;
+}
 enum class LinearActuatorStateRight {
     Unknown, Raised, Lowered, TravelingUp, TravelingDown, Commanded, Stopped
 };
@@ -229,10 +258,7 @@ typedef struct{
 
 //BMS
 
-template <typename T>
-const T& clamp(const T& v, const T& lo, const T& hi) {
-    return (v < lo) ? lo : (hi < v) ? hi : v;
-}
+
 
 
 
