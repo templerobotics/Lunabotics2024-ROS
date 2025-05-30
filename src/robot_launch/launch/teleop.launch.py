@@ -48,12 +48,12 @@ def generate_launch_description():
     #     output='screen'
     # )
 
-    foxglove_bridge = Node(
-        package='foxglove_bridge',
-        executable='foxglove_bridge',
-        name='foxglove_bridge',
-        output='screen'
-    )
+    # foxglove_bridge = Node(
+    #     package='foxglove_bridge',
+    #     executable='foxglove_bridge',
+    #     name='foxglove_bridge',
+    #     output='screen'
+    # )
 
     # --- First Camera (namespace: cam_c960) ---
     camera_input_1 = Node(
@@ -163,16 +163,16 @@ def generate_launch_description():
         mode_control,
         joy_node_jaden,
         digging_control,
-        dumping_control,
-        foxglove_bridge,
-        camera_input_1,
-        camera_input_2,
-        camera_input_3,
-        camera_compressed_1,
-        camera_compressed_2,
-        camera_compressed_3,
-        static_tf_cam_c960,
-        static_tf_cam_c961,
-        static_tf_cam_c962
+        dumping_control
+        # foxglove_bridge,
+        # camera_input_1,
+        # camera_input_2,
+        # camera_input_3,
+        # camera_compressed_1,
+        # camera_compressed_2,
+        # camera_compressed_3,
+        # static_tf_cam_c960,
+        # static_tf_cam_c961,
+        # static_tf_cam_c962
         # servo_control
     ])

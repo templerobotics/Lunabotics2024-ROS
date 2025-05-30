@@ -5,7 +5,6 @@
  */
 #include "core.hpp"
 #include "Digging.hpp"
-#include "DriveBase.hpp"
 
 Digging::Digging()
     : Node("digging")
@@ -16,32 +15,38 @@ Digging::Digging()
     , m_leadscrew_left("can0", LEADSCREW_left_CAN_ID)
     , m_leadscrew_right("can0", LEADSCREW_right_CAN_ID)
         {
-            joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&Digging::joy_callback_digging, this, std::placeholders::_1));
-            initMotors();    
+            // joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&Digging::joy_callback_digging, this, std::placeholders::_1));
+            initMotors();
             configureLimitSwitches();
             linear_actuator_state_left = LinearActuatorStateLeft::Unknown;
             linear_actuator_state_right = LinearActuatorStateRight::Unknown;
-            digging_right_speed_pub = create_publisher<std_msgs::msg::Float64>("/digging/right/speed", 10);
-            digging_left_speed_pub = create_publisher<std_msgs::msg::Float64>("/digging/left/speed", 10);
+            digging_right_speed_pub = create_publisher<std_msgs::msg::Float64>("digging/right/speed", 10);
+            digging_left_speed_pub = create_publisher<std_msgs::msg::Float64>("digging/left/speed", 10);
             // digging_right_temp_pub = create_publisher<std_msgs::msg::Float64>("/digging/right/temp", 30);
             // digging_left_temp_pub = create_publisher<std_msgs::msg::Float64>("/digging/left/temp", 30);
-            leadscrew_right_speed_pub = create_publisher<std_msgs::msg::Float64>("/leadscrew/right/speed", 10);
-            leadscrew_left_speed_pub = create_publisher<std_msgs::msg::Float64>("/leadscrew/left/speed", 10);
+            leadscrew_right_speed_pub = create_publisher<std_msgs::msg::Float64>("leadscrew/right/speed", 10);
+            leadscrew_left_speed_pub = create_publisher<std_msgs::msg::Float64>("leadscrew/left/speed", 10);
             // leadscrew_right_temp_pub = create_publisher<std_msgs::msg::Float64>("/leadscrew/right/temp", 30);
             // leadscrew_left_temp_pub = create_publisher<std_msgs::msg::Float64>("/leadscrew/left/temp", 30);
             leadscrew_right_position_pub = create_publisher<std_msgs::msg::Float64>("leadscrew/right/position", 30);
             leadscrew_left_position_pub = create_publisher<std_msgs::msg::Float64>("leadscrew/left/position", 30);
-            actuator_right_position_pub = create_publisher<std_msgs::msg::Float64>("/actuator/right/position", 10);
-            actuator_left_position_pub = create_publisher<std_msgs::msg::Float64>("/actuator/left/position", 10);
+            actuator_right_position_pub = create_publisher<std_msgs::msg::Float64>("actuator/right/position", 10);
+            actuator_left_position_pub = create_publisher<std_msgs::msg::Float64>("actuator/left/position", 10);
             actuator_right_state_pub = create_publisher<std_msgs::msg::String>("actuator/right/state", 100);
             actuator_left_state_pub = create_publisher<std_msgs::msg::String>("actuator/left/state", 100);
             timer_diagnostics = create_wall_timer(std::chrono::milliseconds(10), std::bind(&Digging::periodic, this));
             timer_linear_actuators = create_wall_timer(std::chrono::milliseconds(10), std::bind(&Digging::periodicLinearActuatorCheck, this));
-            is_digging_running_pub = this->create_publisher<std_msgs::msg::Bool>("/is_digging_running", 10);
-            drivetrain_right_pub = this->create_publisher<std_msgs::msg::Float64>("/drivetrain_right", 10);
-            drivetrain_left_pub = this->create_publisher<std_msgs::msg::Float64>("/drivetrain_left", 10);
+            is_digging_running_pub = create_publisher<std_msgs::msg::Bool>("is_digging_running", 10);
+            actuator_running_right_pub = create_publisher<std_msgs::msg::Bool>("actuator_running_right", 10);
+            actuator_running_left_pub = create_publisher<std_msgs::msg::Bool>("actuator_running_right", 10);
             RCLCPP_INFO(this->get_logger(), "Digging Subsystem Successfully Initialized!");
 
+            actuator_pos_sub  = create_subscription<std_msgs::msg::Float64>(
+                "/cmd_pos_actuator", 10, std::bind(&Digging::actuatorCallback, this, std::placeholders::_1));
+            digging_speed_sub  = create_subscription<std_msgs::msg::Float64>(
+                "/cmd_vel_digging", 10, std::bind(&Digging::diggingCallback, this, std::placeholders::_1));
+            leadscrew_speed_sub = create_subscription<std_msgs::msg::Float64>(
+                "/cmd_vel_leadscrew", 10, std::bind(&Digging::leadscrewCallback, this, std::placeholders::_1));
 
             telemetry_timer = this->create_wall_timer(
                 100ms, [this]() {
@@ -91,190 +96,203 @@ Digging::Digging()
      * @brief Interprets XBOX Joystick digging commands
      * @todo Implement more logic for this function
      */
-    void Digging::joy_callback_digging(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
-        // m_linear_left.SetDutyCycle(1);
-        // m_linear_right.SetDutyCycle(1);
-        bool current_a = joy_msg->buttons[0];
-        if (current_a && !last_a_state) {  // Button A just pressed
-            if (belt_running) {
-                stopDiggingBeltMotors();
-            } else {
-                setBeltSpeedForward(1);//1  // Or however fast you want
-            }
+    void Digging::actuatorCallback(const std_msgs::msg::Float64::SharedPtr msg){
+        m_linear_right.Heartbeat();
+        m_linear_left.Heartbeat();
+        actuator_cmd = msg->data;
+        // actuatorCommand(actuator_cmd);
+        if(actuator_cmd == 1){
+            commandUpLeft();
+            commandUpRight();
         }
-        last_a_state = current_a;
+        else if(actuator_cmd == -1){
+            commandDownLeft();
+            commandDownRight();
+        }
+        else if(actuator_cmd == 0){
+            commandStopLeft();
+            commandStopRight();
+        }
+    }
+    
+    void Digging::diggingCallback(const std_msgs::msg::Float64::SharedPtr msg){
+        m_belt_left.Heartbeat();
+        m_belt_right.Heartbeat();
+        digging_cmd = msg->data;
+        // setBeltSpeed(digging_cmd);
 
-        // Debounced toggle logic for Y (button 3)
-        bool current_y = joy_msg->buttons[3]; //2 when on the nuc
-        if (current_y && !last_y_state) {  // Button Y just pressed
-            if (belt_running) {
-                stopDiggingBeltMotors();
-            } else {
-                setBeltSpeedReverse(1); //1 // Opposite direction
-            }
-        }
-        last_y_state = current_y;
-
-        double rightTrigger = joy_msg->axes[4]; //5 when on the nuc
-        double leftTrigger = joy_msg->axes[5]; //2 when on the nuc
-        double leadscrewSpeed;
-        if (leftTrigger > MIN_THROTTLE_DEADZONE && rightTrigger > MIN_THROTTLE_DEADZONE) {
-            leadscrewSpeed = 0;
-        }
-        else if (leftTrigger > MIN_THROTTLE_DEADZONE){
-			leadscrewSpeed = -1*leftTrigger;
-		}
-		else if (rightTrigger > MIN_THROTTLE_DEADZONE){
-			leadscrewSpeed = rightTrigger;
-		}
-        if(belt_running){
-            setLeadscrewSpeed(clamp(leadscrewSpeed, -0.3, 1.0));
+        if(digging_cmd != 0){
+            m_belt_left.SetDutyCycle(digging_cmd);
+            m_belt_right.SetDutyCycle(-1*digging_cmd);
+            belt_running = true;
         }
         else{
-            setLeadscrewSpeed(clamp(leadscrewSpeed, -1.0, 1.0));
+            m_belt_left.SetDutyCycle(0.0);
+            m_belt_right.SetDutyCycle(0.0);
+            belt_running = false;
         }
-
-        bool current_b = joy_msg->buttons[1];
-        if (current_b && !last_b_state) {
-            if (actuators_running_right) {
-                commandStopRight();
-            } else {
-                commandUpRight();
-            }
-            if (actuators_running_left) {
-                commandStopLeft();
-            } else {
-                commandUpLeft();
-            }
-        }
-        last_b_state = current_b;
-    
-        bool current_x = joy_msg->buttons[2];  // X = down //3 when on the nuc
-        if (current_x && !last_x_state) {
-            if (actuators_running_right) {
-                commandStopRight();
-            } else {
-                commandDownRight();
-            }
-            if (actuators_running_left) {
-                commandStopLeft();
-            } else {
-                commandDownLeft();
-            }
-        }
-        last_x_state = current_x;
-
-
-    //     bool auto_button = joy_msg->buttons[11];
-    //     if(auto_button && !last_auto_state){
-    //         try{
-    //             mode_publisher = create_publisher<std_msgs::msg::String>("current_mode", 10);
-    //             auto msg = std_msgs::msg::String();
-    //             msg.data = "autonomy";
-    //             mode_publisher->publish(msg);
-    //             // commandUpRight();
-    //             // commandUpLeft();
-    //             // if(linear_actuator_state_left == LinearActuatorStateLeft::Raised && linear_actuator_state_right == LinearActuatorStateRight::Raised){
-    //             //     setBeltSpeedForward(1);
-    //             // }
-    //             auto start = std::chrono::high_resolution_clock::now();
-    //             // while (std::chrono::duration_cast<std::chrono::seconds>(
-    //             //     std::chrono::high_resolution_clock::now() -
-    //             //     start1)
-    //             // .count() < 10)
-    //             // {
-    //             //     setLeadscrewSpeed(clamp(leadscrewSpeed, -0.3, 0.0));
-    //             //     std::cout.flush();
-    //             // }
-    //             // stopLeadScrew();
-    //             // auto start2 = std::chrono::high_resolution_clock::now();
-    //             // while (std::chrono::duration_cast<std::chrono::seconds>(
-    //             //     std::chrono::high_resolution_clock::now() -
-    //             //     start2)
-    //             // .count() < 10)
-    //             // {
-    //             //     setLeadscrewSpeed(clamp(leadscrewSpeed, 0.0, 1.0));
-    //             //     commandDownLeft();
-    //             //     commandDownRight();
-    //             //     stopDiggingBeltMotors();
-    //             //     std::cout.flush();
-    //             // }
-    //             double motor_cmd_left = 0.0;
-    //             double motor_cmd_right = 0.0;
-    //             using namespace std::chrono;
-    //             start = high_resolution_clock::now();
-    //             while (duration<double>(high_resolution_clock::now() - start).count() < 2) {
-    //                 motor_cmd_left = 0.3;
-    //                 motor_cmd_right = 0.3;
-
-    //                 std_msgs::msg::Float64 msg;
-    //                 msg.data = motor_cmd_left;
-    //                 drivetrain_left_pub->publish(msg);
-
-    //                 msg.data = motor_cmd_right;
-    //                 drivetrain_right_pub->publish(msg);
-    //             }
-    //             motor_cmd_left = 0.0;
-    //             motor_cmd_right = 0.0;
-
-    //             std_msgs::msg::Float64 msgDrive;
-    //             msgDrive.data = motor_cmd_left;
-    //             drivetrain_left_pub->publish(msgDrive);
-
-    //             msgDrive.data = motor_cmd_right;
-    //             drivetrain_right_pub->publish(msgDrive);
-    //             start = high_resolution_clock::now();
-    //             // while (duration<double>(high_resolution_clock::now() - start).count() < 1) {
-    //             //     commandUpLeft();
-    //             //     commandUpRight();
-    //             // }
-    //             // commandStopLeft();
-    //             // commandStopRight();
-    //         }
-    //         catch (const std::exception& e) {
-    //             RCLCPP_ERROR(get_logger(), "Failed to run leadscrew motors: %s", e.what());
-    //             stopDiggingBeltMotors();
-    //             stopLinearActuatorMotorsLeft();
-    //             stopLinearActuatorMotorsRight();
-    //             stopLeadScrew();
-    //         }
-    //     }
-    //     last_auto_state = auto_button;
+        
+        std_msgs::msg::Bool msgBool;
+        msgBool.data = belt_running;
+        is_digging_running_pub->publish(msgBool);
     }
+
+    void  Digging::leadscrewCallback(const std_msgs::msg::Float64::SharedPtr msg){
+        m_leadscrew_left.Heartbeat();
+        m_leadscrew_right.Heartbeat();
+        leadscrew_cmd = msg->data;
+        // setLeadscrewSpeed(leadscrew_cmd);
+
+        auto position = std::abs(m_leadscrew_left.GetPosition());
+        
+        // if (position <= LEADSCREW_MAX_ERROR && speed < 0) {
+        //     RCLCPP_WARN(get_logger(), "At bottom limit, cannot move down further");
+        //     return;
+        // }
+        
+        if (position >= LEADSCREW_MAX_TRAVEL - LEADSCREW_MAX_ERROR && leadscrew_cmd > 0) {
+            RCLCPP_WARN(get_logger(), "At top limit, cannot move up further");
+            return;
+        }
+
+        leadscrew_state = LeadscrewState::Traveling;
+        m_leadscrew_left.SetDutyCycle(leadscrew_cmd);
+        m_leadscrew_right.SetDutyCycle(leadscrew_cmd);
+    }
+    // void Digging::joy_callback_digging(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
+        // m_linear_left.SetDutyCycle(1);
+        // m_linear_right.SetDutyCycle(1);
+        // bool current_a = joy_msg->buttons[0];
+        // if (current_a && !last_a_state) {  // Button A just pressed
+        //     if (belt_running) {
+        //         stopDiggingBeltMotors();
+        //     } else {
+        //         setBeltSpeedForward(1);//1  // Or however fast you want
+        //     }
+        // }
+        // last_a_state = current_a;
+
+        // Debounced toggle logic for Y (button 3)
+        // bool current_y = joy_msg->buttons[3]; //2 when on the nuc
+        // if (current_y && !last_y_state) {  // Button Y just pressed
+        //     if (belt_running) {
+        //         stopDiggingBeltMotors();
+        //     } else {
+        //         setBeltSpeedReverse(1); //1 // Opposite direction
+        //     }
+        // }
+        // last_y_state = current_y;
+
+        // double rightTrigger = joy_msg->axes[4]; //5 when on the nuc
+        // double leftTrigger = joy_msg->axes[5]; //2 when on the nuc
+        // double leadscrewSpeed;
+        // if (leftTrigger > MIN_THROTTLE_DEADZONE && rightTrigger > MIN_THROTTLE_DEADZONE) {
+        //     leadscrewSpeed = 0;
+        // }
+        // else if (leftTrigger > MIN_THROTTLE_DEADZONE){
+		// 	leadscrewSpeed = -1*leftTrigger;
+		// }
+		// else if (rightTrigger > MIN_THROTTLE_DEADZONE){
+		// 	leadscrewSpeed = rightTrigger;
+		// }
+        // setLeadscrewSpeed(clamp(leadscrewSpeed, -1.0, 1.0));
+
+        // // bool current_b = joy_msg->buttons[1];
+        // if (current_b && !last_b_state) {
+        //     if (actuators_running_right) {
+        //         commandStopRight();
+        //     } else {
+        //         commandUpRight();
+        //     }
+        //     if (actuators_running_left) {
+        //         commandStopLeft();
+        //     } else {
+        //         commandUpLeft();
+        //     }
+        // }
+        // last_b_state = current_b;
+    
+        // bool current_x = joy_msg->buttons[2];  // X = down //3 when on the nuc
+        // if (current_x && !last_x_state) {
+        //     if (actuators_running_right) {
+        //         commandStopRight();
+        //     } else {
+        //         commandDownRight();
+        //     }
+        //     if (actuators_running_left) {
+        //         commandStopLeft();
+        //     } else {
+        //         commandDownLeft();
+        //     }
+        // }
+        // last_x_state = current_x;
+    // }
 
     /**
      * @brief The Digging Belt spins like a smily face 
      */
-    void Digging::setBeltSpeedForward(double speed) {
-        m_belt_left.SetDutyCycle(speed);
-        m_belt_right.SetDutyCycle(-1*speed);
-        belt_running = true;
+    // void Digging::setBeltSpeedForward(double speed) {
 
+    //     m_belt_left.SetDutyCycle(speed);
+    //     m_belt_right.SetDutyCycle(-1*speed);
+    //     belt_running = true;
+
+    //     std_msgs::msg::Bool msg;
+    //     msg.data = true;
+    //     is_digging_running_pub->publish(msg);
+    // }
+    void Digging::setBeltSpeed(double belt_speed){
+        // RCLCPP_INFO(get_logger(), "Digging speed: %lf", belt_speed);
+        if(belt_speed != 0){
+            m_belt_left.SetDutyCycle(belt_speed);
+            m_belt_right.SetDutyCycle(-1*belt_speed);
+            belt_running = true;
+        }
+        else{
+            m_belt_left.SetDutyCycle(0.0);
+            m_belt_right.SetDutyCycle(0.0);
+            belt_running = false;
+        }
+        
         std_msgs::msg::Bool msg;
-        msg.data = true;
+        msg.data = belt_running;
         is_digging_running_pub->publish(msg);
     }
-    
-    void Digging::setBeltSpeedReverse(double speed) {
-        m_belt_left.SetDutyCycle(-1*speed);
-        m_belt_right.SetDutyCycle(speed);
-        belt_running = true;
 
-        std_msgs::msg::Bool msg;
-        msg.data = true;
-        is_digging_running_pub->publish(msg);
-    }
+    // void Digging::actuatorCommand(double actuator_cmd){
+    //     if(actuator_cmd == 1){
+    //         commandUpLeft();
+    //         commandUpRight();
+    //     }
+    //     else if(actuator_cmd == -1){
+    //         commandDownLeft();
+    //         commandDownRight();
+    //     }
+    //     else if(actuator_cmd == 0){
+    //         commandStopLeft();
+    //         commandStopRight();
+    //     }
+    // }
+    // void Digging::setBeltSpeedReverse(double speed) {
+    //     m_belt_left.SetDutyCycle(-1*speed);
+    //     m_belt_right.SetDutyCycle(speed);
+    //     belt_running = true;
 
-    void Digging::stopDiggingBeltMotors() {
-        RCLCPP_INFO(get_logger(), "STOPPING DIGGING BELT MOTORS!");
-        m_belt_left.SetDutyCycle(0.0);
-        m_belt_right.SetDutyCycle(0.0);
-        belt_running = false;
+    //     std_msgs::msg::Bool msg;
+    //     msg.data = true;
+    //     is_digging_running_pub->publish(msg);
+    // }
 
-        std_msgs::msg::Bool msg;
-        msg.data = false;
-        is_digging_running_pub->publish(msg);
-    }
+    // void Digging::stopDiggingBeltMotors() {
+    //     RCLCPP_INFO(get_logger(), "STOPPING DIGGING BELT MOTORS!");
+    //     m_belt_left.SetDutyCycle(0.0);
+    //     m_belt_right.SetDutyCycle(0.0);
+    //     belt_running = false;
+
+    //     std_msgs::msg::Bool msg;
+    //     msg.data = false;
+    //     is_digging_running_pub->publish(msg);
+    // }
     void Digging::stopLeadScrew(){
         m_leadscrew_left.SetDutyCycle(0); 
         m_leadscrew_right.SetDutyCycle(0);
@@ -535,6 +553,7 @@ Digging::Digging()
     void Digging::initMotors() {
         try {
             RCLCPP_INFO(get_logger(), "Configuring Digging Subsystem Motors");
+            m_belt_left.Heartbeat();
             // Belt motors
             m_belt_left.SetIdleMode(IdleMode::kCoast);
             m_belt_left.SetMotorType(MotorType::kBrushless);

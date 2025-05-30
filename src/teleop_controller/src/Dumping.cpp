@@ -24,10 +24,15 @@ Dumping::Dumping()
 
         dumping_right_speed_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/right/speed", 10);
         dumping_left_speed_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/left/speed", 10);
+        is_dumping_running_pub = create_publisher<std_msgs::msg::Bool>("is_dumping_running", 10);
         // dumping_right_temp_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/right/temp", 30);
         // dumping_left_temp_pub = create_publisher<std_msgs::msg::Float64>("/dumping_motor/left/temp", 30);
 
-
+        dumping_cmd_sub  = create_subscription<std_msgs::msg::Float64>(
+            "/cmd_vel_dumping", 10, std::bind(&Dumping::dumpingCallback, this, std::placeholders::_1));
+        is_dumping_running_sub = create_subscription<std_msgs::msg::Bool>("/is_dumping_running", 10, [this](const std_msgs::msg::Bool::SharedPtr msg) {
+            dumping_belt_running = msg->data;
+        });
         telemetry_timer = this->create_wall_timer(
             100ms, [this]() {
         try {
@@ -63,11 +68,19 @@ Dumping::Dumping()
         if(cmd_close_dumplatch) {write(arduino_fd,"c",1);}
     }      
     
-  
+    void Dumping::dumpingCallback(const std_msgs::msg::Float64::SharedPtr msg){
+        m_dumping_left.Heartbeat();
+        m_dumping_right.Heartbeat();
+        dumping_cmd = msg->data;
+        // setBeltSpeed(dumping_cmd);
+
+        m_dumping_left.SetDutyCycle(dumping_cmd);
+        m_dumping_right.SetDutyCycle(-dumping_cmd);
+    }
     void Dumping::joy_callback_dumping(const sensor_msgs::msg::Joy::SharedPtr joy_msg){
         //double dpad_horizontal = joy_msg->axes[6];
-        bool dpad_horizontal_left = joy_msg->buttons[13];
-        bool dpad_horizontal_right = joy_msg->buttons[14];
+        // bool dpad_horizontal_left = joy_msg->buttons[13];
+        // bool dpad_horizontal_right = joy_msg->buttons[14];
         double dump_latch_control = joy_msg->axes[7];
         // int dpad_dumping = joy_msg->axes[6]; //when on the nuc
         // if(dpad_dumping == -1){
@@ -88,44 +101,42 @@ Dumping::Dumping()
         //     }
         // }
         // D-Pad Right → Forward (axes[6] == -1)
-        if (dpad_horizontal_right && !last_dpad_right) {
-            if (dumping_belt_running) {
-                stop_dumping_belt();
-            } else {
-                move_belt_forward();
-                dumping_belt_running = true;
-            }
-        }
-        last_dpad_right = dpad_horizontal_right;
+        // if (dpad_horizontal_right && !last_dpad_right) {
+        //     if (dumping_belt_running) {
+        //         stop_dumping_belt();
+        //     } else {
+        //         move_belt_forward();
+        //         dumping_belt_running = true;
+        //     }
+        // }
+        // last_dpad_right = dpad_horizontal_right;
     
         // D-Pad Left → Reverse (axes[6] == 1)
-        if (dpad_horizontal_left && !last_dpad_left) {
-            if (dumping_belt_running) {
-                stop_dumping_belt();
-            } else {
-                move_belt_reverse();
-                dumping_belt_running = true;
-            }
-        }
-        last_dpad_left = dpad_horizontal_left;
+        // if (dpad_horizontal_left && !last_dpad_left) {
+        //     if (dumping_belt_running) {
+        //         stop_dumping_belt();
+        //     } else {
+        //         move_belt_reverse();
+        //         dumping_belt_running = true;
+        //     }
+        // }
+        // last_dpad_left = dpad_horizontal_left;
     
         // Dump latch control (leave this logic as is)
         if(dump_latch_control < 0) { cmd_close_dumplatch(dump_latch_control); }
         if(dump_latch_control > 0) { cmd_open_dumplatch(dump_latch_control); }
     }
-    void Dumping::move_belt_forward(){
-        m_dumping_left.SetDutyCycle(1.0);
-        m_dumping_right.SetDutyCycle(-1.0);
-        // m_dumping_left.SetDutyCycle(0.5);
-        // m_dumping_right.SetDutyCycle(-0.5);
+    void Dumping::setBeltSpeed(double speed){
+        m_dumping_left.SetDutyCycle(speed);
+        m_dumping_right.SetDutyCycle(-speed);
     }
 
-    void Dumping::move_belt_reverse(){
-        // m_dumping_left.SetDutyCycle(-1.0);
-        // m_dumping_right.SetDutyCycle(1.0);
-        m_dumping_left.SetDutyCycle(-0.25);
-        m_dumping_right.SetDutyCycle(0.25);
-    }
+    // void Dumping::move_belt_reverse(){
+    //     // m_dumping_left.SetDutyCycle(-1.0);
+    //     // m_dumping_right.SetDutyCycle(1.0);
+    //     m_dumping_left.SetDutyCycle(-0.25);
+    //     m_dumping_right.SetDutyCycle(0.25);
+    // }
 
     /*
     void getPostiion(){}
@@ -133,6 +144,7 @@ Dumping::Dumping()
     */
 
     void Dumping::initMotors(){
+        m_dumping_left.Heartbeat();
         m_dumping_left.SetIdleMode(IdleMode::kCoast);
         m_dumping_left.SetMotorType(MotorType::kBrushless);
         m_dumping_left.SetDutyCycle(0.0);
@@ -142,6 +154,7 @@ Dumping::Dumping()
         m_dumping_left.SetPeriodicStatus4Period(0);
         m_dumping_left.BurnFlash();
         
+        m_dumping_right.Heartbeat();
         m_dumping_right.SetIdleMode(IdleMode::kCoast);
         m_dumping_right.SetMotorType(MotorType::kBrushless);
         m_dumping_right.SetDutyCycle(0.0);

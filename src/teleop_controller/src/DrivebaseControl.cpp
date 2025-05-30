@@ -11,8 +11,8 @@ DrivebaseControl::DrivebaseControl()
       right_rear("can0", MOTOR_REAR_RIGHT_CAN_ID),
       controller_teleop_enabled(true), autonomy_enabled(false), is_digging_running(false)
 {
-    joy_sub = create_subscription<sensor_msgs::msg::Joy>(
-        "joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
+    // joy_sub = create_subscription<sensor_msgs::msg::Joy>(
+    //     "joy", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
 
     cmd_vel_pub = create_publisher<geometry_msgs::msg::Twist>("teleop/cmd_vel", 10);
 
@@ -26,16 +26,6 @@ DrivebaseControl::DrivebaseControl()
         [this](const std_msgs::msg::Bool::SharedPtr msg) {
             is_digging_running = msg->data;
         });
-    drivetrain_right_speed = create_subscription<std_msgs::msg::Float64>(
-    "/drivetrain_right", 10,
-    [this](const std_msgs::msg::Float64::SharedPtr msg) {
-        motor_cmd_right = msg->data;
-    });    
-    drivetrain_left_speed = create_subscription<std_msgs::msg::Float64>(
-        "/drivetrain_left", 10,
-        [this](const std_msgs::msg::Float64::SharedPtr msg) {
-            motor_cmd_left = msg->data;
-        }); 
     mode_sub = create_subscription<std_msgs::msg::String>(
         "current_mode", 10,
         [this](const std_msgs::msg::String::SharedPtr msg) {
@@ -43,7 +33,8 @@ DrivebaseControl::DrivebaseControl()
             autonomy_enabled = (msg->data == "autonomy");
             RCLCPP_INFO(get_logger(), "Mode changed to: %s", msg->data.c_str());
         });
-
+    cmd_vel_drive_sub = create_subscription<geometry_msgs::msg::Twist>(
+        "/cmd_vel_drivebase", 10, std::bind(&DrivebaseControl::joy_callback, this, std::placeholders::_1));
     telemetry_timer = this->create_wall_timer(100ms, [this]() {
         try {
             auto msg = std_msgs::msg::Float64();
@@ -64,13 +55,11 @@ DrivebaseControl::DrivebaseControl()
     RCLCPP_INFO(get_logger(), "DrivebaseControl initialized");
 }
 
-void DrivebaseControl::joy_callback(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
+void DrivebaseControl::joy_callback(const geometry_msgs::msg::Twist::SharedPtr msg) {
     left_front.Heartbeat();
-    RCLCPP_ERROR(get_logger(), "motor cmd right: %lf", motor_cmd_right);
-    RCLCPP_ERROR(get_logger(), "motor cmd left: %lf", motor_cmd_left);
     if (controller_teleop_enabled) {
-        linear_x = joy_msg->axes[1];
-        angular_z = joy_msg->axes[2]; //3 when on the nuc
+        linear_x = msg->linear.x;
+        angular_z = msg->angular.z;
 
         if (std::abs(linear_x) < MIN_THROTTLE_DEADZONE && std::abs(angular_z) < MIN_THROTTLE_DEADZONE) {
             left_front.SetDutyCycle(0.0);
@@ -85,15 +74,13 @@ void DrivebaseControl::joy_callback(const sensor_msgs::msg::Joy::SharedPtr joy_m
             calculate_motor_speeds(linear_x, angular_z);
         }
     }
-    // else if(autonomy_enabled){
-    //     left_front.SetDutyCycle(-motor_cmd_left);
-    //     left_rear.SetDutyCycle(-motor_cmd_left);
-    //     right_front.SetDutyCycle(-motor_cmd_right);
-    //     right_rear.SetDutyCycle(-motor_cmd_right);
-    // }
 }
 
 void DrivebaseControl::calculate_motor_speeds(double linear_x_velocity, double angular_z_velocity) {
+    left_front.Heartbeat();
+    left_rear.Heartbeat();
+    right_front.Heartbeat();
+    right_rear.Heartbeat();
     if (std::abs(linear_x_velocity) < MIN_THROTTLE_DEADZONE) linear_x_velocity = 0.0;
     if (std::abs(angular_z_velocity) < MIN_THROTTLE_DEADZONE) angular_z_velocity = 0.0;
 
@@ -109,7 +96,7 @@ void DrivebaseControl::calculate_motor_speeds(double linear_x_velocity, double a
     motor_cmd_left = clamp(motor_cmd_left, -1.0, 1.0);
     motor_cmd_right = clamp(motor_cmd_right, -1.0, 1.0);
 
-    float multiplier = is_digging_running ? 0.03 : 1;
+    float multiplier = is_digging_running ? 0.05 : 1;
 
     motor_cmd_left *= multiplier;
     motor_cmd_right *= multiplier;
@@ -134,6 +121,7 @@ void DrivebaseControl::initMotors() {
             motor.SetPeriodicStatus3Period(0);
             motor.SetPeriodicStatus4Period(0);
             motor.BurnFlash();
+            motor.Heartbeat();
         };
 
         setup_motor(left_front, false);
