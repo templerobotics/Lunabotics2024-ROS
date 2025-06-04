@@ -18,7 +18,7 @@ Dumping::Dumping()
     , m_dumping_right("can0", DUMPING_RIGHT_CAN_ID)
     { 
         
-        joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&Dumping::joy_callback_dumping, this, std::placeholders::_1));
+        // joy_sub = create_subscription<sensor_msgs::msg::Joy>("joy", 10, std::bind(&Dumping::joy_callback_dumping, this, std::placeholders::_1));
         initMotors();
         RCLCPP_INFO(this->get_logger(), "Dumping Subsystem ready to go!\n");
 

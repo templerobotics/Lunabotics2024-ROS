@@ -21,11 +21,11 @@ public:
         
         // Initialize with the node's clock
         last_switch = this->get_clock()->now();
-        is_digging_running_sub = create_subscription<std_msgs::msg::Bool>(
-            "/is_digging_running", 10,
-            [this](const std_msgs::msg::Bool::SharedPtr msg) {
-                is_digging_running = msg->data;
-            });
+        // is_digging_running_sub = create_subscription<std_msgs::msg::Bool>(
+        //     "/is_digging_running", 10,
+        //     [this](const std_msgs::msg::Bool::SharedPtr msg) {
+        //         is_digging_running = msg->data;
+        //     });
         actuator_running_left_sub = create_subscription<std_msgs::msg::Bool>(
             "/actuator_running_left", 10,
             [this](const std_msgs::msg::Bool::SharedPtr msg) {
@@ -116,11 +116,13 @@ private:
                     auto msg = std_msgs::msg::Float64();
                     msg.data = cmd_vel_diggingBelt;
                     cmd_vel_diggingBelt_pub->publish(msg);
+                    is_digging_running = false;
                 } else {
                     cmd_vel_diggingBelt = 1.0;
                     auto msg = std_msgs::msg::Float64();
                     msg.data = cmd_vel_diggingBelt;
                     cmd_vel_diggingBelt_pub->publish(msg);
+                    is_digging_running = true;
                 }  
             }
             last_a_state = current_a;
@@ -133,11 +135,13 @@ private:
                     auto msg = std_msgs::msg::Float64();
                     msg.data = cmd_vel_diggingBelt;
                     cmd_vel_diggingBelt_pub->publish(msg);
+                    is_digging_running = false;
                 } else {
                     cmd_vel_diggingBelt = -1.0;
                     auto msg = std_msgs::msg::Float64();
                     msg.data = cmd_vel_diggingBelt;
                     cmd_vel_diggingBelt_pub->publish(msg);
+                    is_digging_running = true;
                 }
             }
             last_y_state = current_y;
@@ -203,10 +207,18 @@ private:
                 }
             }
             last_dpad_left = dpad_left;
-            auto twist = geometry_msgs::msg::Twist();
-            twist.linear.x = joy_msg->axes[1];
-            twist.angular.z = joy_msg->axes[2];
-            cmd_vel_drive_pub->publish(twist);
+            if(joy_msg->axes[1] > 0 || joy_msg->axes[1] < 0 || joy_msg->axes[2] > 0 || joy_msg->axes[2] < 0)
+            {
+                auto twist = geometry_msgs::msg::Twist();
+                twist.linear.x = joy_msg->axes[1];
+                twist.angular.z = joy_msg->axes[2];
+                cmd_vel_drive_pub->publish(twist);
+            }else{
+                auto twist = geometry_msgs::msg::Twist();
+                twist.linear.x = 0.0;
+                twist.angular.z = 0.0;
+                cmd_vel_drive_pub->publish(twist);
+            }
             
         } else {
             RCLCPP_INFO(get_logger(), "Autonomous Mode Activated!");
@@ -223,11 +235,11 @@ private:
         RCLCPP_INFO(get_logger(), "Mode enabled = %s", msg.data.c_str());
     }
 
-    void callback_teleop_cmdvel(const geometry_msgs::msg::Twist::SharedPtr msg) {
-        if (controller_teleop_enabled) {
-            cmd_vel_drive_pub->publish(*msg);
-        }
-    }
+    // void callback_teleop_cmdvel(const geometry_msgs::msg::Twist::SharedPtr msg) {
+    //     if (controller_teleop_enabled) {
+    //         // cmd_vel_drive_pub->publish(*msg);
+    //     }
+    // }
 
     void callback_autonomy_cmdvel(const geometry_msgs::msg::Twist::SharedPtr msg) {
         if (autonomy_enabled) {

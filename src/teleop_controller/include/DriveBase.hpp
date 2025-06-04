@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core.hpp"
+#include "SparkMax.hpp"
 
 class DrivebaseControl : public rclcpp::Node {
 public:

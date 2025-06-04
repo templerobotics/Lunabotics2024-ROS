@@ -20,23 +20,23 @@ Digging::Digging()
             configureLimitSwitches();
             linear_actuator_state_left = LinearActuatorStateLeft::Unknown;
             linear_actuator_state_right = LinearActuatorStateRight::Unknown;
-            digging_right_speed_pub = create_publisher<std_msgs::msg::Float64>("digging/right/speed", 10);
-            digging_left_speed_pub = create_publisher<std_msgs::msg::Float64>("digging/left/speed", 10);
+            // digging_right_speed_pub = create_publisher<std_msgs::msg::Float64>("digging/right/speed", 10);
+            // digging_left_speed_pub = create_publisher<std_msgs::msg::Float64>("digging/left/speed", 10);
             // digging_right_temp_pub = create_publisher<std_msgs::msg::Float64>("/digging/right/temp", 30);
             // digging_left_temp_pub = create_publisher<std_msgs::msg::Float64>("/digging/left/temp", 30);
-            leadscrew_right_speed_pub = create_publisher<std_msgs::msg::Float64>("leadscrew/right/speed", 10);
-            leadscrew_left_speed_pub = create_publisher<std_msgs::msg::Float64>("leadscrew/left/speed", 10);
+            // leadscrew_right_speed_pub = create_publisher<std_msgs::msg::Float64>("leadscrew/right/speed", 10);
+            // leadscrew_left_speed_pub = create_publisher<std_msgs::msg::Float64>("leadscrew/left/speed", 10);
             // leadscrew_right_temp_pub = create_publisher<std_msgs::msg::Float64>("/leadscrew/right/temp", 30);
             // leadscrew_left_temp_pub = create_publisher<std_msgs::msg::Float64>("/leadscrew/left/temp", 30);
-            leadscrew_right_position_pub = create_publisher<std_msgs::msg::Float64>("leadscrew/right/position", 30);
-            leadscrew_left_position_pub = create_publisher<std_msgs::msg::Float64>("leadscrew/left/position", 30);
-            actuator_right_position_pub = create_publisher<std_msgs::msg::Float64>("actuator/right/position", 10);
-            actuator_left_position_pub = create_publisher<std_msgs::msg::Float64>("actuator/left/position", 10);
-            actuator_right_state_pub = create_publisher<std_msgs::msg::String>("actuator/right/state", 100);
-            actuator_left_state_pub = create_publisher<std_msgs::msg::String>("actuator/left/state", 100);
+            // leadscrew_right_position_pub = create_publisher<std_msgs::msg::Float64>("leadscrew/right/position", 30);
+            // leadscrew_left_position_pub = create_publisher<std_msgs::msg::Float64>("leadscrew/left/position", 30);
+            // actuator_right_position_pub = create_publisher<std_msgs::msg::Float64>("actuator/right/position", 10);
+            // actuator_left_position_pub = create_publisher<std_msgs::msg::Float64>("actuator/left/position", 10);
+            // actuator_right_state_pub = create_publisher<std_msgs::msg::String>("actuator/right/state", 100);
+            // actuator_left_state_pub = create_publisher<std_msgs::msg::String>("actuator/left/state", 100);
             timer_diagnostics = create_wall_timer(std::chrono::milliseconds(10), std::bind(&Digging::periodic, this));
             timer_linear_actuators = create_wall_timer(std::chrono::milliseconds(10), std::bind(&Digging::periodicLinearActuatorCheck, this));
-            is_digging_running_pub = create_publisher<std_msgs::msg::Bool>("is_digging_running", 10);
+            // is_digging_running_pub = create_publisher<std_msgs::msg::Bool>("is_digging_running", 10);
             actuator_running_right_pub = create_publisher<std_msgs::msg::Bool>("actuator_running_right", 10);
             actuator_running_left_pub = create_publisher<std_msgs::msg::Bool>("actuator_running_right", 10);
             RCLCPP_INFO(this->get_logger(), "Digging Subsystem Successfully Initialized!");
@@ -48,47 +48,47 @@ Digging::Digging()
             leadscrew_speed_sub = create_subscription<std_msgs::msg::Float64>(
                 "/cmd_vel_leadscrew", 10, std::bind(&Digging::leadscrewCallback, this, std::placeholders::_1));
 
-            telemetry_timer = this->create_wall_timer(
-                100ms, [this]() {
-            try {
-                auto msg = std_msgs::msg::Float64();
-                msg.data = m_leadscrew_right.GetVelocity();
-                leadscrew_right_speed_pub->publish(msg);
-                msg.data = m_leadscrew_left.GetVelocity();
-                leadscrew_left_speed_pub->publish(msg);
-                msg.data = m_belt_right.GetVelocity();
-                digging_right_speed_pub->publish(msg);
-                msg.data = m_belt_left.GetVelocity();
-                digging_left_speed_pub->publish(msg);
-                // msg.data = m_leadscrew_right.GetTemperature();
-                // leadscrew_right_temp_pub->publish(msg);
-                // msg.data = m_leadscrew_left.GetTemperature();
-                // leadscrew_left_temp_pub->publish(msg);
-                // msg.data = m_belt_right.GetTemperature();
-                // digging_right_temp_pub->publish(msg);
-                // msg.data = m_belt_left.GetTemperature();
-                // digging_left_temp_pub->publish(msg);
-                msg.data = m_linear_right.GetAnalogPosition();
-                actuator_right_position_pub->publish(msg);
-                msg.data = m_linear_left.GetAnalogPosition();
-                actuator_left_position_pub->publish(msg);
-                msg.data = m_leadscrew_left.GetPosition();
-                leadscrew_left_position_pub->publish(msg);
-                msg.data = m_leadscrew_right.GetPosition();
-                leadscrew_right_position_pub->publish(msg);
+            // telemetry_timer = this->create_wall_timer(
+            //     100ms, [this]() {
+            // try {
+            //     auto msg = std_msgs::msg::Float64();
+            //     msg.data = m_leadscrew_right.GetVelocity();
+            //     leadscrew_right_speed_pub->publish(msg);
+            //     msg.data = m_leadscrew_left.GetVelocity();
+            //     leadscrew_left_speed_pub->publish(msg);
+            //     msg.data = m_belt_right.GetVelocity();
+            //     digging_right_speed_pub->publish(msg);
+            //     msg.data = m_belt_left.GetVelocity();
+            //     digging_left_speed_pub->publish(msg);
+            //     // msg.data = m_leadscrew_right.GetTemperature();
+            //     // leadscrew_right_temp_pub->publish(msg);
+            //     // msg.data = m_leadscrew_left.GetTemperature();
+            //     // leadscrew_left_temp_pub->publish(msg);
+            //     // msg.data = m_belt_right.GetTemperature();
+            //     // digging_right_temp_pub->publish(msg);
+            //     // msg.data = m_belt_left.GetTemperature();
+            //     // digging_left_temp_pub->publish(msg);
+            //     msg.data = m_linear_right.GetAnalogPosition();
+            //     actuator_right_position_pub->publish(msg);
+            //     msg.data = m_linear_left.GetAnalogPosition();
+            //     actuator_left_position_pub->publish(msg);
+            //     msg.data = m_leadscrew_left.GetPosition();
+            //     leadscrew_left_position_pub->publish(msg);
+            //     msg.data = m_leadscrew_right.GetPosition();
+            //     leadscrew_right_position_pub->publish(msg);
 
-                auto msgStateRight = std_msgs::msg::String();
-                msgStateRight.data = stateToStringActuatorRight(linear_actuator_state_right);
-                actuator_right_state_pub->publish(msgStateRight);
+            //     auto msgStateRight = std_msgs::msg::String();
+            //     msgStateRight.data = stateToStringActuatorRight(linear_actuator_state_right);
+            //     actuator_right_state_pub->publish(msgStateRight);
 
-                auto msgStateLeft = std_msgs::msg::String();
-                msgStateLeft.data = stateToStringActuatorLeft(linear_actuator_state_left);
-                actuator_left_state_pub->publish(msgStateLeft);
+            //     auto msgStateLeft = std_msgs::msg::String();
+            //     msgStateLeft.data = stateToStringActuatorLeft(linear_actuator_state_left);
+            //     actuator_left_state_pub->publish(msgStateLeft);
 
-                } catch (const std::exception& e) {
-                    RCLCPP_ERROR(get_logger(), "Failed to read motor metrics: %s", e.what());
-                }
-            });
+            //     } catch (const std::exception& e) {
+            //         RCLCPP_ERROR(get_logger(), "Failed to read motor metrics: %s", e.what());
+            //     }
+            // });
         }
 
 
@@ -132,9 +132,9 @@ Digging::Digging()
             belt_running = false;
         }
         
-        std_msgs::msg::Bool msgBool;
-        msgBool.data = belt_running;
-        is_digging_running_pub->publish(msgBool);
+        // std_msgs::msg::Bool msgBool;
+        // msgBool.data = belt_running;
+        // is_digging_running_pub->publish(msgBool);
     }
 
     void  Digging::leadscrewCallback(const std_msgs::msg::Float64::SharedPtr msg){
@@ -254,9 +254,9 @@ Digging::Digging()
             belt_running = false;
         }
         
-        std_msgs::msg::Bool msg;
-        msg.data = belt_running;
-        is_digging_running_pub->publish(msg);
+        // std_msgs::msg::Bool msg;
+        // msg.data = belt_running;
+        // is_digging_running_pub->publish(msg);
     }
 
     // void Digging::actuatorCommand(double actuator_cmd){
@@ -553,7 +553,6 @@ Digging::Digging()
     void Digging::initMotors() {
         try {
             RCLCPP_INFO(get_logger(), "Configuring Digging Subsystem Motors");
-            m_belt_left.Heartbeat();
             // Belt motors
             m_belt_left.SetIdleMode(IdleMode::kCoast);
             m_belt_left.SetMotorType(MotorType::kBrushless);
@@ -562,6 +561,7 @@ Digging::Digging()
             m_belt_left.ResetFaults();
             m_belt_left.SetPeriodicStatus3Period(0);
             m_belt_left.SetPeriodicStatus4Period(0);
+            m_belt_left.Heartbeat();
             m_belt_left.BurnFlash();
             
             m_belt_right.SetIdleMode(IdleMode::kCoast);
@@ -571,6 +571,7 @@ Digging::Digging()
             m_belt_right.ResetFaults();
             m_belt_right.SetPeriodicStatus3Period(0);
             m_belt_right.SetPeriodicStatus4Period(0);
+            m_belt_right.Heartbeat();
             m_belt_right.BurnFlash();
             
             // Linear actuators
@@ -586,6 +587,7 @@ Digging::Digging()
             m_linear_left.SetI(0, 0);
             m_linear_left.SetD(0, 0.00000);
             m_linear_left.SetF(0, 0.00000);
+            m_linear_left.Heartbeat();
             m_linear_left.BurnFlash();
             
             m_linear_right.SetIdleMode(IdleMode::kCoast);
@@ -600,6 +602,7 @@ Digging::Digging()
             m_linear_right.SetI(0, 0);
             m_linear_right.SetD(0, 0.00000);
             m_linear_right.SetF(0, 0.00000);
+            m_linear_right.Heartbeat();
             m_linear_right.BurnFlash();
             
             // Leadscrews
@@ -610,6 +613,7 @@ Digging::Digging()
             m_leadscrew_left.ResetFaults();
             m_leadscrew_left.SetPeriodicStatus3Period(0);
             m_leadscrew_left.SetPeriodicStatus4Period(0);
+            m_leadscrew_left.Heartbeat();
             m_leadscrew_left.BurnFlash();
 
             m_leadscrew_right.SetIdleMode(IdleMode::kCoast);
@@ -619,6 +623,7 @@ Digging::Digging()
             m_leadscrew_right.ResetFaults();
             m_leadscrew_right.SetPeriodicStatus3Period(0);
             m_leadscrew_right.SetPeriodicStatus4Period(0);
+            m_leadscrew_right.Heartbeat();
             m_leadscrew_right.BurnFlash();
 
             RCLCPP_INFO(get_logger(), "Digging Subsystem Motors configured successfully");

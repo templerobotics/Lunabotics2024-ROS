@@ -43,17 +43,17 @@ def generate_launch_description():
         output='screen'
     )
 
-    # servo_control = ExecuteProcess(
-    #     cmd=['python3', '/home/ubuntu/robotics/Lunabotics2024-ROS/src/arduino_nano/servo.py'],
-    #     output='screen'
-    # )
+    servo_control = ExecuteProcess(
+        cmd=['python3', '/home/ubuntu/robotics/Lunabotics2024-ROS/src/arduino_nano/servo.py'],
+        output='screen'
+    )
 
-    # foxglove_bridge = Node(
-    #     package='foxglove_bridge',
-    #     executable='foxglove_bridge',
-    #     name='foxglove_bridge',
-    #     output='screen'
-    # )
+    foxglove_bridge = Node(
+        package='foxglove_bridge',
+        executable='foxglove_bridge',
+        name='foxglove_bridge',
+        output='screen'
+    )
 
     # --- First Camera (namespace: cam_c960) ---
     camera_input_1 = Node(
