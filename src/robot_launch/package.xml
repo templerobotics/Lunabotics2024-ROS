@@ -4,15 +4,14 @@
   <name>robot_launch</name>
   <version>0.0.0</version>
   <description>Launch files for robot</description>
-  <maintainer email="jaseanhow@gmail.com">Jaden Howard</maintainer>
-  <license>TODO</license>
+  <maintainer email="kussimalin@gmail.com">ubuntu</maintainer>
+  <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <exec_depend>teleop_controller</exec_depend>
+  <exec_depend>robot</exec_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>ros2launch</exec_depend>
-  <exec_depend>robot_description</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>bash</exec_depend>
@@ -24,9 +23,7 @@
   <depend>gazebo_ros2_control</depend>
   <depend>ros2_control</depend>
   <depend>ros2_controllers</depend>
-  <depend>xacro</depend>
   <depend>joy</depend>
-  <depend>robot_state_publisher</depend>
   <depend>rclcpp</depend>
 
   <export>

@@ -1,4 +1,0 @@
-string mode_name  # "teleop" or "autonomy"
----
-bool success
-string message

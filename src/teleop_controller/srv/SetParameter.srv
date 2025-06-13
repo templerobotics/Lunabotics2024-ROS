@@ -1,7 +1,0 @@
-# Request
-string param_name
-bool new_value
----
-# Response
-bool success
-string message
